@@ -55,6 +55,143 @@ def save_intents(intents):
         json.dump(intents, f, ensure_ascii=False, indent=2)
 
 
+
+# ── 音乐决策子问题体系（JEV 单次前向并行求解，毫秒级无生成延迟）──────────────
+MUSIC_QUESTIONS = {
+    "music_action": {
+        "type": "choice",
+        "instructions": "用户想要对音乐执行什么操作动作？",
+        "criteria": {
+            "play": "播放、点播、听音乐、来一首",
+            "pause": "暂停、停止播放、别放了、关掉音乐",
+            "next": "切歌、下一首、换一首、跳过",
+            "prev": "上一首、退回上一首",
+            "loop": "单曲循环",
+            "random": "随机播放",
+            "other": "其他操作",
+        },
+    },
+    "music_mood": {
+        "type": "choice",
+        "instructions": "用户想听什么风格、流派或情绪的音乐？",
+        "criteria": {
+            "cheerful": "欢快、轻快、动感、轻松、开心、适合开车",
+            "sad": "伤感、悲伤、安静、抒情、治愈、emo",
+            "rock": "摇滚、燃、激情、金属、电音",
+            "pop": "流行、经典老歌、现代流行",
+            "folk": "民谣、纯音乐、民乐、乡村",
+            "unspecified": "未指定特定情绪或风格",
+        },
+    },
+    "music_artist": {
+        "type": "choice",
+        "instructions": "指令中是否指定了特定歌手或艺术家？",
+        "criteria": {
+            "jay_chou": "周杰伦（周董）",
+            "eason_chan": "陈奕迅",
+            "jj_lin": "林俊杰",
+            "g_e_m": "邓紫棋",
+            "mayday": "五月天",
+            "other_artist": "提到了其他具体歌手",
+            "none": "未指定歌手",
+        },
+    },
+    "music_target": {
+        "type": "choice",
+        "instructions": "用户的具体点歌目标是什么形式？",
+        "criteria": {
+            "specific_song": "指名点播具体的某首歌（如晴天、青花瓷、稻香等）",
+            "artist_all": "点播某个歌手的歌，未指定具体歌名（如'听周杰伦的音乐'）",
+            "mood_all": "点播某种情绪风格的歌，未指定歌手歌名（如'放首欢快的歌'）",
+            "random": "随便播放，无特定目标",
+        },
+    },
+}
+
+
+def extract_music_slots(text, answers):
+    act = answers.get("music_action", {}).get("choice", "play")
+    mood = answers.get("music_mood", {}).get("choice", "unspecified")
+    artist_choice = answers.get("music_artist", {}).get("choice", "none")
+    target = answers.get("music_target", {}).get("choice", "random")
+
+    mood_map = {
+        "cheerful": "欢快 / 轻松",
+        "sad": "伤感 / 抒情",
+        "rock": "摇滚 / 激情",
+        "pop": "流行音乐",
+        "folk": "民谣 / 纯音乐",
+        "unspecified": "未限定",
+    }
+    action_map = {
+        "play": "播放",
+        "pause": "暂停",
+        "next": "切到下一首",
+        "prev": "上一首",
+        "loop": "单曲循环",
+        "random": "随机播放",
+        "other": "其他控制",
+    }
+    target_map = {
+        "specific_song": "指定特定歌曲",
+        "artist_all": "点播歌手全部/热门单曲",
+        "mood_all": "按曲风随心听",
+        "random": "随机点播",
+    }
+    artist_map = {
+        "jay_chou": "周杰伦",
+        "eason_chan": "陈奕迅",
+        "jj_lin": "林俊杰",
+        "g_e_m": "邓紫棋",
+        "mayday": "五月天",
+    }
+
+    artist = artist_map.get(artist_choice)
+    song = None
+
+    # 配合轻量句式正则做精确槽位切分（0ms 极速耗时）
+    cleaned = re.sub(r"^(?:我想?听|请?帮我?放一?首|请?帮我?播放|来一?首|来点|播放|放点|听听|给我放|放首)", "", text).strip()
+    cleaned = re.sub(r"(?:的?(?:音乐|歌|歌曲|曲子))$", "", cleaned).strip()
+
+    if target == "specific_song":
+        m = re.search(r"^(.*?)(?:的)(.+)$", cleaned)
+        if m:
+            cand_artist = m.group(1).strip()
+            cand_song = m.group(2).strip()
+            if not artist:
+                artist = cand_artist
+            song = cand_song
+        else:
+            if artist and cleaned.startswith(artist):
+                song = cleaned[len(artist):].strip(" 的")
+            elif artist and "周董" in cleaned:
+                song = cleaned.replace("周董", "").strip(" 的")
+            else:
+                song = cleaned
+    elif target == "artist_all":
+        song = "未指定（默认播放歌手热门精选）"
+        if not artist and cleaned:
+            artist = cleaned.strip("的")
+    elif target == "mood_all":
+        song = "未指定（按风格智能推荐）"
+    else:
+        song = "未指定"
+
+    return {
+        "action": action_map.get(act, act),
+        "mood": mood_map.get(mood, mood),
+        "artist": artist or "未指定",
+        "song": song or "未指定",
+        "target_type": target_map.get(target, target),
+        "raw": {
+            "action": act,
+            "mood": mood,
+            "artist_choice": artist_choice,
+            "target": target,
+        },
+    }
+
+
 def build_questions(intents):
     choice = {x["name"]: x["desc"] for x in intents if x["in_choice"]}
     noul = [x for x in intents if x["in_noul"]]
@@ -69,8 +206,11 @@ def build_questions(intents):
 
 def call_ollaya(text):
     intents = load_intents()
+    qs = build_questions(intents)
+    # 并行加入音乐维度细粒度决策问题
+    qs.update(MUSIC_QUESTIONS)
     body = {"model": "decision:eos", "state": text,
-            "questions": build_questions(intents)}
+            "questions": qs}
     req = urllib.request.Request(
         OLLAYA_URL, data=json.dumps(body).encode("utf-8"),
         headers={"Content-Type": "application/json"})
@@ -82,14 +222,17 @@ def call_ollaya(text):
     wall_ms = (time.perf_counter() - t0) * 1000
     ans = resp["answers"]
     domains = {x["name"]: ans[x["name"]]["noul"] for x in intents if x["in_noul"]}
+    music_slots = extract_music_slots(text, ans)
     return {
         "intent": {"choice": ans["intent"]["choice"],
                    "probabilities": ans["intent"]["probabilities"]},
         "domains": domains,
+        "music_slots": music_slots,
         "timing": {"wall_ms": round(wall_ms, 1),
                    "model_ms": round(resp.get("total_duration", 0) / 1e6, 1),
                    "input_tokens": resp.get("usage", {}).get("input_tokens", 0)},
     }
+
 
 
 PAGE = r"""<!doctype html>
@@ -204,6 +347,23 @@ button.go:disabled { opacity: .55; cursor: wait; }
 .note { font-size: 12.5px; color: var(--muted); margin: 12px 0 0; }
 [hidden] { display: none !important; }
 
+/* ── 音乐槽位面板（解法一） ── */
+.slot-card { margin-top: 14px; border-left: 4px solid var(--fill); background: var(--surface); }
+.slot-card h2 { font-size: 15px; margin: 0 0 12px; display: flex; align-items: baseline; gap: 8px; color: var(--ink); }
+.slot-card h2 small { font-size: 11.5px; color: var(--muted); font-weight: normal; }
+.slot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.slot-box {
+  background: var(--page); border: 1px solid var(--grid); border-radius: 8px;
+  padding: 10px 12px;
+}
+.slot-lbl { font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 4px; }
+.slot-val { font-size: 14.5px; font-weight: 600; color: var(--ink); word-break: break-all; }
+.slot-details { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.slot-tag {
+  font-size: 11.5px; background: var(--track-dim); color: var(--fill);
+  padding: 3px 8px; border-radius: 4px; font-weight: 500;
+}
+
 /* ── 意图管理 ── */
 .mgmt { margin-top: 22px; }
 .mgmt h2 { font-size: 15.5px; margin: 0 0 4px; }
@@ -249,18 +409,18 @@ table.cfg .op[disabled] { opacity: .35; cursor: not-allowed; }
 <body>
 <main>
   <h1>车机语音意图测试台</h1>
-  <p class="sub">decision:eos · 单意图路由（choice）+ 多标签检出（noul）· 本地 ollaya 127.0.0.1:11435</p>
+  <p class="sub">decision:eos · 单意图路由（choice）+ 多标签检出（noul）+ 音乐槽位多维决策 · 本地 ollaya 127.0.0.1:11435</p>
 
   <div class="domains-row">
     <span class="cap">支持的功能域（<span id="dcount">–</span>）：</span><span id="dchips"></span>
   </div>
 
   <form id="f">
-    <input id="q" placeholder="输入一句话，如：打开空调，然后播放周杰伦的歌" autofocus>
+    <input id="q" placeholder="输入一句话，如：我要听周杰伦的音乐，或者放一首轻快的晴天" autofocus>
     <button class="go" id="go" type="submit">判断</button>
   </form>
   <div class="examples" id="ex">示例：
-    <button>打开空调</button><button>温度调到二十二度</button><button>今天天气怎么样</button>
+    <button>我要听周杰伦的音乐</button><button>放一首周杰伦欢快的晴天</button><button>来点伤感的流行歌曲</button>
     <button>打开空调，然后播放周杰伦的歌</button><button>先暂停音乐，再导航去最近的加油站</button>
     <button>关闭空调，但是不要关座椅加热</button>
   </div>
@@ -284,6 +444,30 @@ table.cfg .op[disabled] { opacity: .35; cursor: not-allowed; }
         <div id="choiceBars"></div>
       </section>
     </div>
+
+    <!-- 音乐槽位分析面板（JEV 分层解耦，毫秒级无生成延迟） -->
+    <section class="card slot-card" id="musicCard" hidden>
+      <h2>🎵 车机音乐槽位抽取<small>JEV 决策模型分层解析 · 毫秒级单次前向 · 零生成等待</small></h2>
+      <div class="slot-grid">
+        <div class="slot-box">
+          <div class="slot-lbl">🎤 听谁的音乐（歌手 / 偏好）</div>
+          <div class="slot-val" id="slotArtist">–</div>
+        </div>
+        <div class="slot-box">
+          <div class="slot-lbl">🎵 听哪首歌（点播目标）</div>
+          <div class="slot-val" id="slotSong">–</div>
+        </div>
+        <div class="slot-box">
+          <div class="slot-lbl">🎨 怎样的音乐（曲风 / 情绪）</div>
+          <div class="slot-val" id="slotMood">–</div>
+        </div>
+        <div class="slot-box">
+          <div class="slot-lbl">⏯️ 控制动作（Action）</div>
+          <div class="slot-val" id="slotAction">–</div>
+        </div>
+      </div>
+      <div class="slot-details" id="slotDetails"></div>
+    </section>
   </section>
 
   <section class="card mgmt" id="mgmt">
@@ -419,6 +603,23 @@ function render(d, text) {
   const probs = Object.entries(d.intent.probabilities).map(([k, v]) => ({k, v})).sort((a, b) => b.v - a.v);
   $('choiceBars').innerHTML = bars(
     probs.map(x => ({label: x.k, v: x.v, top: x.k === d.intent.choice})), null);
+
+  // 渲染车机音乐槽位抽取卡片
+  if (d.music_slots && (d.intent.choice === 'music' || (d.domains && d.domains.music >= 0.30) || d.music_slots.artist !== '未指定' || d.music_slots.song !== '未指定' || d.music_slots.mood !== '未限定')) {
+    $('slotArtist').textContent = d.music_slots.artist;
+    $('slotSong').textContent = d.music_slots.song;
+    $('slotMood').textContent = d.music_slots.mood;
+    $('slotAction').textContent = d.music_slots.action;
+    $('slotDetails').innerHTML = `
+      <span class="slot-tag">点播模式：${esc(d.music_slots.target_type)}</span>
+      <span class="slot-tag">动作语义：${esc(d.music_slots.action)}</span>
+      <span class="slot-tag">JEV 并行单次前向 · 零生成延迟</span>
+    `;
+    $('musicCard').hidden = false;
+  } else {
+    $('musicCard').hidden = true;
+  }
+
   $('result').hidden = false;
 }
 async function judge(text) {
