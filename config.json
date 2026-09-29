@@ -1,0 +1,50 @@
+[
+  {
+    "name": "climate",
+    "desc": "空调控制（含温度、风量、制冷制热）",
+    "in_choice": true,
+    "in_noul": true
+  },
+  {
+    "name": "music",
+    "desc": "音乐控制（含播放、暂停、切歌、音量）",
+    "in_choice": true,
+    "in_noul": true
+  },
+  {
+    "name": "navigation",
+    "desc": "导航操作（含设目的地、路线）",
+    "in_choice": true,
+    "in_noul": true
+  },
+  {
+    "name": "seat",
+    "desc": "座椅控制（含座椅加热、通风）",
+    "in_choice": true,
+    "in_noul": true
+  },
+  {
+    "name": "window",
+    "desc": "车窗控制",
+    "in_choice": true,
+    "in_noul": true
+  },
+  {
+    "name": "phone",
+    "desc": "电话操作（含拨打电话、联系人）",
+    "in_choice": true,
+    "in_noul": true
+  },
+  {
+    "name": "query",
+    "desc": "时间、日期、天气等车辆状态或信息查询，不是控制指令",
+    "in_choice": true,
+    "in_noul": false
+  },
+  {
+    "name": "other",
+    "desc": "以上都不属于（兜底类）",
+    "in_choice": true,
+    "in_noul": false
+  }
+]
