@@ -129,11 +129,12 @@ def extract_music_slots(text, answers=None):
         }
 
     # 1. 在复合句中精准分离音乐相关子句（避免把多意图整句误当成歌名）
-    clauses = re.split(r"[，,；;并且但但是然后同时]", text)
+    clauses = re.split(r"[，,；;。！!？?\s]|并且|但是|然后|同时|顺便|而且|接着", text)
     music_clause = ""
     for c in clauses:
-        if any(w in c for w in ["音乐", "歌", "歌曲", "曲子", "放首", "听首", "周杰伦", "切歌", "别放了", "放歌", "唱"]):
-            music_clause = c.strip()
+        c_str = c.strip()
+        if any(w in c_str for w in ["音乐", "歌", "歌曲", "曲子", "放", "听", "唱", "点播", "播放", "播", "首", "来首", "来一首", "切歌", "下一首", "上一首", "别放了", "单曲循环", "随机播放", "收音机", "电台"]):
+            music_clause = c_str
             break
     if not music_clause:
         music_clause = text.strip()
@@ -186,12 +187,15 @@ def extract_music_slots(text, answers=None):
         }
 
     # 5. 精细歌手与歌名解析（0ms 零模型开销）
-    cleaned = re.sub(r"^(?:请?帮我?放一?首|请?帮我?播放|来一?首|给我放一?首|给我放|我想?听一?首|我想?听|放一?首|放首|放点|来点|播放|听听|放|听)", "", music_clause).strip()
+    pattern = r"^(?:再|也|顺便|接着|然后|麻烦|请)?(?:帮我|给我|为我|我想|我要|去)?(?:播放|点播|放|听|来|唱|搜)?(?:一?首|点|下|个)?\s*"
+    cleaned = re.sub(pattern, "", music_clause).strip()
     cleaned = re.sub(r"(?:的?(?:音乐|歌|歌曲|曲子))$", "", cleaned).strip()
 
     known_artists = [
         "周杰伦", "周董", "陈奕迅", "林俊杰", "邓紫棋", "五月天", "王菲",
-        "李荣浩", "薛之谦", "毛不易", "张学友", "华晨宇", "汪峰", "张杰", "许嵩"
+        "李荣浩", "薛之谦", "毛不易", "张学友", "华晨宇", "汪峰", "张杰", "许嵩",
+        "许巍", "朴树", "刀郎", "李健", "周深", "孙燕姿", "张韶涵", "梁静茹",
+        "莫文蔚", "伍佰", "动力火车", "陶喆", "王力宏", "凤凰传奇", "赵雷"
     ]
     mood_kws = ["欢快", "轻快", "动感", "轻松", "伤感", "悲伤", "安静", "抒情", "摇滚", "流行", "民谣", "纯音乐"]
 
@@ -202,7 +206,7 @@ def extract_music_slots(text, answers=None):
     # 句式 A：全是情绪风格词（如 "来首欢快的歌"）
     if any(cleaned == m or cleaned == m + "的" for m in mood_kws):
         artist = "未指定"
-        song = "未指定（按风格智能推荐）"
+        song = f"未指定（按{cleaned}风格智能推荐）"
         target = "mood_all"
     elif cleaned:
         # 句式 B："歌手 的 歌名"
@@ -220,7 +224,7 @@ def extract_music_slots(text, answers=None):
                     target = "artist_all"
                     break
             if not artist:
-                # 句式 D："歌手 歌名"（如 "周杰伦晴天"）
+                # 句式 D："歌手 歌名"（如 "周杰伦晴天"、"许巍蓝莲花"）
                 for a in known_artists:
                     if cleaned.startswith(a) and len(cleaned) > len(a):
                         artist = "周杰伦" if a == "周董" else a
@@ -437,8 +441,8 @@ def extract_phone_slots(text):
     number = m_num.group(1) if m_num else None
 
     has_phone_cue = bool(number) or any(w in text for w in [
-        "电话", "呼叫", "拨号", "联系人", "打给", "接听", "挂断", "接电话", "拨打", "打电话", "拨通", "重拨", "回拨"
-    ])
+        "电话", "呼叫", "拨号", "联系人", "打给", "接听", "挂断", "接电话", "拨打", "打电话", "拨通", "重拨", "回拨", "联系", "致电"
+    ]) or bool(re.search(r"给.+打", text))
     if not has_phone_cue:
         return {
             "contact": "未指定",
@@ -457,23 +461,33 @@ def extract_phone_slots(text):
 
     contact = None
     if action == "拨打电话":
-        clauses = re.split(r"[，,；;并且但但是然后同时]", text)
+        clauses = re.split(r"[，,；;。！!？?\s]|并且|但是|然后|同时|顺便|而且|接着", text)
         for c in clauses:
             c = c.strip()
-            if not (number and number in c) and not any(kw in c for kw in ["电话", "呼叫", "拨", "打给", "联系", "联系人"]) and not re.search(r"给.+打", c):
+            if not c:
                 continue
-            c_clean = re.sub(r"^(?:请?帮我|我想)?(?:打电话给|给|呼叫|拨打?电话?给|打给|联系|拨通|拨打?)\s*", "", c).strip()
-            c_clean = re.sub(r"(?:打[一一个俩几]?个?电话|的?电话|打电话|呼叫|拨通)$", "", c_clean).strip()
-            c_clean = re.sub(r"^(?:一个|一下|个)?", "", c_clean).strip()
-            c_clean = re.sub(r"(?:打个?|一下)?$", "", c_clean).strip()
-            if c_clean and c_clean not in ["谁", "哪个", "电话"]:
-                if number and c_clean == number:
-                    contact = f"指定号码 ({number})"
-                else:
-                    contact = c_clean
-                break
+            if not (number and number in c) and not any(kw in c for kw in ["电话", "呼叫", "拨", "打给", "联系", "联系人", "致电"]) and not re.search(r"给.+打", c):
+                continue
 
-    if number and not contact:
+            # 模式 1：给 X 打电话 / 给 X 打个电话 / 给 X 拨打 / 致电 X
+            m_b = re.search(r"(?:给|致电)\s*([^，,；;。！!？?\s]+?)\s*(?:打[一一个俩几]?个?电话|打电话|致电|拨打电话|打过去|打一个|拨通|打个|打)?$", c)
+            if m_b and m_b.group(1) and m_b.group(1) not in ["谁", "哪个", "电话"]:
+                cand = m_b.group(1).strip()
+                cand = re.sub(r"^(?:再|顺便|接着|然后|麻烦|请)?(?:帮我|给我|为我|我想|我要)?", "", cand).strip()
+                if cand:
+                    contact = cand
+                    break
+
+            # 模式 2：打电话给 X / 打给 X / 呼叫 X / 联系 X / 拨打 X
+            m_a = re.search(r"(?:打电话给|打给|呼叫|拨打?电话?给|联系一下|联系|拨通|拨打)\s*([^，,；;。！!？?\s]+?)(?:的?电话)?$", c)
+            if m_a and m_a.group(1) and m_a.group(1) not in ["谁", "哪个", "电话"]:
+                cand = m_a.group(1).strip()
+                cand = re.sub(r"^(?:再|顺便|接着|然后|麻烦|请)?(?:帮我|给我|为我|我想|我要)?", "", cand).strip()
+                if cand:
+                    contact = cand
+                    break
+
+    if number and (not contact or contact == number):
         contact = f"指定号码 ({number})"
 
     return {
@@ -525,9 +539,9 @@ DOMAIN_KEYWORDS = {
     "seat": ["座椅加热", "座椅通风", "座椅按摩", "座椅", "加热", "通风", "屁股", "座"],
     "climate": ["空调", "暖气", "暖风", "冷气", "冷风", "除雾", "除霜", "温度", "风量", "外循环", "内循环", "制热", "制冷", "太热", "太冷", "热一点", "冷一点", "有点冷", "有点热", "降温", "升温", "吹风"],
     "window": ["车窗", "天窗", "后排窗", "主驾窗", "副驾窗", "窗户", "开窗", "关窗"],
-    "music": ["音乐", "歌", "歌曲", "曲子", "曲", "首", "收音机", "广播", "音频", "电台", "听", "放", "唱", "点播", "来点", "周董", "周杰伦", "陈奕迅", "林俊杰", "邓紫棋", "五月天", "摇滚", "民谣", "流行", "切歌", "下一首", "上一首", "别放了", "单曲循环", "随机播放", "音量"],
+    "music": ["音乐", "歌", "歌曲", "曲子", "曲", "首", "收音机", "广播", "音频", "电台", "听", "放", "唱", "点播", "播放", "播", "来点", "周董", "周杰伦", "陈奕迅", "林俊杰", "邓紫棋", "五月天", "许巍", "摇滚", "民谣", "流行", "切歌", "下一首", "上一首", "别放了", "单曲循环", "随机播放", "音量"],
     "navigation": ["导航", "路线", "地图", "路况", "目的地", "带我", "回公司", "回家", "怎么走", "堵车", "去哪", "查路线", "带我去", "送我去", "开车去", "开车到", "前往", "导到", "导去", "加油站", "充电桩"],
-    "phone": ["电话", "呼叫", "拨号", "联系人", "打给", "接听", "挂断", "接电话", "拨打", "打电话"],
+    "phone": ["电话", "呼叫", "拨号", "联系人", "打给", "接听", "挂断", "接电话", "拨打", "打电话", "致电", "联系"],
     "query": ["天气", "气温", "下雨", "降雨", "温度如何", "几点", "时间", "星期", "礼拜", "日期", "限行", "尾号", "续航", "电量", "油量", "胎压", "笑话", "百科", "谁", "吗", "怎么样", "如何"],
 }
 
@@ -589,6 +603,9 @@ def build_smart_questions(text, intents):
         # 排除温度调到XX度
         if not re.search(r"(?:调到|升到|降到|吹到|开到)\s*[0-9一二两三四五六七八九十]+度?", text_lower):
             candidate_domains.add("navigation")
+
+    if re.search(r"给.+打", text_lower):
+        candidate_domains.add("phone")
 
     noul_intents = [x for x in intents if x["in_noul"]]
     qs = {}
