@@ -192,6 +192,116 @@ def extract_music_slots(text, answers):
     }
 
 
+CN_NUM = {
+    "零": 0, "一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5,
+    "六": 6, "七": 7, "八": 8, "九": 9, "十": 10,
+}
+
+
+def cn_to_number(s):
+    s = s.strip()
+    if not s:
+        return None
+    try:
+        return float(s)
+    except ValueError:
+        pass
+
+    # 处理带小数点的如 "二十五点五" / "26.5"
+    if "点" in s:
+        parts = s.split("点")
+        integer_part = cn_to_number(parts[0])
+        if integer_part is None:
+            return None
+        dec_str = ""
+        for c in parts[1]:
+            if c in CN_NUM:
+                dec_str += str(CN_NUM[c])
+            elif c.isdigit():
+                dec_str += c
+            else:
+                break
+        if dec_str:
+            return float(f"{int(integer_part)}.{dec_str}")
+        return float(integer_part)
+
+    if s == "十":
+        return 10.0
+    if s.startswith("十"):
+        return 10.0 + CN_NUM.get(s[1], 0)
+
+    m = re.match(r"^([一二两三四五六七八九])十([一二两三四五六七八九])?$", s)
+    if m:
+        tens = CN_NUM.get(m.group(1), 0) * 10
+        ones = CN_NUM.get(m.group(2), 0) if m.group(2) else 0
+        return float(tens + ones)
+
+    if len(s) == 1 and s in CN_NUM:
+        return float(CN_NUM[s])
+
+    return None
+
+
+def extract_climate_slots(text):
+    zone = "全车"
+    if "主驾" in text or "左边" in text:
+        zone = "主驾"
+    elif "副驾" in text or "右边" in text:
+        zone = "副驾"
+    elif "后排" in text:
+        zone = "后排"
+
+    temp = None
+    temp_type = "未指定"
+    delta = None
+
+    # 1. 绝对温度判定：如 "空调调至二十四度", "设为26度", "调到24.5°C", "温度22度"
+    m_abs = re.search(r"(?:温度|调至|调到|设为|设置成|设成|开到|到)?\s*([0-9一二两三四五六七八九十点\.]+)\s*(?:度|°|℃|摄氏度)", text)
+    if m_abs:
+        raw_num = m_abs.group(1).strip()
+        num = cn_to_number(raw_num)
+        if num is not None and 14.0 <= num <= 34.0:
+            temp = num
+            temp_type = "绝对温度设定"
+
+    # 2. 相对温度判定：如 "调高两度", "降温1度", "升温两度", "热一点"
+    if temp is None:
+        m_rel = re.search(r"(?:升温|调高|升高|热一点|暖和点|加|升)?\s*([0-9一二两三四五六七八九十\.]+)\s*(?:度|°|℃)?", text)
+        if ("高" in text or "升" in text or "热" in text) and m_rel and m_rel.group(1):
+            d = cn_to_number(m_rel.group(1))
+            if d and d <= 10:
+                delta = d
+                temp_type = f"相对升温 (+{delta}℃)"
+        elif ("低" in text or "降" in text or "冷" in text):
+            m_low = re.search(r"(?:降温|调低|降低|冷一点|凉快点|减)?\s*([0-9一二两三四五六七八九十\.]+)\s*(?:度|°|℃)?", text)
+            if m_low and m_low.group(1):
+                d = cn_to_number(m_low.group(1))
+                if d and d <= 10:
+                    delta = -d
+                    temp_type = f"相对降温 ({delta}℃)"
+
+    mode = "自动 (AUTO)"
+    if "制冷" in text or "冷风" in text or "冷气" in text:
+        mode = "制冷 (A/C)"
+    elif "制热" in text or "暖风" in text or "暖气" in text:
+        mode = "制热"
+    elif "除雾" in text or "除霜" in text:
+        mode = "除雾/除霜"
+    elif "内循环" in text:
+        mode = "内循环"
+    elif "外循环" in text:
+        mode = "外循环"
+
+    return {
+        "target_temp": f"{temp} ℃" if temp is not None else ("微调" if delta is not None else "未指定"),
+        "temp_value": temp,
+        "temp_type": temp_type,
+        "delta": delta,
+        "zone": zone,
+        "mode": mode,
+    }
+
+
 DOMAIN_KEYWORDS = {
     "seat": ["座椅加热", "座椅通风", "座椅按摩", "座椅", "加热", "通风"],
     "climate": ["空调", "暖气", "暖风", "冷气", "冷风", "除雾", "除霜", "温度", "风量", "外循环", "内循环"],
@@ -274,6 +384,7 @@ def call_ollaya(text):
     ans = resp["answers"]
     domains = {x["name"]: ans[x["name"]]["noul"] for x in intents if x["in_noul"]}
     music_slots = extract_music_slots(text, ans)
+    climate_slots = extract_climate_slots(text)
     negation = analyze_negation(text)
 
     # 功能域动作极性标注与排除处理
@@ -304,6 +415,7 @@ def call_ollaya(text):
                    "probabilities": ans["intent"]["probabilities"]},
         "domains": domains,
         "music_slots": music_slots,
+        "climate_slots": climate_slots,
         "negation": negation,
         "domain_actions": domain_actions,
         "timing": {"wall_ms": round(wall_ms, 1),
@@ -449,6 +561,8 @@ button.go:disabled { opacity: .55; cursor: wait; }
   font-size: 11.5px; background: var(--track-dim); color: var(--fill);
   padding: 3px 8px; border-radius: 4px; font-weight: 500;
 }
+.climate-theme { border-left-color: #009688 !important; }
+.climate-theme .slot-tag { background: rgba(0, 150, 136, 0.12); color: #00796b; }
 
 /* ── 意图管理 ── */
 .mgmt { margin-top: 22px; }
@@ -495,20 +609,20 @@ table.cfg .op[disabled] { opacity: .35; cursor: not-allowed; }
 <body>
 <main>
   <h1>车机语音意图测试台</h1>
-  <p class="sub">decision:eos · 单意图路由（choice）+ 多标签检出（noul）+ 否定排除与动作极性 · 本地 ollaya 127.0.0.1:11435</p>
+  <p class="sub">decision:eos · 单意图路由（choice）+ 多标签检出（noul）+ 音乐/空调全槽位抽取 · 本地 ollaya 127.0.0.1:11435</p>
 
   <div class="domains-row">
     <span class="cap">支持的功能域（<span id="dcount">–</span>）：</span><span id="dchips"></span>
   </div>
 
   <form id="f">
-    <input id="q" placeholder="输入一句话，如：关闭空调，但是不要关座椅加热" autofocus>
+    <input id="q" placeholder="输入一句话，如：空调调至二十四度，或者打开空调并播放周杰伦的歌" autofocus>
     <button class="go" id="go" type="submit">判断</button>
   </form>
   <div class="examples" id="ex">示例：
+    <button>空调调至二十四度</button><button>温度调到二十六点五度</button><button>主驾温度调高两度</button>
     <button>关闭空调，但是不要关座椅加热</button><button>不要座椅加热</button>
-    <button>把车窗打开，但是空调不要动</button><button>导航去公司，音乐不要停</button><button>别放歌了</button>
-    <button>我要听周杰伦的音乐</button><button>放一首周杰伦欢快的晴天</button>
+    <button>把车窗打开，但是空调不要动</button><button>我要听周杰伦的晴天</button>
   </div>
 
   <div id="status"></div>
@@ -553,6 +667,30 @@ table.cfg .op[disabled] { opacity: .35; cursor: not-allowed; }
         </div>
       </div>
       <div class="slot-details" id="slotDetails"></div>
+    </section>
+
+    <!-- 空调槽位分析面板（温度/模式/温区抽取） -->
+    <section class="card slot-card climate-theme" id="climateCard" hidden>
+      <h2>❄️ 车机空调槽位抽取<small>温度与模式精准解析 · 毫秒级单次前向</small></h2>
+      <div class="slot-grid">
+        <div class="slot-box">
+          <div class="slot-lbl">🌡️ 设定目标温度</div>
+          <div class="slot-val" id="slotTemp">–</div>
+        </div>
+        <div class="slot-box">
+          <div class="slot-lbl">🎚️ 温度调节模式</div>
+          <div class="slot-val" id="slotTempType">–</div>
+        </div>
+        <div class="slot-box">
+          <div class="slot-lbl">💺 控制温区（Zone）</div>
+          <div class="slot-val" id="slotZone">–</div>
+        </div>
+        <div class="slot-box">
+          <div class="slot-lbl">💨 工作模式</div>
+          <div class="slot-val" id="slotClimateMode">–</div>
+        </div>
+      </div>
+      <div class="slot-details" id="climateDetails"></div>
     </section>
   </section>
 
@@ -747,6 +885,23 @@ function render(d, text) {
     $('musicCard').hidden = false;
   } else {
     $('musicCard').hidden = true;
+  }
+
+  // 渲染车机空调槽位抽取卡片
+  if (d.climate_slots && !exclusions.includes('climate') && (d.intent.choice === 'climate' || (d.domains && d.domains.climate >= 0.35) || d.climate_slots.target_temp !== '未指定' || d.climate_slots.temp_type !== '未指定')) {
+    $('slotTemp').textContent = d.climate_slots.target_temp;
+    $('slotTempType').textContent = d.climate_slots.temp_type;
+    $('slotZone').textContent = d.climate_slots.zone;
+    $('slotClimateMode').textContent = d.climate_slots.mode;
+    $('climateDetails').innerHTML = `
+      <span class="slot-tag">温区目标：${esc(d.climate_slots.zone)}</span>
+      <span class="slot-tag">工作模式：${esc(d.climate_slots.mode)}</span>
+      <span class="slot-tag">调节模式：${esc(d.climate_slots.temp_type)}</span>
+      <span class="slot-tag">JEV 并行单次前向 · 毫秒级输出</span>
+    `;
+    $('climateCard').hidden = false;
+  } else {
+    $('climateCard').hidden = true;
   }
 
   $('result').hidden = false;
