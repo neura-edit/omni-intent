@@ -109,13 +109,15 @@ def extract_music_slots(text, answers=None):
         "specific_song": "指定特定歌曲",
         "artist_all": "点播歌手全部/热门单曲",
         "mood_all": "按曲风随心听",
+        "genre_mood_all": "按风格/情绪智能推荐",
         "random": "随机点播",
     }
 
     # 0. 如果整句根本没有任何音乐相关的触发词，直接返回未指定，避免非音乐指令误提取
     has_music_cue = any(w in text for w in [
         "音乐", "歌", "歌曲", "曲子", "曲", "首", "收音机", "广播", "音频", "电台",
-        "放首", "听首", "点播", "周董", "周杰伦", "陈奕迅", "林俊杰", "邓紫棋", "五月天",
+        "放首", "听首", "点播", "播放", "播", "放", "听", "唱", "周董", "周杰伦", "陈奕迅", "林俊杰", "邓紫棋", "五月天", "许巍",
+        "古典", "爵士", "轻音乐", "纯音乐", "钢琴", "摇滚", "民谣", "古风", "电音", "老歌",
         "切歌", "下一首", "上一首", "别放了", "单曲循环", "随机播放", "放歌", "听歌", "放点音乐", "来点音乐"
     ])
     if not has_music_cue:
@@ -128,12 +130,44 @@ def extract_music_slots(text, answers=None):
             "raw": {"action": None, "mood": None, "target": None},
         }
 
+    GENRE_MAP = {
+        "classical": ("古典", ["古典", "古典音乐", "交响乐", "管弦乐", "协奏曲", "室内乐", "歌剧", "巴赫", "莫扎特", "贝多芬", "肖邦"]),
+        "jazz": ("爵士", ["爵士", "爵士乐", "布鲁斯", "蓝调", "bossa nova", "波萨诺瓦"]),
+        "piano": ("钢琴/器乐", ["钢琴", "钢琴曲", "吉他", "吉他曲", "小提琴", "萨克斯", "古筝", "二胡", "乐器"]),
+        "light": ("轻音乐/纯音乐", ["轻音乐", "纯音乐", "器乐", "背景音乐", "bgm", "白噪音", "助眠", "冥想"]),
+        "rock": ("摇滚", ["摇滚", "重金属", "硬摇滚", "朋克", "黑胶", "金属"]),
+        "folk": ("民谣", ["民谣", "民歌", "民乐", "乡村音乐", "乡村", "民谣歌曲"]),
+        "pop": ("流行", ["流行", "老歌", "经典老歌", "华语流行", "欧美流行", "粤语歌", "粤语老歌"]),
+        "rap": ("说唱/嘻哈", ["说唱", "嘻哈", "hiphop", "rap", "trap"]),
+        "electronic": ("电子音乐", ["电音", "电子音乐", "dj", "夜店", "慢摇", "蹦迪", "edm"]),
+        "gufeng": ("国风/古风", ["古风", "国风", "中国风", "汉服", "仙侠"]),
+        "children": ("少儿/童谣", ["儿歌", "童谣", "宝宝巴士", "睡前故事", "少儿"]),
+        "talk": ("曲艺/脱口秀", ["相声", "评书", "小品", "脱口秀", "故事", "广播剧"])
+    }
+
+    MOOD_MAP = {
+        "sad": ("伤感/低落 (情绪治愈)", ["心情很差", "心情不好", "难过", "心烦", "烦躁", "郁闷", "抑郁", "伤感", "悲伤", "失恋", "伤心", "emo", "压抑", "哭", "低落", "痛苦", "难受", "治愈"]),
+        "cheerful": ("欢快/提神 (动感充沛)", ["开心", "高兴", "兴奋", "心情好", "愉快", "欢快", "轻快", "动感", "轻松", "嗨", "激情", "燃", "提神", "嗨一点"]),
+        "calm": ("舒缓/安静 (放松助眠)", ["安静", "抒情", "舒缓", "放松", "想静静", "静一静", "催眠", "助眠", "睡前", "冥想", "发呆", "温和", "柔和"])
+    }
+
+    ADJECTIVE_MOODS = [
+        "动感", "欢快", "轻快", "轻松", "伤感", "悲伤", "安静", "舒缓", "治愈", "柔和", "温和",
+        "激情", "燃", "摇滚", "好听", "热门", "经典", "最新", "老", "新", "催眠", "助眠", "放松",
+        "开心", "难过", "低落", "兴奋", "浪漫", "甜蜜", "伤心", "孤独"
+    ]
+
+    GENRE_TERMS = set()
+    for _, (lbl, kws) in GENRE_MAP.items():
+        GENRE_TERMS.add(lbl)
+        GENRE_TERMS.update(kws)
+
     # 1. 在复合句中精准分离音乐相关子句（避免把多意图整句误当成歌名）
     clauses = re.split(r"[，,；;。！!？?\s]|并且|但是|然后|同时|顺便|而且|接着", text)
     music_clause = ""
     for c in clauses:
         c_str = c.strip()
-        if any(w in c_str for w in ["音乐", "歌", "歌曲", "曲子", "放", "听", "唱", "点播", "播放", "播", "首", "来首", "来一首", "切歌", "下一首", "上一首", "别放了", "单曲循环", "随机播放", "收音机", "电台"]):
+        if any(w in c_str for w in ["音乐", "歌", "歌曲", "曲子", "放", "听", "唱", "点播", "播放", "播", "首", "来首", "来一首", "切歌", "下一首", "上一首", "别放了", "单曲循环", "随机播放", "收音机", "电台", "古典", "爵士", "钢琴", "摇滚", "民谣"]):
             music_clause = c_str
             break
     if not music_clause:
@@ -154,20 +188,27 @@ def extract_music_slots(text, answers=None):
         else:
             act = "play"
 
-    # 3. 情绪风格推断
-    if not mood:
-        if any(w in music_clause for w in ["欢快", "轻快", "动感", "轻松", "开心"]):
-            mood = "cheerful"
-        elif any(w in music_clause for w in ["伤感", "悲伤", "安静", "抒情", "治愈", "emo"]):
-            mood = "sad"
-        elif any(w in music_clause for w in ["摇滚", "燃", "激情", "金属", "电音"]):
-            mood = "rock"
-        elif any(w in music_clause for w in ["流行", "老歌"]):
-            mood = "pop"
-        elif any(w in music_clause for w in ["民谣", "纯音乐"]):
-            mood = "folk"
-        else:
-            mood = "unspecified"
+    # 3. 情绪与曲风推断（在整句与音乐分句中同时检测）
+    detected_mood_label = None
+    for m_code, (m_lbl, kws) in MOOD_MAP.items():
+        if any(k in text for k in kws):
+            detected_mood_label = m_lbl
+            break
+
+    detected_genre_label = None
+    for g_code, (g_lbl, kws) in GENRE_MAP.items():
+        if any(k in text for k in kws):
+            detected_genre_label = g_lbl
+            break
+
+    if detected_mood_label and detected_genre_label:
+        mood_display = f"{detected_mood_label} · {detected_genre_label}"
+    elif detected_mood_label:
+        mood_display = detected_mood_label
+    elif detected_genre_label:
+        mood_display = f"{detected_genre_label}曲风"
+    else:
+        mood_display = mood_map.get(mood, "未限定")
 
     # 4. 纯操作性通用指令识别（如 '把音乐打开', '打开音乐', '放歌', '听音乐'，无需抽取歌名）
     generic_patterns = [
@@ -179,7 +220,7 @@ def extract_music_slots(text, answers=None):
     if any(re.search(p, music_clause) for p in generic_patterns):
         return {
             "action": action_map.get(act, "播放"),
-            "mood": mood_map.get(mood, "未限定"),
+            "mood": mood_display,
             "artist": "未指定",
             "song": "未指定（继续播放/随心听）",
             "target_type": "随机点播",
@@ -191,30 +232,42 @@ def extract_music_slots(text, answers=None):
     cleaned = re.sub(pattern, "", music_clause).strip()
     cleaned = re.sub(r"(?:的?(?:音乐|歌|歌曲|曲子))$", "", cleaned).strip()
 
+    is_pure_genre_or_mood = (cleaned in GENRE_TERMS) or (cleaned in ADJECTIVE_MOODS)
+
     known_artists = [
         "周杰伦", "周董", "陈奕迅", "林俊杰", "邓紫棋", "五月天", "王菲",
         "李荣浩", "薛之谦", "毛不易", "张学友", "华晨宇", "汪峰", "张杰", "许嵩",
         "许巍", "朴树", "刀郎", "李健", "周深", "孙燕姿", "张韶涵", "梁静茹",
         "莫文蔚", "伍佰", "动力火车", "陶喆", "王力宏", "凤凰传奇", "赵雷"
     ]
-    mood_kws = ["欢快", "轻快", "动感", "轻松", "伤感", "悲伤", "安静", "抒情", "摇滚", "流行", "民谣", "纯音乐"]
 
     artist = None
     song = None
     target = "random"
 
-    # 句式 A：全是情绪风格词（如 "来首欢快的歌"）
-    if any(cleaned == m or cleaned == m + "的" for m in mood_kws):
+    # 若用户请求的是纯曲风或纯情绪（如 "古典音乐"、"爵士乐"、"伤感音乐"）
+    if is_pure_genre_or_mood or (not cleaned and (detected_genre_label or detected_mood_label)):
+        tag_desc = []
+        if detected_genre_label: tag_desc.append(detected_genre_label)
+        if detected_mood_label: tag_desc.append(detected_mood_label)
+        desc_str = " + ".join(tag_desc) if tag_desc else "风格"
         artist = "未指定"
-        song = f"未指定（按{cleaned}风格智能推荐）"
-        target = "mood_all"
+        song = f"未指定（按{desc_str}智能推荐）"
+        target = "genre_mood_all"
     elif cleaned:
         # 句式 B："歌手 的 歌名"
         m = re.search(r"^(.*?)(?:的)(.+)$", cleaned)
         if m:
-            artist = m.group(1).strip()
-            song = m.group(2).strip()
-            target = "specific_song"
+            left = m.group(1).strip()
+            right = m.group(2).strip()
+            if left in ADJECTIVE_MOODS or right in GENRE_TERMS or right in ["歌", "音乐", "歌曲", "曲子"]:
+                artist = "未指定"
+                song = f"未指定（按{left}风格智能推荐）"
+                target = "genre_mood_all"
+            else:
+                artist = left
+                song = right
+                target = "specific_song"
         else:
             # 句式 C：仅有点歌歌手（如 "我想听陈奕迅"）
             for a in known_artists:
@@ -237,7 +290,7 @@ def extract_music_slots(text, answers=None):
 
     return {
         "action": action_map.get(act, act or "播放"),
-        "mood": mood_map.get(mood, mood or "未限定"),
+        "mood": mood_display,
         "artist": artist or "未指定",
         "song": song or "未指定",
         "target_type": target_map.get(target, target),
