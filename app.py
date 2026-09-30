@@ -13,7 +13,7 @@ import time
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-HOST, PORT = "0.0.0.0", 8080
+HOST, PORT = "127.0.0.1", 8080
 OLLAYA_URL = "http://127.0.0.1:11435/api/decide"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
