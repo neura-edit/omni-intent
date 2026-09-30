@@ -169,6 +169,64 @@ KNOWN_ARTISTS_EN = [
     "Dua Lipa", "Imagine Dragons", "Beyonce", "Post Malone", "Katy Perry"
 ]
 
+ALL_GENRES_ORDERED = []
+for code, (lbl, kws) in GENRE_MAP.items():
+    for kw in kws:
+        ALL_GENRES_ORDERED.append((kw, lbl))
+ALL_GENRES_ORDERED.sort(key=lambda x: len(x[0]), reverse=True)
+
+ALL_MOODS_ORDERED = []
+for code, (lbl, kws) in MOOD_MAP.items():
+    for kw in kws:
+        ALL_MOODS_ORDERED.append((kw, lbl))
+ALL_MOODS_ORDERED.sort(key=lambda x: len(x[0]), reverse=True)
+
+CARRIER_TOKENS = [
+    "我们", "咱们", "大家", "他们", "你们", "车里人", "车上人", "全车人", "车里", "车上",
+    "我", "你", "他", "她", "它",
+    "想要", "想", "要", "打算", "准备", "喜欢", "爱听", "希望能", "希望", "需要", "烦请", "麻烦", "请", "可以", "能",
+    "帮我们", "帮咱们", "帮我", "给我们", "给咱们", "给我", "替我们", "替我", "为我们", "为我",
+    "还", "又", "也", "就", "再", "顺便", "接着", "然后", "先", "现在", "立刻", "马上",
+    "播放", "点播", "播送", "放", "听", "播", "唱", "来", "搜", "查", "换", "切", "听听", "放放", "播播",
+    "一首", "两首", "几首", "首", "曲", "支", "首歌曲", "首歌", "首曲子", "点", "下", "个", "一些", "一点", "些",
+    "的", "音乐", "歌", "歌曲", "曲子", "风格", "曲风", "类型", "旋律", "调子",
+    "吧", "啊", "呀", "啦", "呢", "嘛", "一下", "一会", "会儿",
+    "play", "listen to", "listen", "hear", "song", "songs", "music", "track", "tracks",
+    "some", "a", "an", "the", "to", "piece of", "piece", "please", "can you", "can", "you", "we", "want to", "want",
+    "i", "would like", "would", "like", "let's", "lets", "give us", "give me", "put on"
+]
+CARRIER_TOKENS.sort(key=len, reverse=True)
+
+
+def match_pure_genre_or_mood(clause):
+    c = clause.strip().lower()
+    found_genre = None
+    found_mood = None
+
+    rem = c
+    for kw, lbl in ALL_GENRES_ORDERED:
+        if kw.lower() in rem:
+            found_genre = lbl
+            rem = rem.replace(kw.lower(), "", 1)
+            break
+
+    for kw, lbl in ALL_MOODS_ORDERED:
+        if kw.lower() in rem:
+            found_mood = lbl
+            rem = rem.replace(kw.lower(), "", 1)
+            break
+
+    if not found_genre and not found_mood:
+        return False, None, None
+
+    for tok in CARRIER_TOKENS:
+        rem = rem.replace(tok.lower(), "")
+
+    rem = re.sub(r"[\s,;.!?:;，。！？；：、~`\'\"/\\\(\)\[\]\{\}]+", "", rem).strip()
+    if len(rem) == 0:
+        return True, found_genre, found_mood
+    return False, None, None
+
 
 def extract_music_slots(text, answers=None):
     text_lower = text.lower()
@@ -256,31 +314,21 @@ def extract_music_slots(text, answers=None):
             "raw": {"action": action, "mood": mood_display, "target": "random"}
         }
 
-    # 5. 纯曲风/风格优先判定（如 '我想听放克'、'放点爵士'、'来首古典音乐'、'play funk'）
-    ALL_GENRES_ORDERED = []
-    for code, (lbl, kws) in GENRE_MAP.items():
-        for kw in kws:
-            ALL_GENRES_ORDERED.append((kw, lbl))
-    ALL_GENRES_ORDERED.sort(key=lambda x: len(x[0]), reverse=True)
+    # 5. 纯曲风/情绪优先判定（如 '我想听放克'、'我们要听放克'、'放点爵士'、'来首古典音乐'、'play funk'）
+    pure_ok, pure_genre, pure_mood = match_pure_genre_or_mood(music_clause)
+    if pure_ok:
+        tag_desc = []
+        if pure_genre:
+            tag_desc.append(pure_genre)
+        elif detected_genre:
+            tag_desc.append(detected_genre)
 
-    matched_pure_genre_lbl = None
-    for kw, lbl in ALL_GENRES_ORDERED:
-        pattern = re.compile(re.escape(kw), re.I)
-        m = pattern.search(music_clause)
-        if m:
-            prefix = music_clause[:m.start()].strip()
-            suffix = music_clause[m.end():].strip()
-            suffix_clean = re.sub(r"^(?:的)?(?:音乐|歌|歌曲|曲子|music|songs?)$", "", suffix, flags=re.I).strip()
-            prefix_match = re.match(r"^(?:[我你他]?\s*(?:还|又|也|就|再|顺便|接着|然后|先|麻烦|请)?\s*(?:想要|想|要|打算|希望能?|帮我|给我|替我|为我)?\s*(?:播放|点播|放|听|播|唱|来|搜|查)?\s*(?:一?[首曲支]|首歌曲|首歌|首曲子|点|下|个)?\s*|play|listen to|hear|play\s+some|listen\s+to\s+some)*$", prefix, flags=re.I)
-            if not suffix_clean and prefix_match:
-                matched_pure_genre_lbl = lbl
-                break
-
-    if matched_pure_genre_lbl:
-        tag_desc = [matched_pure_genre_lbl]
-        if detected_mood:
+        if pure_mood:
+            tag_desc.append(pure_mood)
+        elif detected_mood and (not pure_genre or detected_mood != pure_genre):
             tag_desc.append(detected_mood)
-        desc_str = " + ".join(tag_desc)
+
+        desc_str = " + ".join(tag_desc) if tag_desc else "风格"
         return {
             "action": action,
             "mood": mood_display,
@@ -314,9 +362,9 @@ def extract_music_slots(text, answers=None):
                     target = "artist_all"
                     break
 
-    # 中文语法规则解析（非循环单次前向匹配，避免贪婪将 '放克' 中的 '放' 当作动词误吞，留下 '克'）
+    # 中文语法规则解析（单次前向匹配，支持单复数主语与礼貌前缀，避免贪婪吞噬）
     if not artist and not song:
-        pattern = r"^(?:[我你他]?\s*(?:还|又|也|就|再|顺便|接着|然后|先|麻烦|请)?\s*(?:想要|想|要|打算|希望能?|帮我|给我|替我|为我)?\s*(?:播放|点播|放|听|播|唱|来|搜|查)\s*(?:一?[首曲支]|首歌曲|首歌|首曲子|点|下|个)?\s*)"
+        pattern = r"^(?:(?:我(?:们)?|咱们|大家|他们|你们|车[里内上]|全车人|你|他(?:们)?|她(?:们)?)?\s*(?:还|又|也|就|再|顺便|接着|然后|先|麻烦|请)?\s*(?:想要|想|要|打算|希望能?|准备|喜欢|爱听)?\s*(?:帮我(?:们)?|给我(?:们)?|替我(?:们)?|为我(?:们)?|来)?\s*(?:播放|点播|放|听|播|唱|搜|查|切|换)?\s*(?:一?[首曲支]|两首|几首|首歌曲|首歌|首曲子|点|下|个|一些|一点)?\s*)"
         cleaned = re.sub(pattern, "", music_clause).strip()
         cleaned = re.sub(r"(?:的?(?:音乐|歌|歌曲|曲子))$", "", cleaned).strip()
         cleaned = re.sub(r"^(?:play|listen to|hear)?\s*(?:some|a\s+song|a\s+track|a\s+piece\s+of)?\s*", "", cleaned, flags=re.I).strip()
@@ -337,9 +385,10 @@ def extract_music_slots(text, answers=None):
             if m_cn:
                 left = m_cn.group(1).strip()
                 right = m_cn.group(2).strip()
+                left = re.sub(pattern, "", left).strip()
                 if left in ADJECTIVE_MOODS or right in GENRE_TERMS or right in ["歌", "音乐", "歌曲", "曲子"]:
                     artist = "未指定 / Unspecified"
-                    song = f"未指定（按{left}风格智能推荐）"
+                    song = f"未指定（按 {left} 智能推荐） / Recommendation"
                     target = "genre_mood_all"
                 else:
                     artist = left
@@ -644,7 +693,7 @@ def extract_phone_slots(text):
             m_b = re.search(r"(?:给|致电)\s*([^，,；;。！!？?\s]+?)\s*(?:打[一一个俩几]?个?电话|打电话|致电|拨打电话|打过去|打一个|拨通|打个|打)?$", c)
             if m_b and m_b.group(1) and m_b.group(1) not in ["谁", "哪个", "电话"]:
                 cand = m_b.group(1).strip()
-                cand = re.sub(r"^(?:再|顺便|接着|然后|麻烦|请)?(?:帮我|给我|为我|我想|我要)?", "", cand).strip()
+                cand = re.sub(r"^(?:再|顺便|接着|然后|先|麻烦|请)?\s*(?:帮我(?:们)?|给我(?:们)?|为我(?:们)?|替我(?:们)?|我(?:们)?|咱们|大家|他们|你们|想要|想|要|打算)?\s*", "", cand).strip()
                 if cand:
                     contact = cand
                     break
@@ -652,7 +701,7 @@ def extract_phone_slots(text):
             m_a = re.search(r"(?:打电话给|打给|呼叫|拨打?电话?给|联系一下|联系|拨通|拨打)\s*([^，,；;。！!？?\s]+?)(?:的?电话)?$", c)
             if m_a and m_a.group(1) and m_a.group(1) not in ["谁", "哪个", "电话"]:
                 cand = m_a.group(1).strip()
-                cand = re.sub(r"^(?:再|顺便|接着|然后|麻烦|请)?(?:帮我|给我|为我|我想|我要)?", "", cand).strip()
+                cand = re.sub(r"^(?:再|顺便|接着|然后|先|麻烦|请)?\s*(?:帮我(?:们)?|给我(?:们)?|为我(?:们)?|替我(?:们)?|我(?:们)?|咱们|大家|他们|你们|想要|想|要|打算)?\s*", "", cand).strip()
                 if cand:
                     contact = cand
                     break
