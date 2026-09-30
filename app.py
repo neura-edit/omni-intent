@@ -727,7 +727,7 @@ body {
   margin: 0; background: var(--page); color: var(--ink);
   font: 15px/1.55 system-ui, -apple-system, "Segoe UI", "PingFang SC", sans-serif;
 }
-main { max-width: 860px; margin: 0 auto; padding: 28px 20px 60px; }
+main { max-width: 1240px; margin: 0 auto; padding: 26px 24px 60px; }
 h1 { font-size: 21px; margin: 0 0 2px; }
 .sub { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
 .card {
@@ -783,8 +783,48 @@ button.go:disabled { opacity: .55; cursor: wait; }
 }
 .verdict .echo { color: var(--ink-2); font-size: 14px; }
 
-/* 条形图 */
-.panels { display: grid; gap: 14px; margin-top: 4px; }
+/* 左右双栏布局 (Workspace Grid) */
+.workspace-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 960px) {
+  .workspace-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.col-left, .col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.col-right .slot-card {
+  margin-top: 0;
+}
+.empty-slot-hint {
+  text-align: center;
+  padding: 42px 20px;
+  background: var(--surface);
+  border: 1px dashed var(--baseline);
+  border-radius: 10px;
+}
+.empty-slot-hint .hint-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+.empty-slot-hint .hint-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.empty-slot-hint .hint-desc {
+  font-size: 13px;
+  color: var(--muted);
+}
+
 .panel h2 { font-size: 14.5px; margin: 0 0 12px; color: var(--ink); }
 .panel h2 small { font-weight: 400; color: var(--muted); margin-left: 6px; }
 .brow {
@@ -819,17 +859,17 @@ button.go:disabled { opacity: .55; cursor: wait; }
 .note { font-size: 12.5px; color: var(--muted); margin: 12px 0 0; }
 [hidden] { display: none !important; }
 
-/* ── 音乐槽位面板（解法一） ── */
-.slot-card { margin-top: 14px; border-left: 4px solid var(--fill); background: var(--surface); }
+/* ── 槽位面板 ── */
+.slot-card { border-left: 4px solid var(--fill); background: var(--surface); }
 .slot-card h2 { font-size: 15px; margin: 0 0 12px; display: flex; align-items: baseline; gap: 8px; color: var(--ink); }
 .slot-card h2 small { font-size: 11.5px; color: var(--muted); font-weight: normal; }
-.slot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.slot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
 .slot-box {
   background: var(--page); border: 1px solid var(--grid); border-radius: 8px;
-  padding: 10px 12px;
+  padding: 8px 11px;
 }
-.slot-lbl { font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 4px; }
-.slot-val { font-size: 14.5px; font-weight: 600; color: var(--ink); word-break: break-all; }
+.slot-lbl { font-size: 11.5px; color: var(--muted); font-weight: 500; margin-bottom: 3px; }
+.slot-val { font-size: 14px; font-weight: 600; color: var(--ink); word-break: break-all; }
 .slot-details { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
 .slot-tag {
   font-size: 11.5px; background: var(--track-dim); color: var(--fill);
@@ -917,125 +957,138 @@ table.cfg .op[disabled] { opacity: .35; cursor: not-allowed; }
       <div class="tile"><div class="label">模型耗时</div><div class="value"><span id="tModel">–</span><span class="unit">ms</span></div></div>
       <div class="tile"><div class="label">输入 tokens</div><div class="value"><span id="tTok">–</span></div></div>
     </div>
-    <div class="panels">
-      <section class="card panel">
-        <div class="verdict"><span class="tag" id="verdict">–</span><span class="echo" id="echo"></span></div>
-        <h2>多标签检出<small>noul · YES ≥ 0.70 · 灰区 0.50–0.70</small></h2>
-        <div id="noulBars"></div>
-      </section>
-      <section class="card panel">
-        <h2>主意图分布<small>choice · 全类别概率</small></h2>
-        <div id="choiceBars"></div>
-      </section>
+    <div class="workspace-grid">
+      <!-- 左栏：意图分类与概率分布 -->
+      <div class="col-left">
+        <section class="card panel">
+          <div class="verdict"><span class="tag" id="verdict">–</span><span class="echo" id="echo"></span></div>
+          <h2>多标签检出<small>noul · YES ≥ 0.70 · 灰区 0.50–0.70</small></h2>
+          <div id="noulBars"></div>
+        </section>
+        <section class="card panel">
+          <h2>主意图分布<small>choice · 全类别概率分布</small></h2>
+          <div id="choiceBars"></div>
+        </section>
+      </div>
+
+      <!-- 右栏：结构化槽位与分流结果 -->
+      <div class="col-right">
+        <!-- 纯控制或无特定槽位提示 -->
+        <div class="card empty-slot-hint" id="emptySlotHint" hidden>
+          <div class="hint-icon">⚡</div>
+          <div class="hint-title">常规功能控制</div>
+          <div class="hint-desc">当前指令已直接分发至车控总线，无需提取额外槽位参数。</div>
+        </div>
+
+        <!-- 音乐槽位分析面板（JEV 分层解耦，毫秒级无生成延迟） -->
+        <section class="card slot-card" id="musicCard" hidden>
+          <h2>🎵 车机音乐槽位抽取<small>JEV 决策模型分层解析 · 毫秒级单次前向 · 零生成等待</small></h2>
+          <div class="slot-grid">
+            <div class="slot-box">
+              <div class="slot-lbl">🎤 听谁的音乐（歌手 / 偏好）</div>
+              <div class="slot-val" id="slotArtist">–</div>
+            </div>
+            <div class="slot-box">
+              <div class="slot-lbl">🎵 听哪首歌（点播目标）</div>
+              <div class="slot-val" id="slotSong">–</div>
+            </div>
+            <div class="slot-box">
+              <div class="slot-lbl">🎨 怎样的音乐（曲风 / 情绪）</div>
+              <div class="slot-val" id="slotMood">–</div>
+            </div>
+            <div class="slot-box">
+              <div class="slot-lbl">⏯️ 控制动作（Action）</div>
+              <div class="slot-val" id="slotAction">–</div>
+            </div>
+          </div>
+          <div class="slot-details" id="slotDetails"></div>
+        </section>
+
+        <!-- 空调槽位分析面板（温度/模式/温区抽取） -->
+        <section class="card slot-card climate-theme" id="climateCard" hidden>
+          <h2>❄️ 车机空调槽位抽取<small>温度与模式精准解析 · 毫秒级单次前向</small></h2>
+          <div class="slot-grid">
+            <div class="slot-box">
+              <div class="slot-lbl">🌡️ 设定目标温度</div>
+              <div class="slot-val" id="slotTemp">–</div>
+            </div>
+            <div class="slot-box">
+              <div class="slot-lbl">🎚️ 温度调节模式</div>
+              <div class="slot-val" id="slotTempType">–</div>
+            </div>
+            <div class="slot-box">
+              <div class="slot-lbl">💺 控制温区（Zone）</div>
+              <div class="slot-val" id="slotZone">–</div>
+            </div>
+            <div class="slot-box">
+              <div class="slot-lbl">💨 工作模式</div>
+              <div class="slot-val" id="slotClimateMode">–</div>
+            </div>
+          </div>
+          <div class="slot-details" id="climateDetails"></div>
+        </section>
+
+        <!-- 导航槽位分析面板 -->
+        <section class="card slot-card nav-theme" id="navCard" hidden>
+          <h2>🧭 车机导航槽位抽取<small>目的地与路径偏好解析 · 毫秒级单次前向</small></h2>
+          <div class="slot-grid">
+            <div class="slot-box">
+              <div class="slot-lbl">📍 导航目的地 (Destination)</div>
+              <div class="slot-val" id="slotNavDest">–</div>
+            </div>
+            <div class="slot-box">
+              <div class="slot-lbl">🚦 导航动作 (Action)</div>
+              <div class="slot-val" id="slotNavAction">–</div>
+            </div>
+            <div class="slot-box">
+              <div class="slot-lbl">🛣️ 路线偏好 (Preference)</div>
+              <div class="slot-val" id="slotNavPref">–</div>
+            </div>
+          </div>
+          <div class="slot-details" id="navDetails"></div>
+        </section>
+
+        <!-- 电话槽位分析面板 -->
+        <section class="card slot-card phone-theme" id="phoneCard" hidden>
+          <h2>📞 车机电话槽位抽取<small>联系人与号码识别 · 毫秒级单次前向</small></h2>
+          <div class="slot-grid">
+            <div class="slot-box">
+              <div class="slot-lbl">👤 呼叫联系人 (Contact)</div>
+              <div class="slot-val" id="slotPhoneContact">–</div>
+            </div>
+            <div class="slot-box">
+              <div class="slot-lbl">🔢 目标电话号码 (Number)</div>
+              <div class="slot-val" id="slotPhoneNumber">–</div>
+            </div>
+            <div class="slot-box">
+              <div class="slot-lbl">📲 呼叫动作 (Action)</div>
+              <div class="slot-val" id="slotPhoneAction">–</div>
+            </div>
+          </div>
+          <div class="slot-details" id="phoneDetails"></div>
+        </section>
+
+        <!-- 信息查询分流面板 -->
+        <section class="card slot-card query-theme" id="queryCard" hidden>
+          <h2>💬 信息查询与问答分流<small>天气/时间/车况智能分流 · 语音助手联动</small></h2>
+          <div class="slot-grid">
+            <div class="slot-box">
+              <div class="slot-lbl">📋 查询类型 (Type)</div>
+              <div class="slot-val" id="slotQueryType">–</div>
+            </div>
+            <div class="slot-box">
+              <div class="slot-lbl">🎯 查询目标 (Target)</div>
+              <div class="slot-val" id="slotQueryTarget">–</div>
+            </div>
+            <div class="slot-box">
+              <div class="slot-lbl">📢 响应通道 (Channel)</div>
+              <div class="slot-val" id="slotQueryChannel">–</div>
+            </div>
+          </div>
+          <div class="slot-details" id="queryDetails"></div>
+        </section>
+      </div>
     </div>
-
-    <!-- 音乐槽位分析面板（JEV 分层解耦，毫秒级无生成延迟） -->
-    <section class="card slot-card" id="musicCard" hidden>
-      <h2>🎵 车机音乐槽位抽取<small>JEV 决策模型分层解析 · 毫秒级单次前向 · 零生成等待</small></h2>
-      <div class="slot-grid">
-        <div class="slot-box">
-          <div class="slot-lbl">🎤 听谁的音乐（歌手 / 偏好）</div>
-          <div class="slot-val" id="slotArtist">–</div>
-        </div>
-        <div class="slot-box">
-          <div class="slot-lbl">🎵 听哪首歌（点播目标）</div>
-          <div class="slot-val" id="slotSong">–</div>
-        </div>
-        <div class="slot-box">
-          <div class="slot-lbl">🎨 怎样的音乐（曲风 / 情绪）</div>
-          <div class="slot-val" id="slotMood">–</div>
-        </div>
-        <div class="slot-box">
-          <div class="slot-lbl">⏯️ 控制动作（Action）</div>
-          <div class="slot-val" id="slotAction">–</div>
-        </div>
-      </div>
-      <div class="slot-details" id="slotDetails"></div>
-    </section>
-
-    <!-- 空调槽位分析面板（温度/模式/温区抽取） -->
-    <section class="card slot-card climate-theme" id="climateCard" hidden>
-      <h2>❄️ 车机空调槽位抽取<small>温度与模式精准解析 · 毫秒级单次前向</small></h2>
-      <div class="slot-grid">
-        <div class="slot-box">
-          <div class="slot-lbl">🌡️ 设定目标温度</div>
-          <div class="slot-val" id="slotTemp">–</div>
-        </div>
-        <div class="slot-box">
-          <div class="slot-lbl">🎚️ 温度调节模式</div>
-          <div class="slot-val" id="slotTempType">–</div>
-        </div>
-        <div class="slot-box">
-          <div class="slot-lbl">💺 控制温区（Zone）</div>
-          <div class="slot-val" id="slotZone">–</div>
-        </div>
-        <div class="slot-box">
-          <div class="slot-lbl">💨 工作模式</div>
-          <div class="slot-val" id="slotClimateMode">–</div>
-        </div>
-      </div>
-      <div class="slot-details" id="climateDetails"></div>
-    </section>
-
-    <!-- 导航槽位分析面板 -->
-    <section class="card slot-card nav-theme" id="navCard" hidden>
-      <h2>🧭 车机导航槽位抽取<small>目的地与路径偏好解析 · 毫秒级单次前向</small></h2>
-      <div class="slot-grid">
-        <div class="slot-box">
-          <div class="slot-lbl">📍 导航目的地 (Destination)</div>
-          <div class="slot-val" id="slotNavDest">–</div>
-        </div>
-        <div class="slot-box">
-          <div class="slot-lbl">🚦 导航动作 (Action)</div>
-          <div class="slot-val" id="slotNavAction">–</div>
-        </div>
-        <div class="slot-box">
-          <div class="slot-lbl">🛣️ 路线偏好 (Preference)</div>
-          <div class="slot-val" id="slotNavPref">–</div>
-        </div>
-      </div>
-      <div class="slot-details" id="navDetails"></div>
-    </section>
-
-    <!-- 电话槽位分析面板 -->
-    <section class="card slot-card phone-theme" id="phoneCard" hidden>
-      <h2>📞 车机电话槽位抽取<small>联系人与号码识别 · 毫秒级单次前向</small></h2>
-      <div class="slot-grid">
-        <div class="slot-box">
-          <div class="slot-lbl">👤 呼叫联系人 (Contact)</div>
-          <div class="slot-val" id="slotPhoneContact">–</div>
-        </div>
-        <div class="slot-box">
-          <div class="slot-lbl">🔢 目标电话号码 (Number)</div>
-          <div class="slot-val" id="slotPhoneNumber">–</div>
-        </div>
-        <div class="slot-box">
-          <div class="slot-lbl">📲 呼叫动作 (Action)</div>
-          <div class="slot-val" id="slotPhoneAction">–</div>
-        </div>
-      </div>
-      <div class="slot-details" id="phoneDetails"></div>
-    </section>
-
-    <!-- 信息查询分流面板 -->
-    <section class="card slot-card query-theme" id="queryCard" hidden>
-      <h2>💬 信息查询与问答分流<small>天气/时间/车况智能分流 · 语音助手联动</small></h2>
-      <div class="slot-grid">
-        <div class="slot-box">
-          <div class="slot-lbl">📋 查询类型 (Type)</div>
-          <div class="slot-val" id="slotQueryType">–</div>
-        </div>
-        <div class="slot-box">
-          <div class="slot-lbl">🎯 查询目标 (Target)</div>
-          <div class="slot-val" id="slotQueryTarget">–</div>
-        </div>
-        <div class="slot-box">
-          <div class="slot-lbl">📢 响应通道 (Channel)</div>
-          <div class="slot-val" id="slotQueryChannel">–</div>
-        </div>
-      </div>
-      <div class="slot-details" id="queryDetails"></div>
-    </section>
   </section>
 
   <section class="card mgmt" id="mgmt">
@@ -1305,6 +1358,10 @@ function render(d, text) {
   } else {
     $('queryCard').hidden = true;
   }
+
+  // 检查是否有任何槽位卡片被激活显示，若无则展示友好占位提示
+  const anySlotCard = !$('musicCard').hidden || !$('climateCard').hidden || !$('navCard').hidden || !$('phoneCard').hidden || !$('queryCard').hidden;
+  $('emptySlotHint').hidden = anySlotCard;
 
   $('result').hidden = false;
 }
