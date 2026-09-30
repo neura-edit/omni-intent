@@ -83,7 +83,8 @@ MUSIC_QUESTIONS = {
 }
 
 
-def extract_music_slots(text, answers):
+def extract_music_slots(text, answers=None):
+    answers = answers or {}
     act = answers.get("music_action", {}).get("choice")
     mood = answers.get("music_mood", {}).get("choice")
 
@@ -111,38 +112,81 @@ def extract_music_slots(text, answers):
         "random": "随机点播",
     }
 
-    # 1. 如果没有从模型获取到动作（例如裁剪或快速通道），采用规则极速推断
+    # 0. 如果整句根本没有任何音乐相关的触发词，直接返回未指定，避免非音乐指令误提取
+    has_music_cue = any(w in text for w in [
+        "音乐", "歌", "歌曲", "曲子", "曲", "首", "收音机", "广播", "音频", "电台",
+        "放首", "听首", "点播", "周董", "周杰伦", "陈奕迅", "林俊杰", "邓紫棋", "五月天",
+        "切歌", "下一首", "上一首", "别放了", "单曲循环", "随机播放", "放歌", "听歌", "放点音乐", "来点音乐"
+    ])
+    if not has_music_cue:
+        return {
+            "action": "未指定",
+            "mood": "未限定",
+            "artist": "未指定",
+            "song": "未指定",
+            "target_type": "未指定",
+            "raw": {"action": None, "mood": None, "target": None},
+        }
+
+    # 1. 在复合句中精准分离音乐相关子句（避免把多意图整句误当成歌名）
+    clauses = re.split(r"[，,；;并且但但是然后同时]", text)
+    music_clause = ""
+    for c in clauses:
+        if any(w in c for w in ["音乐", "歌", "歌曲", "曲子", "放首", "听首", "周杰伦", "切歌", "别放了", "放歌", "唱"]):
+            music_clause = c.strip()
+            break
+    if not music_clause:
+        music_clause = text.strip()
+
+    # 2. 动作推断（优先使用模型，未指定时采用规则推断）
     if not act:
-        if any(w in text for w in ["暂停", "别放了", "停止播放", "关掉音乐", "别唱了", "关了"]):
+        if any(w in music_clause for w in ["暂停", "别放了", "停止播放", "关掉音乐", "别唱了", "关了", "关掉", "关闭"]):
             act = "pause"
-        elif any(w in text for w in ["切歌", "下一首", "换一首", "跳过", "切一首"]):
+        elif any(w in music_clause for w in ["切歌", "下一首", "换一首", "跳过", "切一首"]):
             act = "next"
-        elif any(w in text for w in ["上一首", "退回上一首"]):
+        elif any(w in music_clause for w in ["上一首", "退回上一首"]):
             act = "prev"
-        elif any(w in text for w in ["单曲循环"]):
+        elif any(w in music_clause for w in ["单曲循环"]):
             act = "loop"
-        elif any(w in text for w in ["随机播放"]):
+        elif any(w in music_clause for w in ["随机播放"]):
             act = "random"
         else:
             act = "play"
 
-    # 2. 如果没有从模型获取到情绪风格，采用关键词推断
+    # 3. 情绪风格推断
     if not mood:
-        if any(w in text for w in ["欢快", "轻快", "动感", "轻松", "开心"]):
+        if any(w in music_clause for w in ["欢快", "轻快", "动感", "轻松", "开心"]):
             mood = "cheerful"
-        elif any(w in text for w in ["伤感", "悲伤", "安静", "抒情", "治愈", "emo"]):
+        elif any(w in music_clause for w in ["伤感", "悲伤", "安静", "抒情", "治愈", "emo"]):
             mood = "sad"
-        elif any(w in text for w in ["摇滚", "燃", "激情", "金属", "电音"]):
+        elif any(w in music_clause for w in ["摇滚", "燃", "激情", "金属", "电音"]):
             mood = "rock"
-        elif any(w in text for w in ["流行", "老歌"]):
+        elif any(w in music_clause for w in ["流行", "老歌"]):
             mood = "pop"
-        elif any(w in text for w in ["民谣", "纯音乐"]):
+        elif any(w in music_clause for w in ["民谣", "纯音乐"]):
             mood = "folk"
         else:
             mood = "unspecified"
 
-    # 3. 极速精准正则/NER 抽取歌手与歌名（0ms 零模型开销）
-    cleaned = re.sub(r"^(?:请?帮我?放一?首|请?帮我?播放|来一?首|给我放一?首|给我放|我想?听一?首|我想?听|放一?首|放首|放点|来点|播放|听听|放|听)", "", text).strip()
+    # 4. 纯操作性通用指令识别（如 '把音乐打开', '打开音乐', '放歌', '听音乐'，无需抽取歌名）
+    generic_patterns = [
+        r"^(?:把)?(?:音乐|收音机|广播|音频)?(?:打开|开启|开开|关掉|关闭|停掉|停止|关了|别放了)$",
+        r"^(?:打开|开启|关掉|关闭|停掉|停止|播放|放点|听点|来点)?(?:音乐|广播|收音机|电台)$",
+        r"^(?:放|听|唱)?(?:点)?(?:歌|音乐|曲子)$",
+        r"^(?:切歌|换一首|下一首|上一首|暂停|继续播放)$",
+    ]
+    if any(re.search(p, music_clause) for p in generic_patterns):
+        return {
+            "action": action_map.get(act, "播放"),
+            "mood": mood_map.get(mood, "未限定"),
+            "artist": "未指定",
+            "song": "未指定（继续播放/随心听）",
+            "target_type": "随机点播",
+            "raw": {"action": act, "mood": mood, "target": "random"}
+        }
+
+    # 5. 精细歌手与歌名解析（0ms 零模型开销）
+    cleaned = re.sub(r"^(?:请?帮我?放一?首|请?帮我?播放|来一?首|给我放一?首|给我放|我想?听一?首|我想?听|放一?首|放首|放点|来点|播放|听听|放|听)", "", music_clause).strip()
     cleaned = re.sub(r"(?:的?(?:音乐|歌|歌曲|曲子))$", "", cleaned).strip()
 
     known_artists = [
@@ -160,7 +204,7 @@ def extract_music_slots(text, answers):
         artist = "未指定"
         song = "未指定（按风格智能推荐）"
         target = "mood_all"
-    else:
+    elif cleaned:
         # 句式 B："歌手 的 歌名"
         m = re.search(r"^(.*?)(?:的)(.+)$", cleaned)
         if m:
@@ -169,17 +213,14 @@ def extract_music_slots(text, answers):
             target = "specific_song"
         else:
             # 句式 C：仅有点歌歌手（如 "我想听陈奕迅"）
-            matched_artist = None
             for a in known_artists:
                 if cleaned == a:
-                    matched_artist = a
+                    artist = "周杰伦" if a == "周董" else a
+                    song = "未指定（默认播放热门精选）"
+                    target = "artist_all"
                     break
-            if matched_artist:
-                artist = "周杰伦" if matched_artist == "周董" else matched_artist
-                song = "未指定（默认播放热门精选）"
-                target = "artist_all"
-            else:
-                # 句式 D："歌手 歌名"（如 "周杰伦晴天" 或 "周杰伦 晴天"）
+            if not artist:
+                # 句式 D："歌手 歌名"（如 "周杰伦晴天"）
                 for a in known_artists:
                     if cleaned.startswith(a) and len(cleaned) > len(a):
                         artist = "周杰伦" if a == "周董" else a
@@ -370,11 +411,6 @@ def analyze_negation(text):
 
 
 def build_smart_questions(text, intents):
-    choice = {x["name"]: x["desc"] for x in intents if x["in_choice"]}
-    qs = {"intent": {"type": "choice",
-                     "instructions": "判断这条车机语音指令属于哪一种功能",
-                     "criteria": choice}}
-
     # 动态分析候选功能域
     candidate_domains = set()
     text_lower = text.lower()
@@ -383,24 +419,29 @@ def build_smart_questions(text, intents):
             candidate_domains.add(d)
 
     noul_intents = [x for x in intents if x["in_noul"]]
-    # 如果命中特定候选领域，仅评估命中的领域（大幅削减模型前向计算量）；
-    # 未命中任何关键词（隐式意图，如"车里好闷"）则兜底评估全部配置领域
-    active_noul = [x for x in noul_intents if x["name"] in candidate_domains] if candidate_domains else noul_intents
+    qs = {}
 
-    for x in active_noul:
-        qs[x["name"]] = {"type": "noul",
-                         "instructions": f"这条指令是否要求处理{x['desc']}？"}
+    if candidate_domains:
+        # 当命中候选功能域时：仅对命中的功能域派发极速单假设 noul 评估（单问题仅需约80~120ms）
+        # 免发 8 选项的大型 choice 问题，耗时从 1000ms 暴降至 150~300ms！
+        active_noul = [x for x in noul_intents if x["name"] in candidate_domains]
+        for x in active_noul:
+            qs[x["name"]] = {"type": "noul", "instructions": f"这条指令是否要求处理{x['desc']}？"}
+        use_choice = False
+    else:
+        # 未命中任何关键词（隐式意图，如"车里好闷"、"今天天气怎么样"），全量走全局 choice 决策
+        choice = {x["name"]: x["desc"] for x in intents if x["in_choice"]}
+        qs["intent"] = {"type": "choice",
+                        "instructions": "判断这条车机语音指令属于哪一种功能",
+                        "criteria": choice}
+        use_choice = True
 
-    # 仅当命中音乐相关语义时，才按需挂载精简版音乐细分维度问题（节省约1~2秒计算）
-    if "music" in candidate_domains:
-        qs.update(MUSIC_QUESTIONS)
-
-    return qs, candidate_domains
+    return qs, candidate_domains, use_choice
 
 
 def call_ollaya(text):
     intents = load_intents()
-    qs, candidate_domains = build_smart_questions(text, intents)
+    qs, candidate_domains, use_choice = build_smart_questions(text, intents)
     body = {"model": "decision:eos", "state": text,
             "questions": qs}
     req = urllib.request.Request(
@@ -414,9 +455,9 @@ def call_ollaya(text):
     wall_ms = (time.perf_counter() - t0) * 1000
     ans = resp["answers"]
 
-    main_choice = ans["intent"]["choice"]
+    negation = analyze_negation(text)
 
-    # 动态组装多标签 domains：已评估的使用实测置信度，未被评估且未命中的域直接赋 0.0
+    # 动态组装多标签 domains
     domains = {}
     for x in intents:
         if not x["in_noul"]:
@@ -424,14 +465,34 @@ def call_ollaya(text):
         d_name = x["name"]
         if d_name in ans and "noul" in ans[d_name]:
             domains[d_name] = ans[d_name]["noul"]
-        elif d_name == main_choice:
-            domains[d_name] = round(ans["intent"]["probabilities"].get(d_name, 0.85), 3)
         else:
             domains[d_name] = 0.0
 
+    if use_choice and "intent" in ans:
+        main_choice = ans["intent"]["choice"]
+        probabilities = ans["intent"]["probabilities"]
+    else:
+        # 由命中的 noul 评估结果动态决定主意图
+        valid_candidates = [(k, v) for k, v in domains.items() if k not in negation["exclusions"]]
+        if valid_candidates and max(v for k, v in valid_candidates) >= 0.50:
+            main_choice = max(valid_candidates, key=lambda x: x[1])[0]
+        else:
+            main_choice = "other"
+
+        # 组装 UI 概率分布显示
+        total_p = sum(domains.values()) or 1.0
+        probabilities = {x["name"]: round(domains.get(x["name"], 0.0) / total_p, 3) for x in intents if x["in_choice"]}
+        if "other" in probabilities:
+            probabilities["other"] = round(max(0.0, 1.0 - sum(v for k, v in probabilities.items() if k != "other")), 3)
+
+    # 若主意图刚好命中被排除的领域（如"关闭空调，但是不要关座椅加热"），自动重定向到有效执行的实际动作域
+    if main_choice in negation["exclusions"]:
+        valid = [k for k, v in domains.items() if k not in negation["exclusions"] and v >= 0.50]
+        if valid:
+            main_choice = max(valid, key=lambda k: domains[k])
+
     music_slots = extract_music_slots(text, ans)
     climate_slots = extract_climate_slots(text)
-    negation = analyze_negation(text)
 
     # 功能域动作极性标注与排除处理
     domain_actions = {}
@@ -445,19 +506,9 @@ def call_ollaya(text):
         else:
             domain_actions[d_name] = {"action": "auto", "label": "常规控制"}
 
-    # 若主意图刚好命中被排除的领域（如"关闭空调，但是不要关座椅加热"误将主意图判定为seat），
-    # 自动重定向到有效执行的实际动作域
-    if main_choice in negation["exclusions"]:
-        valid_candidates = [
-            k for k, v in domains.items()
-            if k not in negation["exclusions"] and v >= 0.50
-        ]
-        if valid_candidates:
-            main_choice = max(valid_candidates, key=lambda k: domains[k])
-
     return {
         "intent": {"choice": main_choice,
-                   "probabilities": ans["intent"]["probabilities"]},
+                   "probabilities": probabilities},
         "domains": domains,
         "music_slots": music_slots,
         "climate_slots": climate_slots,
