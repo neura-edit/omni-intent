@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""车机语音意图测试台 —— 单文件本地 Web 应用（仅标准库）
+"""NEURA EDIT · OmniIntent Decision Engine
 
-用法: python3 app.py   然后访问 http://localhost:8080
-依赖: 本机 ollaya 守护进程 (127.0.0.1:11435) 与 decision:eos 模型
-配置: ./config.json 持久化功能域定义，页面可增删改，立即生效
+High-throughput in-cabin multi-intent routing and deterministic slot extraction.
+Runtime: Python 3 standard library (zero external dependencies).
+Backend: Ollaya daemon (127.0.0.1:11435) with decision:eos model.
 """
 import json
 import os
@@ -17,11 +17,10 @@ HOST, PORT = "0.0.0.0", 8080
 OLLAYA_URL = "http://127.0.0.1:11435/api/decide"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
-YES, GRAY = 0.70, 0.50  # 路由阈值 / 灰区下限（实测建议）
+CONFIDENCE_THRESHOLD = 0.50
 NAME_RE = re.compile(r"^[a-z][a-z0-9_]{0,31}$")
 
-# ── 默认意图体系（经实测校准：补 query 类修复信息查询误路由）──────────────
-# 每项: name(问题键/展示名) desc(类别描述) in_choice(参与主意图) in_noul(参与多标签)
+# Default domain registry: in_choice (single routing), in_noul (multi-label detection)
 DEFAULT_INTENTS = [
     {"name": "climate",    "desc": "空调控制（含温度、风量、制冷制热）",            "in_choice": True,  "in_noul": True},
     {"name": "music",      "desc": "音乐控制（含播放、暂停、切歌、音量）",           "in_choice": True,  "in_noul": True},
@@ -32,7 +31,7 @@ DEFAULT_INTENTS = [
     {"name": "query",      "desc": "时间、日期、天气等信息查询或问答",                "in_choice": True,  "in_noul": True},
     {"name": "other",      "desc": "以上都不属于（兜底类）",                        "in_choice": True,  "in_noul": False},
 ]
-PROTECTED = {"other"}  # 不可删除；主意图必留
+PROTECTED = {"other"}  # Fallback category; protected from deletion
 
 
 def load_intents():
@@ -53,34 +52,6 @@ def load_intents():
 def save_intents(intents):
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(intents, f, ensure_ascii=False, indent=2)
-
-
-
-# ── 精简版音乐子维度体系（按需动态挂载，避免多分支冗余计算）──────────────
-MUSIC_QUESTIONS = {
-    "music_action": {
-        "type": "choice",
-        "instructions": "音乐操作动作",
-        "criteria": {
-            "play": "播放点歌",
-            "pause": "暂停停止",
-            "next": "切歌下一首",
-            "prev": "退回上一首",
-            "other": "其他操作",
-        },
-    },
-    "music_mood": {
-        "type": "choice",
-        "instructions": "音乐风格或情绪",
-        "criteria": {
-            "cheerful": "欢快轻松",
-            "sad": "伤感抒情",
-            "rock": "摇滚燃爆",
-            "pop": "流行经典",
-            "unspecified": "未指定",
-        },
-    },
-}
 
 
 def is_english_query(text):
@@ -138,10 +109,127 @@ GENRE_MAP = {
 }
 
 MOOD_MAP = {
-    "sad": ("伤感/低落 · Sad/Healing", ["心情很差", "心情不好", "难过", "心烦", "烦躁", "郁闷", "抑郁", "伤感", "悲伤", "失恋", "伤心", "emo", "压抑", "哭", "低落", "痛苦", "难受", "治愈", "sad", "unhappy", "depressed", "heartbroken", "down", "sorrow", "healing", "gloomy"]),
-    "cheerful": ("欢快/提神 · Upbeat/Energetic", ["开心", "高兴", "兴奋", "心情好", "愉快", "欢快", "轻快", "动感", "轻松", "嗨", "激情", "燃", "提神", "嗨一点", "happy", "cheerful", "energetic", "upbeat", "excited", "pumped", "party"]),
-    "calm": ("舒缓/安静 · Calm/Relaxed", ["安静", "抒情", "舒缓", "放松", "想静静", "静一静", "催眠", "助眠", "睡前", "冥想", "发呆", "温和", "柔和", "calm", "relax", "relaxing", "peaceful", "quiet", "sleepy", "soothing", "chill"])
+    "sad": ("伤感/低落 / Sad & Healing", ["心情很差", "心情不好", "难过", "心烦", "烦躁", "郁闷", "抑郁", "伤感", "悲伤", "失恋", "伤心", "emo", "压抑", "哭", "低落", "痛苦", "难受", "治愈", "sad", "unhappy", "depressed", "heartbroken", "down", "sorrow", "healing", "gloomy"]),
+    "cheerful": ("欢快/提神 / Upbeat & Energetic", ["开心", "高兴", "兴奋", "心情好", "愉快", "欢快", "轻快", "动感", "轻松", "嗨", "激情", "燃", "提神", "嗨一点", "happy", "cheerful", "energetic", "upbeat", "excited", "pumped", "party"]),
+    "calm": ("舒缓/安静 / Calm & Relaxed", ["安静", "抒情", "舒缓", "放松", "想静静", "静一静", "催眠", "助眠", "睡前", "冥想", "发呆", "温和", "柔和", "calm", "relax", "relaxing", "peaceful", "quiet", "sleepy", "soothing", "chill"])
 }
+
+
+KNOWN_ARTISTS_BILINGUAL = {
+    "周杰伦": "周杰伦 / Jay Chou", "周董": "周杰伦 / Jay Chou", "jay chou": "周杰伦 / Jay Chou",
+    "陈奕迅": "陈奕迅 / Eason Chan", "eason chan": "陈奕迅 / Eason Chan",
+    "林俊杰": "林俊杰 / JJ Lin", "jj lin": "林俊杰 / JJ Lin", "jj": "林俊杰 / JJ Lin",
+    "邓紫棋": "邓紫棋 / G.E.M.", "g.e.m.": "邓紫棋 / G.E.M.", "gem": "邓紫棋 / G.E.M.",
+    "五月天": "五月天 / Mayday", "mayday": "五月天 / Mayday",
+    "王菲": "王菲 / Faye Wong", "faye wong": "王菲 / Faye Wong",
+    "李荣浩": "李荣浩 / Ronghao Li", "ronghao li": "李荣浩 / Ronghao Li",
+    "薛之谦": "薛之谦 / Joker Xue", "joker xue": "薛之谦 / Joker Xue",
+    "毛不易": "毛不易 / Buyi Mao", "buyi mao": "毛不易 / Buyi Mao",
+    "张学友": "张学友 / Jacky Cheung", "jacky cheung": "张学友 / Jacky Cheung",
+    "华晨宇": "华晨宇 / Chenyu Hua", "chenyu hua": "华晨宇 / Chenyu Hua",
+    "汪峰": "汪峰 / Feng Wang", "feng wang": "汪峰 / Feng Wang",
+    "张杰": "张杰 / Jason Zhang", "jason zhang": "张杰 / Jason Zhang",
+    "许嵩": "许嵩 / Vae Xu", "vae xu": "许嵩 / Vae Xu",
+    "许巍": "许巍 / Wei Xu", "wei xu": "许巍 / Wei Xu",
+    "朴树": "朴树 / Pu Shu", "pu shu": "朴树 / Pu Shu",
+    "刀郎": "刀郎 / Dao Lang", "dao lang": "刀郎 / Dao Lang",
+    "李健": "李健 / Jian Li", "jian li": "李健 / Jian Li",
+    "周深": "周深 / Shen Zhou", "shen zhou": "周深 / Shen Zhou",
+    "孙燕姿": "孙燕姿 / Stefanie Sun", "stefanie sun": "孙燕姿 / Stefanie Sun",
+    "张韶涵": "张韶涵 / Angela Zhang", "angela zhang": "张韶涵 / Angela Zhang",
+    "梁静茹": "梁静茹 / Fish Leong", "fish leong": "梁静茹 / Fish Leong",
+    "莫文蔚": "莫文蔚 / Karen Mok", "karen mok": "莫文蔚 / Karen Mok",
+    "伍佰": "伍佰 / Wu Bai", "wu bai": "伍佰 / Wu Bai",
+    "动力火车": "动力火车 / Power Station", "power station": "动力火车 / Power Station",
+    "陶喆": "陶喆 / David Tao", "david tao": "陶喆 / David Tao",
+    "王力宏": "王力宏 / Leehom Wang", "leehom wang": "王力宏 / Leehom Wang",
+    "凤凰传奇": "凤凰传奇 / Phoenix Legend", "phoenix legend": "凤凰传奇 / Phoenix Legend",
+    "赵雷": "赵雷 / Lei Zhao", "lei zhao": "赵雷 / Lei Zhao",
+    "taylor swift": "泰勒·斯威夫特 / Taylor Swift",
+    "ed sheeran": "艾德·希兰 / Ed Sheeran",
+    "coldplay": "酷玩乐队 / Coldplay",
+    "adele": "阿黛尔 / Adele",
+    "bruno mars": "布鲁诺·马尔斯 / Bruno Mars",
+    "billie eilish": "比莉·艾利什 / Billie Eilish",
+    "eminem": "埃米纳姆 / Eminem",
+    "michael jackson": "迈克尔·杰克逊 / Michael Jackson",
+    "queen": "皇后乐队 / Queen",
+    "maroon 5": "魔力红 / Maroon 5",
+    "八三夭": "八三夭 / 831",
+    "831": "八三夭 / 831",
+    "celine dion": "席琳·迪翁 / Celine Dion",
+    "席琳·迪翁": "席琳·迪翁 / Celine Dion"
+}
+
+SONG_BILINGUAL = {
+    "外婆的告别式": "外婆的告别式 / Grandma's Farewell", "grandma's farewell": "外婆的告别式 / Grandma's Farewell",
+    "我心永恒": "我心永恒 / My Heart Will Go On", "my heart will go on": "我心永恒 / My Heart Will Go On",
+    "伟大的渺小": "伟大的渺小 / Little Big Us", "little big us": "伟大的渺小 / Little Big Us",
+    "蓝莲花": "蓝莲花 / Blue Lotus", "blue lotus": "蓝莲花 / Blue Lotus",
+    "听海": "听海 / Listen to the Sea", "listen to the sea": "听海 / Listen to the Sea",
+    "晴天": "晴天 / Sunny Day", "sunny day": "晴天 / Sunny Day",
+    "青花瓷": "青花瓷 / Blue and White Porcelain", "blue and white porcelain": "青花瓷 / Blue and White Porcelain",
+    "七里香": "七里香 / Common Jasmine Orange", "common jasmine orange": "七里香 / Common Jasmine Orange",
+    "十年": "十年 / Ten Years", "ten years": "十年 / Ten Years",
+    "稻香": "稻香 / Fragrance of Rice", "fragrance of rice": "稻香 / Fragrance of Rice",
+    "夜曲": "夜曲 / Nocturne", "nocturne": "夜曲 / Nocturne",
+    "告白气球": "告白气球 / Love Confession", "love confession": "告白气球 / Love Confession",
+    "红豆": "红豆 / Red Bean", "red bean": "红豆 / Red Bean",
+    "年少有为": "年少有为 / If I Were Young", "if i were young": "年少有为 / If I Were Young",
+    "平凡之路": "平凡之路 / The Ordinary Road", "the ordinary road": "平凡之路 / The Ordinary Road",
+    "消愁": "消愁 / Sorrow Drowning", "sorrow drowning": "消愁 / Sorrow Drowning",
+    "起风了": "起风了 / The Wind Rises", "the wind rises": "起风了 / The Wind Rises",
+    "shape of you": "你的样子 / Shape of You", "你的样子": "你的样子 / Shape of You",
+    "perfect": "完美 / Perfect",
+    "someone like you": "像你一样的人 / Someone Like You",
+    "bad guy": "坏家伙 / Bad Guy",
+    "yellow": "黄色 / Yellow",
+    "bohemian rhapsody": "波西米亚狂想曲 / Bohemian Rhapsody"
+}
+
+def make_recommendation_song(tags):
+    zh_list = []
+    en_list = []
+    for t in tags:
+        t = str(t).strip()
+        if not t:
+            continue
+        if " / " in t:
+            parts = t.split(" / ")
+            zh_list.append(parts[0].strip())
+            en_list.append(parts[-1].strip())
+        else:
+            found = False
+            for m_code, (m_lbl, kws) in MOOD_MAP.items():
+                if t in kws or t == m_code or t == m_lbl:
+                    p = m_lbl.split(" / ")
+                    zh_list.append(p[0].strip())
+                    en_list.append(p[-1].strip())
+                    found = True
+                    break
+            if not found:
+                for g_code, (g_lbl, kws) in GENRE_MAP.items():
+                    if t in kws or t == g_code or t == g_lbl:
+                        p = g_lbl.split(" / ")
+                        zh_list.append(p[0].strip())
+                        en_list.append(p[-1].strip())
+                        found = True
+                        break
+            if not found:
+                if t in KNOWN_ARTISTS_BILINGUAL:
+                    p = KNOWN_ARTISTS_BILINGUAL[t].split(" / ")
+                    zh_list.append(p[0].strip())
+                    en_list.append(p[-1].strip())
+                elif t in SONG_BILINGUAL:
+                    p = SONG_BILINGUAL[t].split(" / ")
+                    zh_list.append(p[0].strip())
+                    en_list.append(p[-1].strip())
+                else:
+                    zh_list.append(t)
+                    en_list.append(t)
+    zh_str = " + ".join(zh_list) if zh_list else "音乐"
+    en_str = " + ".join(en_list) if en_list else "Music"
+    return f"未指定（按 {zh_str} 智能推荐） / Unspecified (Recommended by {en_str})"
 
 ADJECTIVE_MOODS = [
     "动感", "欢快", "轻快", "轻松", "伤感", "悲伤", "安静", "舒缓", "治愈", "柔和", "温和",
@@ -159,14 +247,14 @@ KNOWN_ARTISTS_CN = [
     "周杰伦", "周董", "陈奕迅", "林俊杰", "邓紫棋", "五月天", "王菲",
     "李荣浩", "薛之谦", "毛不易", "张学友", "华晨宇", "汪峰", "张杰", "许嵩",
     "许巍", "朴树", "刀郎", "李健", "周深", "孙燕姿", "张韶涵", "梁静茹",
-    "莫文蔚", "伍佰", "动力火车", "陶喆", "王力宏", "凤凰传奇", "赵雷"
+    "莫文蔚", "伍佰", "动力火车", "陶喆", "王力宏", "凤凰传奇", "赵雷", "八三夭"
 ]
 
 KNOWN_ARTISTS_EN = [
     "Taylor Swift", "Ed Sheeran", "Adele", "Coldplay", "Billie Eilish",
     "Justin Bieber", "Bruno Mars", "The Weeknd", "Drake", "Eminem",
     "Michael Jackson", "Queen", "Maroon 5", "Lady Gaga", "Rihanna",
-    "Dua Lipa", "Imagine Dragons", "Beyonce", "Post Malone", "Katy Perry"
+    "Dua Lipa", "Imagine Dragons", "Beyonce", "Post Malone", "Katy Perry", "Celine Dion"
 ]
 
 ALL_GENRES_ORDERED = []
@@ -228,7 +316,7 @@ def match_pure_genre_or_mood(clause):
     return False, None, None
 
 
-def extract_music_slots(text, answers=None):
+def extract_music_slots(text):
     text_lower = text.lower()
     has_cue = any(w in text_lower for w in [
         "音乐", "歌", "歌曲", "曲子", "曲", "首", "收音机", "广播", "音频", "电台",
@@ -248,7 +336,7 @@ def extract_music_slots(text, answers=None):
             "raw": {"action": None, "mood": None, "target": None},
         }
 
-    # 1. 动作推断
+    # 1. Action inference
     if any(w in text_lower for w in ["暂停", "别放了", "停止播放", "关掉音乐", "别唱了", "关了", "关掉", "关闭", "pause", "stop music", "stop playing"]):
         action = "暂停 / Pause"
     elif any(w in text_lower for w in ["切歌", "下一首", "换一首", "跳过", "切一首", "next song", "next track", "next", "skip"]):
@@ -262,7 +350,7 @@ def extract_music_slots(text, answers=None):
     else:
         action = "播放 / Play"
 
-    # 2. 情绪与曲风推断
+    # 2. Mood & genre classification
     detected_mood = None
     for m_code, (m_lbl, kws) in MOOD_MAP.items():
         if any(k in text_lower for k in kws):
@@ -276,7 +364,11 @@ def extract_music_slots(text, answers=None):
             break
 
     if detected_mood and detected_genre:
-        mood_display = f"{detected_mood} · {detected_genre}"
+        zh_m = detected_mood.split(" / ")[0].strip()
+        en_m = detected_mood.split(" / ")[1].strip() if " / " in detected_mood else detected_mood
+        zh_g = detected_genre.split(" / ")[0].strip()
+        en_g = detected_genre.split(" / ")[1].strip() if " / " in detected_genre else detected_genre
+        mood_display = f"{zh_m} + {zh_g} / {en_m} + {en_g}"
     elif detected_mood:
         mood_display = detected_mood
     elif detected_genre:
@@ -284,7 +376,7 @@ def extract_music_slots(text, answers=None):
     else:
         mood_display = "未限定 / Any Mood"
 
-    # 3. 抽取音乐分句
+    # 3. Extract musical clause
     clauses = re.split(r"[,;!?，；！？]|\band\b|\bbut\b|\bthen\b|并且|但是|然后|同时|顺便|而且|接着", text, flags=re.I)
     music_clause = ""
     for c in clauses:
@@ -295,7 +387,7 @@ def extract_music_slots(text, answers=None):
     if not music_clause:
         music_clause = text.strip()
 
-    # 4. 通用操作指令匹配（在音乐子句上匹配，如 '把音乐打开'、'play music'）
+    # 4. Generic playback command detection
     generic_patterns = [
         r"^(?:把)?(?:音乐|收音机|广播|音频)?(?:打开|开启|开开|关掉|关闭|停掉|停止|关了|别放了)$",
         r"^(?:打开|开启|关掉|关闭|停掉|停止|播放|放点|听点|来点)?(?:音乐|广播|收音机|电台)$",
@@ -314,7 +406,7 @@ def extract_music_slots(text, answers=None):
             "raw": {"action": action, "mood": mood_display, "target": "random"}
         }
 
-    # 5. 纯曲风/情绪优先判定（如 '我想听放克'、'我们要听放克'、'放点爵士'、'来首古典音乐'、'play funk'）
+    # 5. Pure genre/mood heuristic matching
     pure_ok, pure_genre, pure_mood = match_pure_genre_or_mood(music_clause)
     if pure_ok:
         tag_desc = []
@@ -328,12 +420,11 @@ def extract_music_slots(text, answers=None):
         elif detected_mood and (not pure_genre or detected_mood != pure_genre):
             tag_desc.append(detected_mood)
 
-        desc_str = " + ".join(tag_desc) if tag_desc else "风格"
         return {
             "action": action,
             "mood": mood_display,
             "artist": "未指定 / Unspecified",
-            "song": f"未指定（按 {desc_str} 智能推荐） / Recommendation",
+            "song": make_recommendation_song(tag_desc),
             "target_type": "风格/情绪智能推荐 / Genre & Mood Mix",
             "raw": {"action": action, "mood": mood_display, "target": "genre_mood_all"},
         }
@@ -342,12 +433,19 @@ def extract_music_slots(text, answers=None):
     song = None
     target = "random"
 
-    # 英文特定句式解析
-    m_en1 = re.search(r"(?:play|listen to|hear)\s+(?:the\s+song\s+)?(.+?)\s+by\s+([A-Za-z0-9\s\.\'-]+)", music_clause, re.I)
+    # English syntactic pattern matching
+    m_en1 = re.search(r"(?:play|listen to|hear)\s+(?:(?:the|a)\s+song\s+(?:called|titled)\s+)?(.+?)\s+by\s+([A-Za-z0-9\s\.\'-]+)", music_clause, re.I)
     if m_en1:
-        song = m_en1.group(1).strip()
-        artist = m_en1.group(2).strip()
-        target = "specific_song"
+        s_cand = m_en1.group(1).strip()
+        a_cand = m_en1.group(2).strip()
+        if s_cand.lower() in ["a song", "some songs", "songs", "music", "something", "a track", "any song", "a piece"]:
+            artist = a_cand
+            song = "Popular Hits / 热门精选"
+            target = "artist_all"
+        else:
+            song = s_cand
+            artist = a_cand
+            target = "specific_song"
     else:
         m_en2 = re.search(r"(?:play|listen to)\s+([A-Za-z0-9\s\.\'-]+?)\'s\s+(.+)", music_clause, re.I)
         if m_en2:
@@ -362,7 +460,7 @@ def extract_music_slots(text, answers=None):
                     target = "artist_all"
                     break
 
-    # 中文语法规则解析（单次前向匹配，支持单复数主语与礼貌前缀，避免贪婪吞噬）
+    # Chinese syntactic pattern matching with prefix pruning
     if not artist and not song:
         pattern = r"^(?:(?:我(?:们)?|咱们|大家|他们|你们|车[里内上]|全车人|你|他(?:们)?|她(?:们)?)?\s*(?:还|又|也|就|再|顺便|接着|然后|先|麻烦|请)?\s*(?:想要|想|要|打算|希望能?|准备|喜欢|爱听)?\s*(?:帮我(?:们)?|给我(?:们)?|替我(?:们)?|为我(?:们)?|来)?\s*(?:播放|点播|放|听|播|唱|搜|查|切|换)?\s*(?:一?[首曲支]|两首|几首|首歌曲|首歌|首曲子|点|下|个|一些|一点)?\s*)"
         cleaned = re.sub(pattern, "", music_clause).strip()
@@ -376,9 +474,8 @@ def extract_music_slots(text, answers=None):
             tag_desc = []
             if detected_genre: tag_desc.append(detected_genre)
             if detected_mood: tag_desc.append(detected_mood)
-            desc_str = " + ".join(tag_desc) if tag_desc else "风格"
             artist = "未指定 / Unspecified"
-            song = f"未指定（按 {desc_str} 智能推荐） / Recommendation"
+            song = make_recommendation_song(tag_desc)
             target = "genre_mood_all"
         elif cleaned:
             m_cn = re.search(r"^(.*?)(?:的)(.+)$", cleaned)
@@ -388,29 +485,46 @@ def extract_music_slots(text, answers=None):
                 left = re.sub(pattern, "", left).strip()
                 if left in ADJECTIVE_MOODS or right in GENRE_TERMS or right in ["歌", "音乐", "歌曲", "曲子"]:
                     artist = "未指定 / Unspecified"
-                    song = f"未指定（按 {left} 智能推荐） / Recommendation"
+                    song = make_recommendation_song([left])
                     target = "genre_mood_all"
                 else:
-                    artist = left
-                    song = right
+                    artist = KNOWN_ARTISTS_BILINGUAL.get(left, left)
+                    song = SONG_BILINGUAL.get(right, right)
                     target = "specific_song"
             else:
                 for a in KNOWN_ARTISTS_CN:
                     if cleaned == a:
-                        artist = "周杰伦" if a == "周董" else a
-                        song = "未指定（默认播放热门精选）"
+                        raw_a = "周杰伦" if a == "周董" else a
+                        artist = KNOWN_ARTISTS_BILINGUAL.get(raw_a, raw_a)
+                        song = "未指定（默认播放热门精选） / Unspecified (Top Hits)"
                         target = "artist_all"
                         break
                 if not artist:
                     for a in KNOWN_ARTISTS_CN:
                         if cleaned.startswith(a) and len(cleaned) > len(a):
-                            artist = "周杰伦" if a == "周董" else a
+                            raw_a = "周杰伦" if a == "周董" else a
+                            artist = KNOWN_ARTISTS_BILINGUAL.get(raw_a, raw_a)
                             song = cleaned[len(a):].strip(" 的")
                             target = "specific_song"
                             break
                     if not song and cleaned:
                         song = cleaned
                         target = "specific_song"
+
+    if artist:
+        artist_clean = artist.strip()
+        artist_lower = artist_clean.lower()
+        for a_k, a_v in KNOWN_ARTISTS_BILINGUAL.items():
+            if artist_clean == a_k or artist_lower == a_k.lower():
+                artist = a_v
+                break
+    if song:
+        song_clean = song.strip()
+        song_lower = song_clean.lower()
+        for s_k, s_v in SONG_BILINGUAL.items():
+            if song_clean == s_k or song_lower == s_k.lower():
+                song = s_v
+                break
 
     target_map = {
         "specific_song": "指定特定单曲 / Specific Song",
@@ -492,13 +606,13 @@ def extract_climate_slots(text):
     temp_type = "未指定 / Unspecified"
     delta = None
 
-    # 1. 绝对温度判定 (EN + CN)
-    m_abs_en = re.search(r"(?:set\s+(?:the\s+)?(?:temp|temperature)\s+to|temp\s+to|make\s+it)\s*([0-9\.]+)\s*(?:degrees|degree|c|celsius|f|°c)?", text_lower)
+    # 1. Absolute temperature parsing (EN / CN)
+    m_abs_en = re.search(r"(?:set\s+(?:the\s+)?(?:temp|temperature|ac|a/c|air)\s+to|temp\s+to|ac\s+to|make\s+it)\s*([0-9\.]+)\s*(?:degrees|degree|c|celsius|f|°c)?", text_lower)
     m_abs_cn = re.search(r"(?:温度|调至|调到|设为|设置成|设成|开到|到)?\s*([0-9一二两三四五六七八九十点\.]+)\s*(?:度|°|℃|摄氏度)", text)
 
     if m_abs_en:
         num = float(m_abs_en.group(1))
-        if 55.0 <= num <= 90.0:  # 华氏度转摄氏度
+        if 55.0 <= num <= 90.0:  # Convert Fahrenheit to Celsius
             num = round((num - 32) * 5 / 9, 1)
         if 14.0 <= num <= 34.0:
             temp = num
@@ -509,51 +623,51 @@ def extract_climate_slots(text):
             temp = num
             temp_type = "绝对温度设定 / Target Temp"
 
-    # 2. 相对温度判定 (EN + CN)
+    # 2. Relative temperature adjustment (EN / CN)
     if temp is None:
         if any(w in text_lower for w in ["warmer", "hotter", "heat up", "raise temp", "increase temp"]):
             m_d = re.search(r"by\s*([0-9\.]+)\s*(?:degrees|degree|°)?", text_lower)
             delta = float(m_d.group(1)) if m_d else 2.0
-            temp_type = f"相对升温 (+{delta}℃) / Warmer"
+            temp_type = f"相对升温 (+{delta}℃) / Warmer (+{delta}°C)"
         elif any(w in text_lower for w in ["cooler", "colder", "cool down", "lower temp", "decrease temp"]):
             m_d = re.search(r"by\s*([0-9\.]+)\s*(?:degrees|degree|°)?", text_lower)
             delta = -(float(m_d.group(1)) if m_d else 2.0)
-            temp_type = f"相对降温 ({delta}℃) / Cooler"
+            temp_type = f"相对降温 ({delta}℃) / Cooler ({delta}°C)"
         elif ("高" in text or "升" in text or "热" in text):
             m_rel = re.search(r"(?:升温|调高|升高|热一点|暖和点|加|升)?\s*([0-9一二两三四五六七八九十\.]+)\s*(?:度|°|℃)?", text)
             if m_rel and m_rel.group(1):
                 d = cn_to_number(m_rel.group(1))
                 if d and d <= 10:
                     delta = d
-                    temp_type = f"相对升温 (+{delta}℃) / Warmer"
+                    temp_type = f"相对升温 (+{delta}℃) / Warmer (+{delta}°C)"
             else:
                 delta = 1.0
-                temp_type = f"相对升温 (+{delta}℃) / Warmer"
+                temp_type = f"相对升温 (+{delta}℃) / Warmer (+1.0°C)"
         elif ("低" in text or "降" in text or "冷" in text):
             m_low = re.search(r"(?:降温|调低|降低|冷一点|凉快点|减)?\s*([0-9一二两三四五六七八九十\.]+)\s*(?:度|°|℃)?", text)
             if m_low and m_low.group(1):
                 d = cn_to_number(m_low.group(1))
                 if d and d <= 10:
                     delta = -d
-                    temp_type = f"相对降温 ({delta}℃) / Cooler"
+                    temp_type = f"相对降温 ({delta}℃) / Cooler ({delta}°C)"
             else:
                 delta = -1.0
-                temp_type = f"相对降温 ({delta}℃) / Cooler"
+                temp_type = f"相对降温 (-1.0℃) / Cooler (-1.0°C)"
 
-    mode = "自动 (AUTO)"
+    mode = "自动 / Automatic (AUTO)"
     if any(w in text_lower for w in ["制冷", "冷风", "冷气", "ac", "a/c", "cooling"]):
-        mode = "制冷 / A/C"
+        mode = "制冷 / Cooling (A/C)"
     elif any(w in text_lower for w in ["制热", "暖风", "暖气", "heater", "heating"]):
-        mode = "制热 / Heater"
+        mode = "制热 / Heating (HEATER)"
     elif any(w in text_lower for w in ["除雾", "除霜", "defrost", "defog"]):
-        mode = "除雾/除霜 / Defrost"
+        mode = "除雾/除霜 / Defrost & Defog"
     elif any(w in text_lower for w in ["内循环", "recirculation"]):
         mode = "内循环 / Recirculation"
     elif any(w in text_lower for w in ["外循环", "fresh air"]):
         mode = "外循环 / Fresh Air"
 
     return {
-        "target_temp": f"{temp} ℃" if temp is not None else ("微调" if delta is not None else "未指定 / Unspecified"),
+        "target_temp": (f"{temp} ℃ / {temp} °C" if temp is not None else ("相对微调 / Relative Adjustment" if delta is not None else "未指定 / Unspecified")),
         "temp_value": temp,
         "temp_type": temp_type,
         "delta": delta,
@@ -601,18 +715,18 @@ def extract_nav_slots(text):
         pref = "时间最快 / Fastest Route"
 
     dest = None
-    # English dest pattern
+    # English destination pattern matching
     m_en = re.search(r"(?:navigate to|take me to|drive to|directions to|route to|go to|head to)\s+([^,;!?]+)", text, re.I)
     if m_en:
         dest_raw = m_en.group(1).strip()
         dest_clean = re.sub(r"\b(avoiding traffic|avoid traffic|avoiding highways|avoid highways|fastest route|shortest route)\b", "", dest_raw, flags=re.I).strip()
         dest = dest_clean
     else:
-        clauses = re.split(r"[,;!?，；！？]|\band\b|\bbut\b|\bthen\b|并且|但|但是|然后|同时", text)
+        clauses = re.split(r"[,;!?，；！？]|\band\b|\bbut\b|\bthen\b|并且|但|但是|然后|同时|顺便|另外|再", text)
         patterns = [
-            r"(?:^|\s)(?:导航|带我|我想|送我|开车|开去|帮我导?到|请帮我导?到|导到|导去)?(?:去|到|至|向|前往)\s*([^，,；;。！!？?]+?)(?:怎么走|的路线|的路况|路线|路况|导航)?$",
+            r"(?:^|\s)(?:再|然后再|顺便|另外|还想|还要|顺带)?\s*(?:导航|带我|我想|我要|送我|开车|开去|帮我导?到|请帮我导?到|导到|导去)?\s*(?:去|到|至|向|前往)\s*([^，,；;。！!？?]+?)(?:怎么走|的路线|的路况|路线|路况|导航)?$",
             r"(?:^|\s)(?:查一下|查询|看看)?(?:去|到|前往)\s*([^，,；;。！!？?]+?)(?:的路线|的路况|怎么走)?$",
-            r"(?:回|去)(公司|家|学校|办公室|机场|车站|酒店|医院|超市)",
+            r"(?:回|去)(公司|家|学校|办公室|机场|车站|酒店|医院|超市|香港|西雅图|北京|上海)",
         ]
         for c in clauses:
             c = c.strip()
@@ -633,11 +747,52 @@ def extract_nav_slots(text):
             if dest:
                 break
 
+    COMMON_DEST_MAP = {
+        "公司": "公司 / Office",
+        "家": "家 / Home",
+        "办公室": "办公室 / Office",
+        "学校": "学校 / School",
+        "机场": "机场 / Airport",
+        "车站": "火车站 / Railway Station",
+        "火车站": "火车站 / Railway Station",
+        "高铁站": "高铁站 / High-Speed Rail Station",
+        "医院": "医院 / Hospital",
+        "超市": "超市 / Supermarket",
+        "商场": "商场 / Shopping Mall",
+        "加油站": "加油站 / Gas Station",
+        "充电站": "充电站 / Charging Station",
+        "充电桩": "充电桩 / Charging Station",
+        "酒店": "酒店 / Hotel",
+        "西藏": "西藏 / Tibet",
+        "北京": "北京 / Beijing",
+        "上海": "上海 / Shanghai",
+        "香港": "香港 / Hong Kong",
+        "西雅图": "西雅图 / Seattle",
+        "上海虹桥火车站": "上海虹桥火车站 / Shanghai Hongqiao Railway Station",
+        "office": "公司 / Office",
+        "home": "家 / Home",
+        "shanghai hongqiao railway station": "上海虹桥火车站 / Shanghai Hongqiao Railway Station",
+        "sfo airport": "旧金山国际机场 / SFO Airport",
+        "airport": "机场 / Airport",
+        "central park": "中央公园 / Central Park",
+        "times square": "时代广场 / Times Square",
+        "beijing": "北京 / Beijing",
+        "shanghai": "上海 / Shanghai",
+        "tibet": "西藏 / Tibet",
+        "hong kong": "香港 / Hong Kong",
+        "seattle": "西雅图 / Seattle"
+    }
+
     if not dest:
         if "回家" in text or "go home" in text_lower:
             dest = "家 / Home"
         elif "回公司" in text or "go to office" in text_lower:
             dest = "公司 / Office"
+
+    if dest and dest.lower() in COMMON_DEST_MAP:
+        dest = COMMON_DEST_MAP[dest.lower()]
+    elif dest and dest in COMMON_DEST_MAP:
+        dest = COMMON_DEST_MAP[dest]
 
     return {
         "destination": dest or "未指定 / Unspecified",
@@ -679,7 +834,7 @@ def extract_phone_slots(text):
             if not c:
                 continue
 
-            # 英文模式：call John / dial 911 / ring Alice
+            # English dialing pattern matching
             m_en = re.search(r"^(?:please\s+)?(?:call|dial|ring)\s+(?:to\s+)?([A-Za-z0-9\s]+?)(?:,\s*please|\s+please)?$", c, re.I)
             if m_en:
                 cand = m_en.group(1).strip()
@@ -705,6 +860,29 @@ def extract_phone_slots(text):
                 if cand:
                     contact = cand
                     break
+
+    COMMON_CONTACT_MAP = {
+        "张三": "张三 / Zhang San",
+        "小李": "小李 / Xiao Li",
+        "李四": "李四 / Li Si",
+        "王五": "王五 / Wang Wu",
+        "小王": "小王 / Xiao Wang",
+        "老张": "老张 / Lao Zhang",
+        "老婆": "老婆 / Wife",
+        "老公": "老公 / Husband",
+        "爸爸": "爸爸 / Dad",
+        "妈妈": "妈妈 / Mom",
+        "john": "约翰 / John",
+        "alice": "爱丽丝 / Alice",
+        "bob": "鲍勃 / Bob",
+        "zhang san": "张三 / Zhang San",
+        "xiao li": "小李 / Xiao Li",
+        "li si": "李四 / Li Si",
+        "wang wu": "王五 / Wang Wu"
+    }
+
+    if contact and contact in COMMON_CONTACT_MAP:
+        contact = COMMON_CONTACT_MAP[contact]
 
     if number and (not contact or contact == number):
         contact = f"指定号码 ({number}) / Number ({number})"
@@ -735,20 +913,20 @@ def extract_query_slots(text):
     target = "通用信息 / General Info"
 
     if any(w in text_lower for w in ["天气", "气温", "下雨", "降雨", "阴天", "晴天", "刮风", "冷不冷", "热不热", "下雪", "weather", "rain", "forecast", "sunny", "snow"]):
-        q_type = "天气与环境查询 / Weather Query"
-        target = "天气状况 / 天气趋势 (Weather & Forecast)"
+        q_type = "天气与环境查询 / Weather & Forecast Query"
+        target = "天气状况与趋势 / Weather Condition & Forecast"
     elif any(w in text_lower for w in ["几点", "时间", "星期", "礼拜", "日期", "哪一年", "几号", "what time", "clock", "today's date", "what day"]):
-        q_type = "时间与日期查询 / Time Query"
-        target = "当前标准时间 / 日历 (Current Time & Date)"
+        q_type = "时间与日期查询 / Time & Date Query"
+        target = "当前标准时间与日历 / Current Time & Date"
     elif any(w in text_lower for w in ["限行", "限号", "尾号", "license plate restriction"]):
         q_type = "交通限行查询 / Traffic Restriction"
-        target = "机动车尾号限行规则 (Plate Restriction Rules)"
+        target = "机动车尾号限行规则 / License Plate Restriction Rules"
     elif any(w in text_lower for w in ["续航", "还能开", "多少公里", "电量", "油量", "胎压", "车门关了吗", "battery", "range", "tire pressure", "mileage"]):
         q_type = "车辆状态查询 / Vehicle Status"
-        target = "三电 / 胎压 / 剩余续航 (Battery, Range & Status)"
+        target = "三电/胎压/剩余续航 / Battery, Range & Status"
     elif any(w in text_lower for w in ["笑话", "讲个故事", "你是谁", "聊天", "joke", "story", "who are you"]):
         q_type = "车载闲聊问答 / In-Car Chat"
-        target = "语音助手交互 (Voice Assistant Interaction)"
+        target = "语音助手交互 / Voice Assistant Interaction"
 
     return {
         "query_type": q_type,
@@ -781,7 +959,8 @@ DOMAIN_KEYWORDS = {
         "切歌", "下一首", "上一首", "别放了", "单曲循环", "随机播放", "放歌", "听歌", "放点音乐", "来点音乐",
         "music", "song", "songs", "track", "tune", "play", "listen", "radio", "fm", "am", "artist",
         "album", "playlist", "volume", "pause", "stop music", "next song", "previous song", "repeat", "shuffle",
-        "classical", "jazz", "rock", "pop", "edm", "hip hop", "hiphop", "rap", "r&b", "soul", "folk", "acoustic", "lofi", "ambient"
+        "classical", "jazz", "rock", "pop", "edm", "hip hop", "hiphop", "rap", "r&b", "soul", "folk", "acoustic", "lofi", "ambient",
+        "八三夭", "celine dion"
     ],
     "navigation": [
         "导航", "路线", "地图", "路况", "目的地", "带我", "回公司", "回家", "怎么走", "堵车", "去哪", "查路线",
@@ -802,46 +981,64 @@ DOMAIN_KEYWORDS = {
 }
 
 
+def match_kw(kw, text_lower):
+    if re.search(r"^[a-zA-Z0-9_\-/\s]+$", kw):
+        return bool(re.search(r"\b" + re.escape(kw) + r"\b", text_lower))
+    return kw in text_lower
+
+
 def analyze_negation(text):
     clauses = re.split(r"[,;!?，；！？]|\band\b|\bbut\b|\bthen\b|\bwhile\b|\bas well as\b|\balso\b|并且|但是|然后|同时|顺便|而且|接着", text, flags=re.I)
     clauses = [c.strip() for c in clauses if c.strip()]
 
-    exclusions = set()   # 排除性否定：明确要求“不要动 / 维持现状 / 别关 / 不要改变”，必须直接忽略剔除！
-    turn_offs = set()    # 关闭性否定：明确要求“不要X / 关掉X / 停止X”，必须执行关闭操作！
-    turn_ons = set()     # 开启/调节性指令
+    exclusions = set()   # Preservation intent (e.g. 'keep / do not touch')
+    turn_offs = set()    # Deactivation intent (e.g. 'turn off / close / stop')
+    turn_ons = set()     # Activation / adjustment intent
 
     domain_order = ["seat", "window", "climate", "music", "navigation", "phone", "query"]
 
     for c in clauses:
         c_lower = c.lower()
-        # 1. 排除性否定模式
-        m_ex_cn = (re.search(r"(?:不要|别|不用|切勿|请勿)(?:动|关|开|停|改|碰|调整)(.+)", c) or
-                   re.search(r"(.+?)(?:不要|别|不用)(?:动|停|关|开|断|调整)", c))
-        m_ex_en = (re.search(r"(?:don\'t|do not|never|leave|keep)\s+(?:touch|change|alter|modify|turn off|close)\s+(.+)", c_lower) or
-                   re.search(r"(?:except|excluding|but not)\s+(.+)", c_lower))
+        # 1. Preservation intent pattern (排除性否定 / 维持现状)
+        m_ex_cn = (re.search(r"(?:不要|别|不用|切勿|请勿)\s*(?:动|关|开|停|改|碰|调整|改变)\s*(.+)", c) or
+                   re.search(r"(.+?)\s*(?:不要|别|不用)\s*(?:动|停|关|开|断|调整|改变)", c) or
+                   re.search(r"(.+?)\s*(?:保持现状|维持现状|维持原样|不要动|别动)", c) or
+                   re.search(r"(?:保持|维持)\s*(.+?)\s*(?:现状|不变|原样)", c))
+
+        m_ex_en = (re.search(r"(?:don\'t|do not|never)\s+(?:touch|change|alter|modify|turn off|close|shut down)\s+(.+)", c_lower) or
+                   re.search(r"leave\s+(.+?)\s+alone", c_lower) or
+                   re.search(r"(?:keep|maintain)\s+(.+?)(?:\s+(?:on|off|as is|running|alone)|$)", c_lower) or
+                   re.search(r"(?:except|excluding|but not|without(?: touching)?)\s+(.+)", c_lower))
+
         if m_ex_cn or m_ex_en:
             target_str = (m_ex_cn.group(1) if m_ex_cn else m_ex_en.group(1)).lower()
             for d in domain_order:
-                if any(kw in target_str for kw in DOMAIN_KEYWORDS[d]):
+                if any(match_kw(kw, target_str) for kw in DOMAIN_KEYWORDS[d]):
                     exclusions.add(d)
                     break
             continue
 
-        # 2. 关闭性否定
-        m_off_cn = (re.search(r"^(?:不要|别|不用|关掉|关闭|停掉|停止|关了|退出|取消)(.+)$", c) or
-                    re.search(r"(.+?)(?:关掉|关闭|停掉|停了|关了)$", c))
-        m_off_en = re.search(r"^(?:turn off|switch off|shut down|disable|stop|cancel|exit|quit|pause)\s+(.+)$", c_lower)
+        # 2. Deactivation intent pattern (关闭性否定 / 关闭停止)
+        c_clean_en = re.sub(r"^(?:please\s+|can\s+you\s+|could\s+you\s+|would\s+you\s+|i\s+want\s+to\s+|we\s+want\s+to\s+|help\s+me\s+|just\s+)", "", c_lower).strip()
+        c_clean_cn = re.sub(r"^(?:请(?:帮我|给我|麻烦)?|麻烦(?:帮我|给我)?|帮我|给我|替我|我想|我要|咱们|大家|顺便)?\s*", "", c).strip()
+
+        m_off_cn = (re.search(r"^(?:不要|别|不用|关掉|关闭|停掉|停止|关了|退出|取消)\s*(.+)$", c_clean_cn) or
+                    re.search(r"^(?:把)?\s*(.+?)\s*(?:关掉|关闭|停掉|停了|关了|退出|取消)$", c_clean_cn))
+
+        m_off_en = (re.search(r"^(?:turn off|switch off|shut down|disable|stop|cancel|exit|quit|pause|close)\s+(.+)$", c_clean_en) or
+                    re.search(r"^(?:turn|switch|shut)\s+(.+?)\s+(?:off|down)$", c_clean_en))
+
         if m_off_cn or m_off_en:
             target_str = (m_off_cn.group(1) if m_off_cn else m_off_en.group(1)).lower()
             for d in domain_order:
-                if any(kw in target_str for kw in DOMAIN_KEYWORDS[d]):
+                if any(match_kw(kw, target_str) for kw in DOMAIN_KEYWORDS[d]):
                     turn_offs.add(d)
                     break
             continue
 
-        # 3. 普通正向指令
+        # 3. Positive activation pattern
         for d in domain_order:
-            if any(kw in c_lower for kw in DOMAIN_KEYWORDS[d]):
+            if any(match_kw(kw, c_lower) for kw in DOMAIN_KEYWORDS[d]):
                 turn_ons.add(d)
 
     return {
@@ -855,7 +1052,7 @@ def build_smart_questions(text, intents):
     candidate_domains = set()
     text_lower = text.lower()
     for d, kws in DOMAIN_KEYWORDS.items():
-        if any(kw in text_lower for kw in kws):
+        if any(match_kw(kw, text_lower) for kw in kws):
             candidate_domains.add(d)
 
     if re.search(r"(?:^|[，,；;。！!？?\s])(?:我想|我要|帮我|请)?(?:去|到|回|前往)\s*[\u4e00-\u9fa5]{2,15}", text_lower):
@@ -918,7 +1115,7 @@ def call_ollaya(text):
 
     negation = analyze_negation(text)
 
-    # 动态组装多标签 domains
+    # Aggregate multi-label classification outputs
     domains = {}
     for x in intents:
         if not x["in_noul"]:
@@ -934,7 +1131,7 @@ def call_ollaya(text):
         probabilities = ans["intent"]["probabilities"]
     else:
         valid_candidates = [(k, v) for k, v in domains.items() if k not in negation["exclusions"]]
-        if valid_candidates and max(v for k, v in valid_candidates) >= 0.50:
+        if valid_candidates and max(v for k, v in valid_candidates) >= CONFIDENCE_THRESHOLD:
             main_choice = max(valid_candidates, key=lambda x: x[1])[0]
         else:
             main_choice = "other"
@@ -945,11 +1142,11 @@ def call_ollaya(text):
             probabilities["other"] = round(max(0.0, 1.0 - sum(v for k, v in probabilities.items() if k != "other")), 3)
 
     if main_choice in negation["exclusions"]:
-        valid = [k for k, v in domains.items() if k not in negation["exclusions"] and v >= 0.50]
+        valid = [k for k, v in domains.items() if k not in negation["exclusions"] and v >= CONFIDENCE_THRESHOLD]
         if valid:
             main_choice = max(valid, key=lambda k: domains[k])
 
-    music_slots = extract_music_slots(text, ans)
+    music_slots = extract_music_slots(text)
     climate_slots = extract_climate_slots(text)
     nav_slots = extract_nav_slots(text)
     phone_slots = extract_phone_slots(text)
@@ -989,7 +1186,8 @@ PAGE = r"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>N/E · NEURA EDIT | In-Cabin Voice Intelligence Playground</title>
+<title>NEURA EDIT (N/E) · OmniIntent Decision Engine</title>
+<link rel="icon" type="image/png" href="/assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -1161,6 +1359,42 @@ body {
 .nav-btn.primary:hover {
   background: var(--blueprint-hover);
   color: #fff;
+}
+
+.lang-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg-surface);
+  border: 1px solid var(--rule-soft);
+  padding: 2px;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.lang-pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border: none;
+  background: transparent;
+  color: var(--ink-mute);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.lang-pill:hover {
+  color: var(--ink);
+}
+.lang-pill.active {
+  background: var(--blueprint);
+  color: #fff;
+}
+.lang-divider {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-mute);
+  opacity: 0.4;
+  user-select: none;
 }
 
 /* ── Hero / Masthead Section ── */
@@ -1996,21 +2230,20 @@ table.cfg .op[disabled] {
   <div class="nav-inner">
     <a href="#" class="brand-group">
       <div class="brand-logo-wrap">
-        <svg class="brand-logo" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1.5" y="1.5" width="29" height="29" stroke="currentColor" stroke-width="1.2" fill="var(--bg)"/>
-          <line x1="1.5" y1="5.5" x2="5.5" y2="1.5" stroke="var(--blueprint)" stroke-width="1.2"/>
-          <line x1="30.5" y1="26.5" x2="26.5" y2="30.5" stroke="var(--blueprint)" stroke-width="1.2"/>
-          <text x="16" y="21" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="800" fill="var(--blueprint)" text-anchor="middle" letter-spacing="-0.5">N/E</text>
-        </svg>
+        <img class="brand-logo" src="/assets/logo.png" alt="N/E Logo" width="32" height="32" style="border-radius:6px;display:block;object-fit:cover;border:1px solid var(--rule-soft);">
       </div>
       <div class="brand-titles">
         <span class="brand-name">NEURA EDIT</span>
-        <span class="brand-sub">COCKPIT VOICE LAB</span>
+        <span class="brand-sub">OMNIINTENT SYSTEMS</span>
       </div>
     </a>
     <div class="nav-actions">
       <button class="nav-btn" id="themeBtn" type="button" title="Toggle Light/Dark Theme">◐ <span id="themeLabel">THEME</span></button>
-      <button class="nav-btn primary" id="langBtn" type="button">🌐 <span id="langLabel">ENGLISH</span></button>
+      <div class="lang-switcher" id="langSwitch" role="group" aria-label="Language selection">
+        <button type="button" class="lang-pill active" id="btnLangZh" title="切换至中文">中文</button>
+        <span class="lang-divider">/</span>
+        <button type="button" class="lang-pill" id="btnLangEn" title="Switch to English">EN</button>
+      </div>
     </div>
   </div>
 </header>
@@ -2019,23 +2252,24 @@ table.cfg .op[disabled] {
 <section class="manual-masthead">
   <div class="container">
     <div class="manual-meta-row">
-      <span>[ORG: <b class="highlight">N/E // NEURA EDIT</b>] · AUTOMOTIVE VOICE AI</span>
-      <span>SPEC: <b class="highlight">2026.09-REV</b> · DUAL-TRACK NLU</span>
+      <span>[SYSTEM: <b class="highlight">NEURA EDIT</b>]</span>
+      <span>DEMO: <b class="highlight">MULTI-INTENT &amp; SLOTS</b></span>
     </div>
     <div class="masthead-grid">
       <div class="masthead-left">
-        <h1 class="manual-title" id="heroTitle">IN-CABIN VOICE INTELLIGENCE</h1>
+        <h1 class="manual-title" id="heroTitle">车机多意图并行决策引擎</h1>
         <p class="manual-tagline" id="heroTagline">
-          欢迎体验 NEURA EDIT (N/E) 车载全双工多意图识别与槽位提取试验台。专为车载智能座舱设计，以确定性、超低延迟（~140ms）实现涵盖 21 种音乐曲风、空调多温区调节、导航路径规划、电话呼叫及车况问答的联合路由与精准槽位抽取，原生具备 CAN 车控总线否定词排除能力与零生成等待。
+          告别端侧小模型（SLM）自回归逐字生成的迟滞，突破传统 NLU“单句仅能单意图”的瓶颈。<b>NEURA EDIT (N/E) 车机多意图并行决策引擎</b>，基于单次前向神经计算，实现 <b>~140ms 极速响应</b> 与 <b>多域指令同句并发解析</b>。一句话同时调度空调温控、多曲风音乐、导航路径并完成确定性槽位直出；原生支持否定指令排除，兼具大模型的泛化理解与车规级控制的高确定性。
         </p>
         <div class="manual-attribution" id="heroAttr">
-          Architected & Engineered by <b>N/E · NEURA EDIT</b>
+          系统设计与工程构建：<b>N/E · NEURA EDIT</b>
         </div>
         <div class="specs-strip">
-          <span class="spec-chip">⚡ <b>~140ms</b> LATENCY</span>
-          <span class="spec-chip">🎯 <b>DUAL-TRACK</b> MULTI-INTENT</span>
-          <span class="spec-chip">🎵 <b>21 GENRES</b> ZERO-WAIT</span>
-          <span class="spec-chip">🛡️ <b>CAN BUS</b> NEGATION SHIELD</span>
+          <span class="spec-chip" id="spec1">⚡ <b>~140ms</b> 零生成等待</span>
+          <span class="spec-chip" id="spec2">🎯 <b>多指令同句并发</b></span>
+          <span class="spec-chip" id="spec3">🎵 <b>21 种曲风/情绪全覆盖</b></span>
+          <span class="spec-chip" id="spec4">🛡️ <b>智能否定排除</b></span>
+          <span class="spec-chip" id="spec5">🔒 <b>确定性槽位直出</b></span>
         </div>
         <div class="masthead-cta">
           <a href="#console" class="cta-btn" id="heroCtaGo">⚡ 进入控制台</a>
@@ -2047,19 +2281,19 @@ table.cfg .op[disabled] {
         <div class="fig-plate">
           <div class="fig-header">
             <span class="fig-tag">FIG. 001</span>
-            <span class="fig-status">● LIVE PIPELINE ARCHITECTURE</span>
+            <span class="fig-status">● PIPELINE ARCHITECTURE</span>
           </div>
           <div class="fig-terminal">
-            <div><span class="t-dim">[SYS_BOOT]</span> <span class="t-blue">NEURA-EDIT COCKPIT AGENT</span></div>
-            <div><span class="t-dim">[MODEL]</span> DECISION:EOS (127.0.0.1:11435)</div>
-            <div><span class="t-dim">[EXECUTION]</span> SINGLE FORWARD PASS (JEV)</div>
-            <div><span class="t-dim">[NEGATION]</span> DUAL EXCLUSION OVERRIDE</div>
+            <div><span class="t-dim">[SYSTEM]</span> <span class="t-blue">NEURA-EDIT OMNIINTENT SYSTEMS</span></div>
+            <div><span class="t-dim">[PURPOSE]</span> MULTI-INTENT &amp; SLOTS DEMO</div>
+            <div><span class="t-dim">[DOMAINS]</span> CLIMATE · MUSIC · NAV · PHONE · QUERY</div>
+            <div><span class="t-dim">[FILTER]</span> NEGATION EXCLUSION OVERRIDE</div>
             <div class="term-divider">----------------------------------------</div>
             <div class="term-pipeline">
-              <div class="p-step">AUDIO IN</div>
-              <div class="p-step active">DECISION</div>
+              <div class="p-step">VOICE IN</div>
+              <div class="p-step active">INTENT</div>
               <div class="p-step active">SLOTS</div>
-              <div class="p-step">CAN BUS</div>
+              <div class="p-step">EXECUTE</div>
             </div>
           </div>
         </div>
@@ -2071,14 +2305,14 @@ table.cfg .op[disabled] {
 <!-- Interactive Console -->
 <main class="container" id="console">
   <div class="console-header">
-    <div class="console-title" id="consoleTitle">VOICE COMMAND CONSOLE</div>
+    <div class="console-title" id="consoleTitle">车机多意图并行控制台</div>
     <div class="console-meta" id="consoleMeta">[STATUS: READY] // PORT 8080</div>
   </div>
 
   <div class="query-box">
     <form class="cmd-form" id="f">
       <div class="cmd-prompt">&gt;</div>
-      <input id="q" placeholder="输入一句话，如：空调调至二十四度，或者打开空调并播放周杰伦的歌" autofocus autocomplete="off" spellcheck="false">
+      <input id="q" placeholder="输入车机语音指令，如：打开空调，放一首八三夭的外婆的告别式，再导航去香港" autofocus autocomplete="off" spellcheck="false">
       <button class="go" id="go" type="submit">判定</button>
     </form>
     <div class="examples-wrap" id="ex"></div>
@@ -2116,13 +2350,13 @@ table.cfg .op[disabled] {
       <div class="col-left">
         <section class="panel">
           <div class="panel-header">
-            <h2 id="noulTitle">多标签检出<small id="noulSub">noul · YES ≥ 0.70 · 灰区 0.50–0.70</small></h2>
+            <h2><span id="noulTitle">多标签检出</span><small id="noulSub">noul · YES ≥ 0.70 · 灰区 0.50–0.70</small></h2>
           </div>
           <div id="noulBars"></div>
         </section>
         <section class="panel">
           <div class="panel-header">
-            <h2 id="choiceTitle">主意图概率分布<small id="choiceSub">choice · 全类别归一化概率</small></h2>
+            <h2><span id="choiceTitle">主意图概率分布</span><small id="choiceSub">choice · 全类别归一化概率</small></h2>
           </div>
           <div id="choiceBars"></div>
         </section>
@@ -2130,11 +2364,11 @@ table.cfg .op[disabled] {
 
       <!-- Right Column: Extracted Slots Cards -->
       <div class="col-right">
-        <!-- Direct CAN Bus Execution Hint -->
+        <!-- Direct Execution Hint -->
         <div class="panel empty-slot-hint" id="emptySlotHint" hidden>
           <div class="hint-icon">⚡</div>
-          <div class="hint-title" id="emptyTitle">车控总线直接执行</div>
-          <div class="hint-desc" id="emptyDesc">当前指令已直接分发至车控 CAN 总线，无需额外提取槽位参数。</div>
+          <div class="hint-title" id="emptyTitle">直接执行控制</div>
+          <div class="hint-desc" id="emptyDesc">当前指令已直接分发执行，无需额外提取槽位参数。</div>
         </div>
 
         <!-- Music Slots Card -->
@@ -2271,10 +2505,10 @@ table.cfg .op[disabled] {
 <footer class="footer">
   <div class="footer-inner">
     <div>
-      <b>NEURA EDIT (N/E)</b> · In-Cabin Voice Intelligence Playground
+      <b>NEURA EDIT (N/E)</b> · OmniIntent Decision Engine
     </div>
     <div class="footer-right">
-      <span class="footer-link">ENGINEERED FROM FIRST PRINCIPLES</span>
+      <span class="footer-link">SIGNAL OVER TOKENS</span>
       <span class="footer-link">127.0.0.1:11435</span>
     </div>
   </div>
@@ -2282,6 +2516,8 @@ table.cfg .op[disabled] {
 
 <script>
 const $ = id => document.getElementById(id);
+const setText = (id, val) => { const el = $(id); if (el) el.textContent = val; };
+const setHtml = (id, val) => { const el = $(id); if (el) el.innerHTML = val; };
 let INTENTS = [];
 let CURRENT_LANG = localStorage.getItem('ne_lang') || 'zh';
 let CURRENT_THEME = localStorage.getItem('ne_theme') || 'light';
@@ -2290,33 +2526,39 @@ document.documentElement.setAttribute('data-theme', CURRENT_THEME);
 
 const I18N = {
   zh: {
-    heroTitle: '车机语音智能试验台',
-    heroTagline: '欢迎体验由 NEURA EDIT (N/E) 打造的车载全双工多意图识别与槽位提取试验台。专为车载智能座舱设计，以确定性、超低延迟（~140ms）实现涵盖 21 种音乐曲风、空调多温区调节、导航路径规划、电话呼叫及车况问答的联合路由与精准槽位抽取，原生具备 CAN 车控总线否定词排除能力与零生成等待。',
+    heroTitle: '车机多意图并行决策引擎',
+    heroTagline: '告别端侧小模型（SLM）自回归逐字生成的迟滞，突破传统 NLU“单句仅能单意图”的瓶颈。<b>NEURA EDIT (N/E) 车机多意图并行决策引擎</b>，基于单次前向神经计算，实现 <b>~140ms 极速响应</b> 与 <b>多域指令同句并发解析</b>。一句话同时调度空调温控、多曲风音乐、导航路径并完成确定性槽位直出；原生支持否定指令排除，兼具大模型的泛化理解与车规级控制的高确定性。',
     heroAttr: '系统设计与工程构建：<b>N/E · NEURA EDIT</b>',
     heroCtaGo: '⚡ 进入控制台',
     heroCtaDemo: '📋 运行多指令示例',
     heroCtaCfg: '⚙️ 功能域配置',
-    consoleTitle: '车机语音指令控制台',
+    spec1: '⚡ <b>~140ms</b> 零生成等待',
+    spec2: '🎯 <b>多指令同句并发</b>',
+    spec3: '🎵 <b>21 种曲风/情绪全覆盖</b>',
+    spec4: '🛡️ <b>智能否定排除</b>',
+    spec5: '🔒 <b>确定性槽位直出</b>',
+    consoleTitle: '车机多意图并行控制台',
     consoleMeta: '[状态: 正常连接] // 本地端口 8080',
-    placeholder: '输入车机语音指令，如：空调调至二十四度，或者打开空调并播放周杰伦的歌',
+    placeholder: '输入车机语音指令，如：打开空调，放一首八三夭的外婆的告别式，再导航去香港',
     go: '开始判定',
     exLabel: '推荐示例：',
     examples: [
+      '打开空调，放一首八三夭的外婆的告别式，再导航去香港',
       '空调调至二十四度',
       '关闭空调，但是不要关座椅加热',
       '把车窗打开，把音乐打开，空调调到二十度',
       '我们要听放克',
-      '我想给张三打电话，我还想听一首林俊杰的伟大的渺小，再帮我导航去公司',
       '导航去上海虹桥火车站，躲避拥堵',
       '今天天气怎么样'
     ],
-    dCap: '支持的功能域（',
+    dCapPre: '支持的功能域（',
+    dCapPost: '）：',
     lblWall: '端到端耗时',
     lblModel: '模型计算耗时',
     lblTok: '输入 Tokens',
     tokNote: '(含指令模板)',
-    emptyTitle: '车控总线直接执行',
-    emptyDesc: '当前指令已直接分发至车控 CAN 总线，无需额外提取槽位参数。',
+    emptyTitle: '直接执行控制',
+    emptyDesc: '当前指令已直接分发执行，无需额外提取槽位参数。',
     judging: '正在通过 decision:eos 神经计算判定中…',
     noulTitle: '多标签检出',
     noulSub: 'noul · YES ≥ 0.70 · 灰区 0.50–0.70',
@@ -2370,33 +2612,39 @@ const I18N = {
     themeLabel: CURRENT_THEME === 'dark' ? '浅色' : '深色'
   },
   en: {
-    heroTitle: 'IN-CABIN VOICE INTELLIGENCE',
-    heroTagline: 'Welcome to the NEURA EDIT (N/E) In-Cabin Voice Intelligence Playground. Built from first principles for modern connected vehicles, this system demonstrates deterministic, ultra-low latency (~140ms) joint intent routing and multi-slot extraction across 21 musical genres, climate regulation, waypoint navigation, telephony, and vehicle status queries—all with zero generation latency and CAN-bus negation detection.',
+    heroTitle: 'OMNIINTENT DECISION ENGINE',
+    heroTagline: 'Moving beyond the token-by-token generation latency of SLMs, and transcending the single-intent bottlenecks of conventional in-cabin NLU. <b>NEURA EDIT (N/E) OmniIntent Engine</b> leverages single-pass neural decision computation to achieve <b>sub-150ms low-latency dispatch</b> with <b>true multi-domain concurrency</b>. In a single breath, it seamlessly coordinates climate control, multi-genre music, and navigation routing with deterministic slot extraction and smart negation filtering.',
     heroAttr: 'Architected & Engineered by <b>N/E · NEURA EDIT</b>',
-    heroCtaGo: '⚡ Launch Playground',
+    heroCtaGo: '⚡ Launch Console',
     heroCtaDemo: '📋 Run Multi-Command Demo',
     heroCtaCfg: '⚙️ Domain Config',
-    consoleTitle: 'VOICE COMMAND CONSOLE',
+    spec1: '⚡ <b>~140ms</b> Zero Generation Delay',
+    spec2: '🎯 <b>Multi-Intent</b> Concurrency',
+    spec3: '🎵 <b>21 Acoustic Genres</b>',
+    spec4: '🛡️ <b>Smart Negation Filter</b>',
+    spec5: '🔒 <b>Deterministic Slots</b>',
+    consoleTitle: 'OMNIINTENT COMMAND CONSOLE',
     consoleMeta: '[STATUS: ONLINE] // LOCALHOST:8080',
-    placeholder: 'Enter in-cabin voice query, e.g.: call John, play some jazz music, and set temperature to 22 degrees',
+    placeholder: 'Enter in-cabin voice query, e.g.: Turn on the AC, play a song by Celine Dion, and navigate to Seattle',
     go: 'Analyze',
     exLabel: 'Preset Queries: ',
     examples: [
-      'set temperature to 22 degrees',
+      'Turn on the AC, play a song by Celine Dion, and navigate to Seattle',
+      'set temperature to 24 degrees',
       'turn off the AC, but do not touch heated seats',
-      'call John, play some jazz music, and set temperature to 22 degrees',
-      'we want to listen to jazz',
-      'navigate to SFO Airport avoiding traffic',
-      'play Shape of You by Ed Sheeran',
+      'open the windows, play music, and set AC to 20 degrees',
+      'we want to listen to funk',
+      'navigate to Shanghai Hongqiao Railway Station, avoid traffic',
       'what is the weather today'
     ],
-    dCap: 'Active Domains (',
+    dCapPre: 'Active Domains (',
+    dCapPost: '): ',
     lblWall: 'End-to-End Latency',
     lblModel: 'Model Compute Time',
     lblTok: 'Input Tokens',
     tokNote: '(incl. prompt template)',
-    emptyTitle: 'Direct Vehicle Bus Control',
-    emptyDesc: 'Command dispatched directly to vehicle CAN bus without additional slot extraction.',
+    emptyTitle: 'Direct Execution',
+    emptyDesc: 'Command dispatched directly for execution without additional slot parameters.',
     judging: 'Evaluating forward pass with decision:eos…',
     noulTitle: 'Multi-Label Detection',
     noulSub: 'noul · YES ≥ 0.70 · Gray Zone 0.50–0.70',
@@ -2482,6 +2730,7 @@ function localizeSlotValue(val, lang) {
     '未指定（继续播放/随心听） / Continue Playback': { zh: '未指定（继续播放/随心听）', en: 'Continue Playback' },
     'Popular Hits / 热门精选': { zh: '热门精选', en: 'Popular Hits' },
     '未指定（默认播放热门精选）': { zh: '未指定（默认播放热门精选）', en: 'Unspecified (Top Hits)' },
+    '未指定（默认播放热门精选） / Unspecified (Top Hits)': { zh: '未指定（默认播放热门精选）', en: 'Unspecified (Top Hits)' },
     '绝对温度设定 / Target Temp': { zh: '设定目标温度', en: 'Target Temperature' },
     '相对温度微调 / Relative Delta': { zh: '相对温度微调', en: 'Relative Delta' },
     '全车 / All Zones': { zh: '全车', en: 'All Zones' },
@@ -2489,9 +2738,13 @@ function localizeSlotValue(val, lang) {
     '副驾 / Passenger': { zh: '副驾', en: 'Passenger' },
     '后排 / Rear': { zh: '后排', en: 'Rear' },
     '自动 (AUTO)': { zh: '自动 (AUTO)', en: 'Automatic (AUTO)' },
+    '自动 / Automatic (AUTO)': { zh: '自动 (AUTO)', en: 'Automatic (AUTO)' },
     '制冷 (A/C)': { zh: '制冷 (A/C)', en: 'Cooling (A/C)' },
+    '制冷 / Cooling (A/C)': { zh: '制冷 (A/C)', en: 'Cooling (A/C)' },
     '制热 (HEATER)': { zh: '制热 (HEATER)', en: 'Heating (HEATER)' },
-    '除雾/除霜 / Defrost': { zh: '除雾/除霜', en: 'Defrost' },
+    '制热 / Heating (HEATER)': { zh: '制热 (HEATER)', en: 'Heating (HEATER)' },
+    '除雾/除霜 / Defrost': { zh: '除雾/除霜', en: 'Defrost & Defog' },
+    '除雾/除霜 / Defrost & Defog': { zh: '除雾/除霜', en: 'Defrost & Defog' },
     '内循环 / Recirculation': { zh: '内循环', en: 'Recirculation' },
     '外循环 / Fresh Air': { zh: '外循环', en: 'Fresh Air' },
     '设置目的地导航 / Set Destination': { zh: '设置目的地导航', en: 'Set Destination' },
@@ -2510,27 +2763,22 @@ function localizeSlotValue(val, lang) {
     '拨打电话 / Make Call': { zh: '拨打电话', en: 'Make Call' },
     '挂断电话 / Hang Up': { zh: '挂断电话', en: 'Hang Up' },
     '接听电话 / Answer Call': { zh: '接听电话', en: 'Answer Call' },
-    '重拨电话 / Redial': { zh: '重拨电话', en: 'Redial' }
+    '重拨电话 / Redial': { zh: '重拨电话', en: 'Redial' },
+    '天气与环境查询 / Weather & Forecast Query': { zh: '天气与环境查询', en: 'Weather & Forecast Query' },
+    '天气状况与趋势 / Weather Condition & Forecast': { zh: '天气状况与趋势', en: 'Weather Condition & Forecast' },
+    '时间与日期查询 / Time & Date Query': { zh: '时间与日期查询', en: 'Time & Date Query' },
+    '当前标准时间与日历 / Current Time & Date': { zh: '当前标准时间与日历', en: 'Current Time & Date' },
+    '交通限行查询 / Traffic Restriction': { zh: '交通限行查询', en: 'Traffic Restriction' },
+    '机动车尾号限行规则 / License Plate Restriction Rules': { zh: '机动车尾号限行规则', en: 'License Plate Restriction Rules' },
+    '车辆状态查询 / Vehicle Status': { zh: '车辆车况查询', en: 'Vehicle Status Query' },
+    '三电/胎压/剩余续航 / Battery, Range & Status': { zh: '三电/胎压/剩余续航', en: 'Battery, Range & Status' },
+    '车载闲聊问答 / In-Car Chat': { zh: '车载闲聊问答', en: 'In-Car Chat' },
+    '语音助手交互 / Voice Assistant Interaction': { zh: '语音助手交互', en: 'Voice Assistant Interaction' },
+    'TTS 语音助手播报 / Voice Assistant TTS': { zh: 'TTS 语音助手播报', en: 'Voice Assistant TTS' }
   };
 
   if (DICT[val]) {
     return DICT[val][lang];
-  }
-
-  if (val.includes('智能推荐')) {
-    if (lang === 'en') {
-      let g = val.replace(/^未指定（按\s*/, '').replace(/\s*智能推荐）.*$/, '');
-      if (g.includes('/')) {
-        const parts = g.split('+').map(p => {
-          const slash = p.split('/');
-          return slash[1] ? slash[1].trim() : slash[0].trim();
-        });
-        g = parts.join(' + ');
-      }
-      return `Unspecified (Recommended by ${g})`;
-    } else {
-      return val.replace(/\s*\/\s*Recommendation.*$/, '');
-    }
   }
 
   if (val.includes(' / ')) {
@@ -2538,83 +2786,187 @@ function localizeSlotValue(val, lang) {
     return lang === 'en' ? parts[parts.length - 1].trim() : parts[0].trim();
   }
 
+  const WORD_DICT = {
+    '公司': { zh: '公司', en: 'Office' },
+    '家': { zh: '家', en: 'Home' },
+    '西藏': { zh: '西藏', en: 'Tibet' },
+    '北京': { zh: '北京', en: 'Beijing' },
+    '上海': { zh: '上海', en: 'Shanghai' },
+    '上海虹桥火车站': { zh: '上海虹桥火车站', en: 'Shanghai Hongqiao Railway Station' },
+    '张三': { zh: '张三', en: 'Zhang San' },
+    '小李': { zh: '小李', en: 'Xiao Li' },
+    '李四': { zh: '李四', en: 'Li Si' },
+    '王五': { zh: '王五', en: 'Wang Wu' },
+    '老婆': { zh: '老婆', en: 'Wife' },
+    '老公': { zh: '老公', en: 'Husband' },
+    '爸爸': { zh: '爸爸', en: 'Dad' },
+    '妈妈': { zh: '妈妈', en: 'Mom' },
+    '林俊杰': { zh: '林俊杰', en: 'JJ Lin' },
+    '周杰伦': { zh: '周杰伦', en: 'Jay Chou' },
+    '许巍': { zh: '许巍', en: 'Wei Xu' },
+    '伟大的渺小': { zh: '伟大的渺小', en: 'Little Big Us' },
+    '蓝莲花': { zh: '蓝莲花', en: 'Blue Lotus' },
+    '青花瓷': { zh: '青花瓷', en: 'Blue and White Porcelain' },
+    '放克': { zh: '放克', en: 'Disco / Funk' },
+    '古典': { zh: '古典', en: 'Classical' },
+    '摇滚': { zh: '摇滚', en: 'Rock' },
+    '爵士': { zh: '爵士', en: 'Jazz' },
+    '伤感/低落': { zh: '伤感/低落', en: 'Sad & Healing' },
+    '欢快/提神': { zh: '欢快/提神', en: 'Upbeat & Energetic' },
+    '舒缓/安静': { zh: '舒缓/安静', en: 'Calm & Relaxed' },
+    '八三夭': { zh: '八三夭', en: '831' },
+    '外婆的告别式': { zh: '外婆的告别式', en: "Grandma's Farewell" },
+    '香港': { zh: '香港', en: 'Hong Kong' },
+    '西雅图': { zh: '西雅图', en: 'Seattle' },
+    '席琳·迪翁': { zh: '席琳·迪翁', en: 'Celine Dion' },
+    'Celine Dion': { zh: '席琳·迪翁', en: 'Celine Dion' }
+  };
+
+  if (WORD_DICT[val]) {
+    return WORD_DICT[val][lang];
+  }
+
   return val;
 }
 
+function formatErrorMsg(msg, lang) {
+  if (!msg) return lang === 'en' ? 'Unknown error' : '未知错误';
+  let res = String(msg);
+  if (lang === 'en') {
+    res = res.replace(/^(失败：|判定失败：)/, '')
+             .replace(/连不上\s*ollaya\s*守护进程:/g, 'Failed to connect to ollaya daemon:')
+             .replace(/（systemctl status ollaya）/g, ' (Please verify that ollaya service is running)')
+             .replace(/（请检查 ollaya 守护进程是否已启动）/g, ' (Please verify that ollaya service is running)')
+             .replace(/text 不能为空/g, 'Query text cannot be empty')
+             .replace(/描述不能为空/g, 'Description cannot be empty')
+             .replace(/域名需为小写字母开头的 a-z0-9_，长度 ≤32/g, 'Domain name must start with a lowercase letter and contain only a-z0-9_ (max length 32)')
+             .replace(/(.+?) 是兜底类，必须保留在主意图中/g, '$1 is a fallback category and must remain in primary intents');
+    return res;
+  } else {
+    res = res.replace(/^Evaluation Failed:\s*/, '')
+             .replace(/Failed to connect to ollaya daemon:/g, '连不上 ollaya 守护进程:')
+             .replace(/\(Please verify that ollaya service is running\)/g, '（请检查 ollaya 守护进程是否已启动）')
+             .replace(/\(Please check if ollaya service is running\)/g, '（请检查 ollaya 守护进程是否已启动）')
+             .replace(/Query text cannot be empty/g, '指令内容不能为空')
+             .replace(/Description cannot be empty/g, '描述不能为空');
+    return res;
+  }
+}
+
 function setLanguage(lang) {
+  const oldLang = CURRENT_LANG;
   CURRENT_LANG = lang;
   localStorage.setItem('ne_lang', lang);
-  const t = I18N[lang];
+  const t = I18N[lang] || I18N.zh;
+  const oldT = I18N[oldLang] || I18N.zh;
 
-  $('heroTitle').textContent = t.heroTitle;
-  $('heroTagline').innerHTML = t.heroTagline;
-  $('heroAttr').innerHTML = t.heroAttr;
-  $('heroCtaGo').textContent = t.heroCtaGo;
-  $('heroCtaDemo').textContent = t.heroCtaDemo;
-  $('heroCtaCfg').textContent = t.heroCtaCfg;
-  $('consoleTitle').textContent = t.consoleTitle;
-  $('consoleMeta').textContent = t.consoleMeta;
-  $('q').placeholder = t.placeholder;
-  $('go').textContent = t.go;
-  $('dCap').innerHTML = `${t.dCap}<span id="dcount">${INTENTS.length}</span>）：`;
-  $('lblWall').textContent = t.lblWall;
-  $('lblModel').textContent = t.lblModel;
-  $('lblTok').textContent = t.lblTok;
-  $('tokNote').textContent = t.tokNote;
-  $('emptyTitle').textContent = t.emptyTitle;
-  $('emptyDesc').textContent = t.emptyDesc;
-  $('noulTitle').textContent = t.noulTitle;
-  $('noulSub').textContent = t.noulSub;
-  $('choiceTitle').textContent = t.choiceTitle;
-  $('choiceSub').textContent = t.choiceSub;
-  $('cardTitleMusic').textContent = t.cardTitleMusic;
-  $('cardSubMusic').textContent = t.cardSubMusic;
-  $('lblSlotArtist').textContent = t.lblSlotArtist;
-  $('lblSlotSong').textContent = t.lblSlotSong;
-  $('lblSlotMood').textContent = t.lblSlotMood;
-  $('lblSlotAction').textContent = t.lblSlotAction;
-  $('cardTitleClimate').textContent = t.cardTitleClimate;
-  $('cardSubClimate').textContent = t.cardSubClimate;
-  $('lblSlotTemp').textContent = t.lblSlotTemp;
-  $('lblSlotTempType').textContent = t.lblSlotTempType;
-  $('lblSlotZone').textContent = t.lblSlotZone;
-  $('lblSlotClimateMode').textContent = t.lblSlotClimateMode;
-  $('cardTitleNav').textContent = t.cardTitleNav;
-  $('cardSubNav').textContent = t.cardSubNav;
-  $('lblSlotNavDest').textContent = t.lblSlotNavDest;
-  $('lblSlotNavAction').textContent = t.lblSlotNavAction;
-  $('lblSlotNavPref').textContent = t.lblSlotNavPref;
-  $('cardTitlePhone').textContent = t.cardTitlePhone;
-  $('cardSubPhone').textContent = t.cardSubPhone;
-  $('lblSlotPhoneContact').textContent = t.lblSlotPhoneContact;
-  $('lblSlotPhoneNumber').textContent = t.lblSlotPhoneNumber;
-  $('lblSlotPhoneAction').textContent = t.lblSlotPhoneAction;
-  $('cardTitleQuery').textContent = t.cardTitleQuery;
-  $('cardSubQuery').textContent = t.cardSubQuery;
-  $('lblSlotQueryType').textContent = t.lblSlotQueryType;
-  $('lblSlotQueryTarget').textContent = t.lblSlotQueryTarget;
-  $('lblSlotQueryChannel').textContent = t.lblSlotQueryChannel;
-  $('mgmtTitle').textContent = t.mgmtTitle;
-  $('mgmtSub').textContent = t.mgmtSub;
-  $('thName').textContent = t.thName;
-  $('thDesc').textContent = t.thDesc;
-  $('thChoice').textContent = t.thChoice;
-  $('thNoul').textContent = t.thNoul;
-  $('thOps').textContent = t.thOps;
-  $('iName').placeholder = t.iNamePlaceholder;
-  $('iDesc').placeholder = t.iDescPlaceholder;
-  $('lblChoice').textContent = t.lblChoice;
-  $('lblNoul').textContent = t.lblNoul;
-  $('iSave').textContent = t.iSaveAdd;
-  $('iCancel').textContent = t.iCancel;
-  $('langLabel').textContent = t.langLabel;
-  $('themeLabel').textContent = CURRENT_THEME === 'dark' ? (lang === 'zh' ? '浅色' : 'LIGHT') : (lang === 'zh' ? '深色' : 'DARK');
+  setText('heroTitle', t.heroTitle);
+  setHtml('heroTagline', t.heroTagline);
+  setHtml('heroAttr', t.heroAttr);
+  setHtml('spec1', t.spec1);
+  setHtml('spec2', t.spec2);
+  setHtml('spec3', t.spec3);
+  setHtml('spec4', t.spec4);
+  setHtml('spec5', t.spec5);
 
-  $('ex').innerHTML = `<span class="ex-label">${t.exLabel}</span>` + t.examples.map(ex => `<button type="button">${esc(ex)}</button>`).join('');
+  const bZh = $('btnLangZh'), bEn = $('btnLangEn');
+  if (bZh) bZh.classList.toggle('active', lang === 'zh');
+  if (bEn) bEn.classList.toggle('active', lang === 'en');
+
+  setText('heroCtaGo', t.heroCtaGo);
+  setText('heroCtaDemo', t.heroCtaDemo);
+  setText('heroCtaCfg', t.heroCtaCfg);
+  setText('consoleTitle', t.consoleTitle);
+  setText('consoleMeta', t.consoleMeta);
+
+  const qEl = $('q');
+  if (qEl) qEl.placeholder = t.placeholder;
+  setText('go', t.go);
+
+  setHtml('dCap', `${t.dCapPre}<span id="dcount">${INTENTS.length}</span>${t.dCapPost}`);
+  setText('lblWall', t.lblWall);
+  setText('lblModel', t.lblModel);
+  setText('lblTok', t.lblTok);
+  setText('tokNote', t.tokNote);
+  setText('emptyTitle', t.emptyTitle);
+  setText('emptyDesc', t.emptyDesc);
+  setText('noulTitle', t.noulTitle);
+  setText('noulSub', t.noulSub);
+  setText('choiceTitle', t.choiceTitle);
+  setText('choiceSub', t.choiceSub);
+
+  setText('cardTitleMusic', t.cardTitleMusic);
+  setText('cardSubMusic', t.cardSubMusic);
+  setText('lblSlotArtist', t.lblSlotArtist);
+  setText('lblSlotSong', t.lblSlotSong);
+  setText('lblSlotMood', t.lblSlotMood);
+  setText('lblSlotAction', t.lblSlotAction);
+
+  setText('cardTitleClimate', t.cardTitleClimate);
+  setText('cardSubClimate', t.cardSubClimate);
+  setText('lblSlotTemp', t.lblSlotTemp);
+  setText('lblSlotTempType', t.lblSlotTempType);
+  setText('lblSlotZone', t.lblSlotZone);
+  setText('lblSlotClimateMode', t.lblSlotClimateMode);
+
+  setText('cardTitleNav', t.cardTitleNav);
+  setText('cardSubNav', t.cardSubNav);
+  setText('lblSlotNavDest', t.lblSlotNavDest);
+  setText('lblSlotNavAction', t.lblSlotNavAction);
+  setText('lblSlotNavPref', t.lblSlotNavPref);
+
+  setText('cardTitlePhone', t.cardTitlePhone);
+  setText('cardSubPhone', t.cardSubPhone);
+  setText('lblSlotPhoneContact', t.lblSlotPhoneContact);
+  setText('lblSlotPhoneNumber', t.lblSlotPhoneNumber);
+  setText('lblSlotPhoneAction', t.lblSlotPhoneAction);
+
+  setText('cardTitleQuery', t.cardTitleQuery);
+  setText('cardSubQuery', t.cardSubQuery);
+  setText('lblSlotQueryType', t.lblSlotQueryType);
+  setText('lblSlotQueryTarget', t.lblSlotQueryTarget);
+  setText('lblSlotQueryChannel', t.lblSlotQueryChannel);
+
+  setText('mgmtTitle', t.mgmtTitle);
+  setText('mgmtSub', t.mgmtSub);
+  setText('thName', t.thName);
+  setText('thDesc', t.thDesc);
+  setText('thChoice', t.thChoice);
+  setText('thNoul', t.thNoul);
+  setText('thOps', t.thOps);
+
+  const iNameEl = $('iName');
+  if (iNameEl) iNameEl.placeholder = t.iNamePlaceholder;
+  const iDescEl = $('iDesc');
+  if (iDescEl) iDescEl.placeholder = t.iDescPlaceholder;
+
+  setText('lblChoice', t.lblChoice);
+  setText('lblNoul', t.lblNoul);
+  setText('iSave', t.iSaveAdd);
+  setText('iCancel', t.iCancel);
+  setText('themeLabel', CURRENT_THEME === 'dark' ? (lang === 'zh' ? '浅色' : 'LIGHT') : (lang === 'zh' ? '深色' : 'DARK'));
+
+  setHtml('ex', `<span class="ex-label">${t.exLabel}</span>` + t.examples.map(ex => `<button type="button">${esc(ex)}</button>`).join(''));
+
+  if (qEl) {
+    const curVal = qEl.value.trim();
+    if (curVal && oldT && oldT.examples) {
+      const idx = oldT.examples.indexOf(curVal);
+      if (idx !== -1 && t.examples[idx]) {
+        qEl.value = t.examples[idx];
+      }
+    }
+  }
 
   renderCfg();
   if (window.LAST_RESULT && window.LAST_TEXT) {
     render(window.LAST_RESULT, window.LAST_TEXT);
+  }
+
+  const stEl = $('status');
+  if (stEl && stEl.className === 'err' && stEl.textContent) {
+    const rawErr = stEl.textContent.replace(/^(Evaluation Failed:\s*|失败：\s*|判定失败：\s*)/, '');
+    stEl.textContent = (lang === 'en' ? 'Evaluation Failed: ' : '判定失败：') + formatErrorMsg(rawErr, lang);
   }
 }
 
@@ -2627,14 +2979,13 @@ function toggleTheme() {
 }
 
 $('themeBtn').addEventListener('click', toggleTheme);
-$('langBtn').addEventListener('click', () => {
-  setLanguage(CURRENT_LANG === 'zh' ? 'en' : 'zh');
-});
+$('btnLangZh').addEventListener('click', () => setLanguage('zh'));
+$('btnLangEn').addEventListener('click', () => setLanguage('en'));
 
 $('heroCtaDemo').addEventListener('click', () => {
   const demoQuery = CURRENT_LANG === 'en'
-    ? 'call John, play some jazz music, and set temperature to 22 degrees'
-    : '我想给张三打电话，我还想听一首林俊杰的伟大的渺小，再帮我导航去公司';
+    ? 'Turn on the AC, play a song by Celine Dion, and navigate to Seattle'
+    : '打开空调，放一首八三夭的外婆的告别式，再导航去香港';
   $('q').value = demoQuery;
   $('console').scrollIntoView({ behavior: 'smooth' });
   judge(demoQuery);
@@ -2792,7 +3143,7 @@ function render(d, text) {
   }
 
   if (excludedHits.length) {
-    verdictHtml += `<span class="ex-tag" style="border-color:var(--danger);color:var(--danger);">⏸️ ${CURRENT_LANG === 'en' ? 'CAN Negation Excluded: ' : 'CAN 否定排除项：'}${esc(excludedHits.join(', '))}</span>`;
+    verdictHtml += `<span class="ex-tag" style="border-color:var(--danger);color:var(--danger);">⏸️ ${CURRENT_LANG === 'en' ? 'Negation Excluded: ' : '否定词已排除：'}${esc(excludedHits.join(', '))}</span>`;
   }
   vd.innerHTML = verdictHtml;
 
@@ -2897,7 +3248,7 @@ function render(d, text) {
     $('queryDetails').innerHTML = `
       <span class="slot-tag">${CURRENT_LANG === 'en' ? 'Category: ' : '问答类别：'}${esc(localizeSlotValue(d.query_slots.query_type, CURRENT_LANG))}</span>
       <span class="slot-tag">${CURRENT_LANG === 'en' ? 'Target: ' : '查询目标：'}${esc(localizeSlotValue(d.query_slots.query_target, CURRENT_LANG))}</span>
-      <span class="slot-tag">${CURRENT_LANG === 'en' ? 'Channel: TTS Assistant' : '响应方式：语音助手播报'}</span>
+      <span class="slot-tag">${CURRENT_LANG === 'en' ? 'Channel: Voice Assistant TTS' : '响应方式：TTS 语音助手播报'}</span>
     `;
     $('queryCard').hidden = false;
   } else {
@@ -2916,12 +3267,14 @@ async function judge(text) {
   try {
     const d = await api('/api/decide', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({text}),
+      body: JSON.stringify({text, lang: CURRENT_LANG}),
     });
     st.textContent = '';
     render(d, text);
   } catch (e) {
-    st.className = 'err'; st.textContent = (CURRENT_LANG === 'en' ? 'Evaluation Failed: ' : '失败：') + e.message;
+    const raw = e.message || 'Unknown error';
+    st.className = 'err';
+    st.textContent = (CURRENT_LANG === 'en' ? 'Evaluation Failed: ' : '判定失败：') + formatErrorMsg(raw, CURRENT_LANG);
   } finally { go.disabled = false; }
 }
 
@@ -2968,20 +3321,33 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, PAGE, "text/html; charset=utf-8")
         elif self.path == "/api/config":
             self._json(200, {"ok": True, "intents": load_intents()})
+        elif self.path in ("/assets/logo.png", "/favicon.ico"):
+            logo_path = os.path.join(BASE_DIR, "assets", "logo.png")
+            if os.path.exists(logo_path):
+                with open(logo_path, "rb") as f:
+                    self._send(200, f.read(), "image/png")
+            else:
+                self._json(404, {"ok": False, "error": "logo not found"})
         else:
             self._json(404, {"ok": False, "error": "not found"})
 
     def do_POST(self):
         if self.path == "/api/decide":
             try:
-                text = self._body().get("text", "").strip()
+                b = self._body()
+                text = b.get("text", "").strip()
+                lang = b.get("lang", "zh")
                 if not text:
-                    self._json(400, {"ok": False, "error": "text 不能为空"})
+                    self._json(400, {"ok": False, "error": "Query text cannot be empty" if lang == "en" else "text 不能为空"})
                     return
                 self._json(200, {"ok": True, **call_ollaya(text)})
             except urllib.error.URLError as e:
-                self._json(502, {"ok": False, "error":
-                    f"连不上 ollaya 守护进程: {e.reason}（systemctl status ollaya）"})
+                err_msg = (
+                    f"Failed to connect to ollaya daemon: {e.reason} (Please verify that ollaya service is running)"
+                    if lang == "en"
+                    else f"连不上 ollaya 守护进程: {e.reason}（请检查 ollaya 守护进程是否已启动）"
+                )
+                self._json(502, {"ok": False, "error": err_msg})
             except Exception as e:
                 self._json(500, {"ok": False, "error": str(e)})
         elif self.path == "/api/config/intent":  # upsert
@@ -3036,12 +3402,11 @@ class Handler(BaseHTTPRequestHandler):
             self._json(404, {"ok": False, "error": "not found"})
 
     def log_message(self, fmt, *args):
-        pass  # 安静模式
-
+        pass  # Quiet mode: suppress standard HTTP access logs
 
 if __name__ == "__main__":
     if not os.path.exists(CONFIG_PATH):
         save_intents([dict(x) for x in DEFAULT_INTENTS])
     srv = ThreadingHTTPServer((HOST, PORT), Handler)
-    print(f"意图测试台已启动: http://localhost:{PORT}  (Ctrl+C 停止)")
+    print(f"[NEURA EDIT] OmniIntent Engine running on http://127.0.0.1:{PORT}")
     srv.serve_forever()
