@@ -192,6 +192,57 @@ def extract_music_slots(text, answers):
     }
 
 
+DOMAIN_KEYWORDS = {
+    "seat": ["座椅加热", "座椅通风", "座椅按摩", "座椅", "加热", "通风"],
+    "climate": ["空调", "暖气", "暖风", "冷气", "冷风", "除雾", "除霜", "温度", "风量", "外循环", "内循环"],
+    "window": ["车窗", "天窗", "后排窗", "主驾窗", "副驾窗", "窗户"],
+    "music": ["音乐", "歌", "歌曲", "收音机", "广播", "音频", "电台"],
+    "navigation": ["导航", "路线", "地图", "路况", "目的地"],
+    "phone": ["电话", "呼叫", "拨号", "联系人"],
+}
+
+
+def analyze_negation(text):
+    clauses = re.split(r"[，,；;并且但但是然后同时]", text)
+    clauses = [c.strip() for c in clauses if c.strip()]
+
+    exclusions = set()   # 排除性否定：明确要求“不要动 / 维持现状 / 别关 / 不要改变”，必须直接忽略剔除！
+    turn_offs = set()    # 关闭性否定：明确要求“不要X / 关掉X / 停止X”，必须执行关闭操作！
+    turn_ons = set()     # 开启/调节性指令
+
+    for c in clauses:
+        # 1. 排除性否定模式（如：不要动空调、不要关座椅加热、音乐不要停、天窗别动）
+        m_ex = (re.search(r"(?:不要|别|不用|切勿|请勿)(?:动|关|开|停|改|碰|调整)(.+)", c) or
+                re.search(r"(.+?)(?:不要|别|不用)(?:动|停|关|开|断|调整)", c))
+        if m_ex:
+            target_str = m_ex.group(1)
+            for d, kws in DOMAIN_KEYWORDS.items():
+                if any(kw in target_str for kw in kws):
+                    exclusions.add(d)
+            continue
+
+        # 2. 关闭性否定（如：不要座椅加热、不要空调、关掉车窗、别放歌了、退出导航）
+        m_off = (re.search(r"^(?:不要|别|不用|关掉|关闭|停掉|停止|关了|退出|取消)(.+)$", c) or
+                 re.search(r"(.+?)(?:关掉|关闭|停掉|停了|关了)$", c))
+        if m_off:
+            target_str = m_off.group(1)
+            for d, kws in DOMAIN_KEYWORDS.items():
+                if any(kw in target_str for kw in kws):
+                    turn_offs.add(d)
+            continue
+
+        # 3. 普通正向指令（如：把车窗打开、导航去公司、打开空调）
+        for d, kws in DOMAIN_KEYWORDS.items():
+            if any(kw in c for kw in kws):
+                turn_ons.add(d)
+
+    return {
+        "exclusions": list(exclusions),
+        "turn_offs": list(turn_offs),
+        "turn_ons": list(turn_ons),
+    }
+
+
 def build_questions(intents):
     choice = {x["name"]: x["desc"] for x in intents if x["in_choice"]}
     noul = [x for x in intents if x["in_noul"]]
@@ -223,11 +274,38 @@ def call_ollaya(text):
     ans = resp["answers"]
     domains = {x["name"]: ans[x["name"]]["noul"] for x in intents if x["in_noul"]}
     music_slots = extract_music_slots(text, ans)
+    negation = analyze_negation(text)
+
+    # 功能域动作极性标注与排除处理
+    domain_actions = {}
+    for d_name in domains:
+        if d_name in negation["exclusions"]:
+            domain_actions[d_name] = {"action": "exclude", "label": "维持现状/排除(已忽略)"}
+        elif d_name in negation["turn_offs"]:
+            domain_actions[d_name] = {"action": "turn_off", "label": "关闭/停止"}
+        elif d_name in negation["turn_ons"]:
+            domain_actions[d_name] = {"action": "turn_on", "label": "开启/调节"}
+        else:
+            domain_actions[d_name] = {"action": "auto", "label": "常规控制"}
+
+    # 若主意图刚好命中被排除的领域（如"关闭空调，但是不要关座椅加热"误将主意图判定为seat），
+    # 自动重定向到有效执行的实际动作域
+    main_choice = ans["intent"]["choice"]
+    if main_choice in negation["exclusions"]:
+        valid_candidates = [
+            k for k, v in domains.items()
+            if k not in negation["exclusions"] and v >= 0.50
+        ]
+        if valid_candidates:
+            main_choice = max(valid_candidates, key=lambda k: domains[k])
+
     return {
-        "intent": {"choice": ans["intent"]["choice"],
+        "intent": {"choice": main_choice,
                    "probabilities": ans["intent"]["probabilities"]},
         "domains": domains,
         "music_slots": music_slots,
+        "negation": negation,
+        "domain_actions": domain_actions,
         "timing": {"wall_ms": round(wall_ms, 1),
                    "model_ms": round(resp.get("total_duration", 0) / 1e6, 1),
                    "input_tokens": resp.get("usage", {}).get("input_tokens", 0)},
@@ -341,9 +419,17 @@ button.go:disabled { opacity: .55; cursor: wait; }
 .chip { font-size: 12px; font-weight: 600; text-align: left; white-space: nowrap; }
 .chip.yes { color: var(--ok-text); }
 .chip.yes::before { content: "●"; font-size: 9px; margin-right: 4px; color: var(--fill); }
+.chip.turn_off { color: var(--danger); }
+.chip.turn_off::before { content: "●"; font-size: 9px; margin-right: 4px; color: var(--danger); }
+.chip.exclude { color: var(--muted); text-decoration: line-through; }
+.chip.exclude::before { content: "⊘"; font-size: 10px; margin-right: 4px; color: var(--muted); text-decoration: none; }
 .chip.gray { color: var(--ink-2); }
 .chip.gray::before { content: "◐"; margin-right: 4px; color: var(--warn); }
 .chip.no { color: var(--muted); }
+.ex-tag {
+  display: inline-block; font-size: 12px; background: rgba(137, 135, 129, 0.18);
+  color: var(--muted); padding: 3px 10px; border-radius: 999px; margin-left: 6px; font-weight: 500;
+}
 .note { font-size: 12.5px; color: var(--muted); margin: 12px 0 0; }
 [hidden] { display: none !important; }
 
@@ -409,20 +495,20 @@ table.cfg .op[disabled] { opacity: .35; cursor: not-allowed; }
 <body>
 <main>
   <h1>车机语音意图测试台</h1>
-  <p class="sub">decision:eos · 单意图路由（choice）+ 多标签检出（noul）+ 音乐槽位多维决策 · 本地 ollaya 127.0.0.1:11435</p>
+  <p class="sub">decision:eos · 单意图路由（choice）+ 多标签检出（noul）+ 否定排除与动作极性 · 本地 ollaya 127.0.0.1:11435</p>
 
   <div class="domains-row">
     <span class="cap">支持的功能域（<span id="dcount">–</span>）：</span><span id="dchips"></span>
   </div>
 
   <form id="f">
-    <input id="q" placeholder="输入一句话，如：我要听周杰伦的音乐，或者放一首轻快的晴天" autofocus>
+    <input id="q" placeholder="输入一句话，如：关闭空调，但是不要关座椅加热" autofocus>
     <button class="go" id="go" type="submit">判断</button>
   </form>
   <div class="examples" id="ex">示例：
-    <button>我要听周杰伦的音乐</button><button>放一首周杰伦欢快的晴天</button><button>来点伤感的流行歌曲</button>
-    <button>打开空调，然后播放周杰伦的歌</button><button>先暂停音乐，再导航去最近的加油站</button>
-    <button>关闭空调，但是不要关座椅加热</button>
+    <button>关闭空调，但是不要关座椅加热</button><button>不要座椅加热</button>
+    <button>把车窗打开，但是空调不要动</button><button>导航去公司，音乐不要停</button><button>别放歌了</button>
+    <button>我要听周杰伦的音乐</button><button>放一首周杰伦欢快的晴天</button>
   </div>
 
   <div id="status"></div>
@@ -583,21 +669,64 @@ function render(d, text) {
   $('tModel').textContent = d.timing.model_ms;
   $('tTok').textContent = d.timing.input_tokens;
 
-  const domains = Object.entries(d.domains).map(([k, v]) => ({k, v})).sort((a, b) => b.v - a.v);
-  const hit = domains.filter(x => x.v >= 0.70).map(x => x.k);
-  const gray = domains.filter(x => x.v >= 0.50 && x.v < 0.70).map(x => x.k);
-  const vd = $('verdict');
-  if (hit.length >= 2) { vd.textContent = `多指令 · ${hit.join(' + ')}`; }
-  else if (hit.length === 1) { vd.textContent = `单指令 · ${hit[0]}`; }
-  else { vd.textContent = `未检出${gray.length ? '（灰区：' + gray.join('、') + '，建议走兜底）' : ''}`; }
+  const exclusions = (d.negation && d.negation.exclusions) || [];
+  const turnOffs = (d.negation && d.negation.turn_offs) || [];
+  const domainActions = d.domain_actions || {};
 
+  const domains = Object.entries(d.domains).map(([k, v]) => ({k, v})).sort((a, b) => b.v - a.v);
+
+  // 排除性否定项（如"不要动空调"、"不要关座椅加热"）直接从待执行指令中剔除（忽略）！
+  const hit = domains.filter(x => x.v >= 0.70 && !exclusions.includes(x.k)).map(x => x.k);
+  const excludedHits = domains.filter(x => exclusions.includes(x.k)).map(x => x.k);
+  const gray = domains.filter(x => x.v >= 0.50 && x.v < 0.70 && !exclusions.includes(x.k)).map(x => x.k);
+
+  const vd = $('verdict');
+  let verdictHtml = '';
+  if (hit.length >= 2) {
+    const labels = hit.map(h => {
+      const act = domainActions[h] ? domainActions[h].action : '';
+      return h + (act === 'turn_off' ? ' (关闭)' : (act === 'turn_on' ? ' (开启)' : ''));
+    });
+    verdictHtml = `<span class="tag">多指令 · ${esc(labels.join(' + '))}</span>`;
+  } else if (hit.length === 1) {
+    const act = domainActions[hit[0]] ? domainActions[hit[0]].action : '';
+    const actLabel = act === 'turn_off' ? ' (关闭)' : (act === 'turn_on' ? ' (开启)' : '');
+    verdictHtml = `<span class="tag">单指令 · ${esc(hit[0] + actLabel)}</span>`;
+  } else {
+    verdictHtml = `<span class="tag">未检出${gray.length ? '（灰区：' + gray.join('、') + '，建议走兜底）' : ''}</span>`;
+  }
+
+  // 若存在被识别为排除条件的设备，在界面顶部清晰显示“已忽略排除项”
+  if (excludedHits.length) {
+    verdictHtml += `<span class="ex-tag">⏸️ 已忽略排除项：${esc(excludedHits.join('、'))} (维持现状)</span>`;
+  }
+  vd.innerHTML = verdictHtml;
+
+  // 渲染多标签检出条形图
   $('noulBars').innerHTML = domains.length ? bars(
-    domains.map(x => ({
-      label: x.k, v: x.v,
-      top: x.v >= 0.70, dim: x.v >= 0.50 && x.v < 0.70,
-      cls: x.v >= 0.70 ? 'yes' : (x.v >= 0.50 ? 'gray' : 'no'),
-    })),
-    r => r.v >= 0.70 ? 'YES' : (r.v >= 0.50 ? '灰区' : '—')
+    domains.map(x => {
+      const isEx = exclusions.includes(x.k);
+      const isOff = turnOffs.includes(x.k);
+      let cls = 'no';
+      if (isEx) { cls = 'exclude'; }
+      else if (x.v >= 0.70) { cls = isOff ? 'turn_off' : 'yes'; }
+      else if (x.v >= 0.50) { cls = 'gray'; }
+
+      return {
+        label: x.k, v: x.v,
+        top: !isEx && x.v >= 0.70,
+        dim: isEx || (x.v >= 0.50 && x.v < 0.70),
+        cls: cls,
+        isEx: isEx, isOff: isOff
+      };
+    }),
+    r => {
+      if (r.isEx) return '已排除 (忽略)';
+      if (r.isOff && r.v >= 0.70) return 'YES (关闭)';
+      if (r.v >= 0.70) return 'YES (开启)';
+      if (r.v >= 0.50) return '灰区';
+      return '—';
+    }
   ) : '<p class="note">当前没有参与多标签检出的功能域</p>';
 
   const probs = Object.entries(d.intent.probabilities).map(([k, v]) => ({k, v})).sort((a, b) => b.v - a.v);
