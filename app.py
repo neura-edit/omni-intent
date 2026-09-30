@@ -916,6 +916,8 @@ function render(d, text) {
 
   const vd = $('verdict');
   let verdictHtml = '';
+  const hasQueryCue = /天气|气温|下雨|几点|时间|星期|日期|限行|讲个笑话/.test(text);
+
   if (hit.length >= 2) {
     const labels = hit.map(h => {
       const act = domainActions[h] ? domainActions[h].action : '';
@@ -926,8 +928,17 @@ function render(d, text) {
     const act = domainActions[hit[0]] ? domainActions[hit[0]].action : '';
     const actLabel = act === 'turn_off' ? ' (关闭)' : (act === 'turn_on' ? ' (开启)' : '');
     verdictHtml = `<span class="tag">单指令 · ${esc(hit[0] + actLabel)}</span>`;
+  } else if (d.intent && d.intent.choice === 'query') {
+    verdictHtml = `<span class="tag" style="background:#e8f0fe;color:#1967d2;">💬 语音查询 · 天气/状态信息播报 (不走车控总线，分流至语音助手)</span>`;
+  } else if (d.intent && d.intent.choice !== 'other') {
+    verdictHtml = `<span class="tag">单意图 · ${esc(d.intent.choice)}</span>`;
   } else {
     verdictHtml = `<span class="tag">未检出${gray.length ? '（灰区：' + gray.join('、') + '，建议走兜底）' : ''}</span>`;
+  }
+
+  // 复合场景：既有车控指令，又有查询需求（如"打开空调，今天天气怎么样"）
+  if (hit.length >= 1 && (hasQueryCue || d.intent.choice === 'query')) {
+    verdictHtml += `<span class="ex-tag" style="background:#e8f0fe;color:#1967d2;font-weight:600;">💬 + 天气/信息播报 (双轨分流)</span>`;
   }
 
   // 若存在被识别为排除条件的设备，在界面顶部清晰显示“已忽略排除项”
