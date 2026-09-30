@@ -56,73 +56,37 @@ def save_intents(intents):
 
 
 
-# ── 音乐决策子问题体系（JEV 单次前向并行求解，毫秒级无生成延迟）──────────────
+# ── 精简版音乐子维度体系（按需动态挂载，避免多分支冗余计算）──────────────
 MUSIC_QUESTIONS = {
     "music_action": {
         "type": "choice",
-        "instructions": "用户想要对音乐执行什么操作动作？",
+        "instructions": "音乐操作动作",
         "criteria": {
-            "play": "播放、点播、听音乐、来一首",
-            "pause": "暂停、停止播放、别放了、关掉音乐",
-            "next": "切歌、下一首、换一首、跳过",
-            "prev": "上一首、退回上一首",
-            "loop": "单曲循环",
-            "random": "随机播放",
+            "play": "播放点歌",
+            "pause": "暂停停止",
+            "next": "切歌下一首",
+            "prev": "退回上一首",
             "other": "其他操作",
         },
     },
     "music_mood": {
         "type": "choice",
-        "instructions": "用户想听什么风格、流派或情绪的音乐？",
+        "instructions": "音乐风格或情绪",
         "criteria": {
-            "cheerful": "欢快、轻快、动感、轻松、开心、适合开车",
-            "sad": "伤感、悲伤、安静、抒情、治愈、emo",
-            "rock": "摇滚、燃、激情、金属、电音",
-            "pop": "流行、经典老歌、现代流行",
-            "folk": "民谣、纯音乐、民乐、乡村",
-            "unspecified": "未指定特定情绪或风格",
-        },
-    },
-    "music_artist": {
-        "type": "choice",
-        "instructions": "指令中是否指定了特定歌手或艺术家？",
-        "criteria": {
-            "jay_chou": "周杰伦（周董）",
-            "eason_chan": "陈奕迅",
-            "jj_lin": "林俊杰",
-            "g_e_m": "邓紫棋",
-            "mayday": "五月天",
-            "other_artist": "提到了其他具体歌手",
-            "none": "未指定歌手",
-        },
-    },
-    "music_target": {
-        "type": "choice",
-        "instructions": "用户的具体点歌目标是什么形式？",
-        "criteria": {
-            "specific_song": "指名点播具体的某首歌（如晴天、青花瓷、稻香等）",
-            "artist_all": "点播某个歌手的歌，未指定具体歌名（如'听周杰伦的音乐'）",
-            "mood_all": "点播某种情绪风格的歌，未指定歌手歌名（如'放首欢快的歌'）",
-            "random": "随便播放，无特定目标",
+            "cheerful": "欢快轻松",
+            "sad": "伤感抒情",
+            "rock": "摇滚燃爆",
+            "pop": "流行经典",
+            "unspecified": "未指定",
         },
     },
 }
 
 
 def extract_music_slots(text, answers):
-    act = answers.get("music_action", {}).get("choice", "play")
-    mood = answers.get("music_mood", {}).get("choice", "unspecified")
-    artist_choice = answers.get("music_artist", {}).get("choice", "none")
-    target = answers.get("music_target", {}).get("choice", "random")
+    act = answers.get("music_action", {}).get("choice")
+    mood = answers.get("music_mood", {}).get("choice")
 
-    mood_map = {
-        "cheerful": "欢快 / 轻松",
-        "sad": "伤感 / 抒情",
-        "rock": "摇滚 / 激情",
-        "pop": "流行音乐",
-        "folk": "民谣 / 纯音乐",
-        "unspecified": "未限定",
-    }
     action_map = {
         "play": "播放",
         "pause": "暂停",
@@ -132,61 +96,109 @@ def extract_music_slots(text, answers):
         "random": "随机播放",
         "other": "其他控制",
     }
+    mood_map = {
+        "cheerful": "欢快 / 轻松",
+        "sad": "伤感 / 抒情",
+        "rock": "摇滚 / 激情",
+        "pop": "流行音乐",
+        "folk": "民谣 / 纯音乐",
+        "unspecified": "未限定",
+    }
     target_map = {
         "specific_song": "指定特定歌曲",
         "artist_all": "点播歌手全部/热门单曲",
         "mood_all": "按曲风随心听",
         "random": "随机点播",
     }
-    artist_map = {
-        "jay_chou": "周杰伦",
-        "eason_chan": "陈奕迅",
-        "jj_lin": "林俊杰",
-        "g_e_m": "邓紫棋",
-        "mayday": "五月天",
-    }
 
-    artist = artist_map.get(artist_choice)
-    song = None
+    # 1. 如果没有从模型获取到动作（例如裁剪或快速通道），采用规则极速推断
+    if not act:
+        if any(w in text for w in ["暂停", "别放了", "停止播放", "关掉音乐", "别唱了", "关了"]):
+            act = "pause"
+        elif any(w in text for w in ["切歌", "下一首", "换一首", "跳过", "切一首"]):
+            act = "next"
+        elif any(w in text for w in ["上一首", "退回上一首"]):
+            act = "prev"
+        elif any(w in text for w in ["单曲循环"]):
+            act = "loop"
+        elif any(w in text for w in ["随机播放"]):
+            act = "random"
+        else:
+            act = "play"
 
-    # 配合轻量句式正则做精确槽位切分（0ms 极速耗时）
-    cleaned = re.sub(r"^(?:我想?听|请?帮我?放一?首|请?帮我?播放|来一?首|来点|播放|放点|听听|给我放|放首)", "", text).strip()
+    # 2. 如果没有从模型获取到情绪风格，采用关键词推断
+    if not mood:
+        if any(w in text for w in ["欢快", "轻快", "动感", "轻松", "开心"]):
+            mood = "cheerful"
+        elif any(w in text for w in ["伤感", "悲伤", "安静", "抒情", "治愈", "emo"]):
+            mood = "sad"
+        elif any(w in text for w in ["摇滚", "燃", "激情", "金属", "电音"]):
+            mood = "rock"
+        elif any(w in text for w in ["流行", "老歌"]):
+            mood = "pop"
+        elif any(w in text for w in ["民谣", "纯音乐"]):
+            mood = "folk"
+        else:
+            mood = "unspecified"
+
+    # 3. 极速精准正则/NER 抽取歌手与歌名（0ms 零模型开销）
+    cleaned = re.sub(r"^(?:请?帮我?放一?首|请?帮我?播放|来一?首|给我放一?首|给我放|我想?听一?首|我想?听|放一?首|放首|放点|来点|播放|听听|放|听)", "", text).strip()
     cleaned = re.sub(r"(?:的?(?:音乐|歌|歌曲|曲子))$", "", cleaned).strip()
 
-    if target == "specific_song":
+    known_artists = [
+        "周杰伦", "周董", "陈奕迅", "林俊杰", "邓紫棋", "五月天", "王菲",
+        "李荣浩", "薛之谦", "毛不易", "张学友", "华晨宇", "汪峰", "张杰", "许嵩"
+    ]
+    mood_kws = ["欢快", "轻快", "动感", "轻松", "伤感", "悲伤", "安静", "抒情", "摇滚", "流行", "民谣", "纯音乐"]
+
+    artist = None
+    song = None
+    target = "random"
+
+    # 句式 A：全是情绪风格词（如 "来首欢快的歌"）
+    if any(cleaned == m or cleaned == m + "的" for m in mood_kws):
+        artist = "未指定"
+        song = "未指定（按风格智能推荐）"
+        target = "mood_all"
+    else:
+        # 句式 B："歌手 的 歌名"
         m = re.search(r"^(.*?)(?:的)(.+)$", cleaned)
         if m:
-            cand_artist = m.group(1).strip()
-            cand_song = m.group(2).strip()
-            if not artist:
-                artist = cand_artist
-            song = cand_song
+            artist = m.group(1).strip()
+            song = m.group(2).strip()
+            target = "specific_song"
         else:
-            if artist and cleaned.startswith(artist):
-                song = cleaned[len(artist):].strip(" 的")
-            elif artist and "周董" in cleaned:
-                song = cleaned.replace("周董", "").strip(" 的")
+            # 句式 C：仅有点歌歌手（如 "我想听陈奕迅"）
+            matched_artist = None
+            for a in known_artists:
+                if cleaned == a:
+                    matched_artist = a
+                    break
+            if matched_artist:
+                artist = "周杰伦" if matched_artist == "周董" else matched_artist
+                song = "未指定（默认播放热门精选）"
+                target = "artist_all"
             else:
-                song = cleaned
-    elif target == "artist_all":
-        song = "未指定（默认播放歌手热门精选）"
-        if not artist and cleaned:
-            artist = cleaned.strip("的")
-    elif target == "mood_all":
-        song = "未指定（按风格智能推荐）"
-    else:
-        song = "未指定"
+                # 句式 D："歌手 歌名"（如 "周杰伦晴天" 或 "周杰伦 晴天"）
+                for a in known_artists:
+                    if cleaned.startswith(a) and len(cleaned) > len(a):
+                        artist = "周杰伦" if a == "周董" else a
+                        song = cleaned[len(a):].strip(" 的")
+                        target = "specific_song"
+                        break
+                if not song and cleaned:
+                    song = cleaned
+                    target = "specific_song"
 
     return {
-        "action": action_map.get(act, act),
-        "mood": mood_map.get(mood, mood),
+        "action": action_map.get(act, act or "播放"),
+        "mood": mood_map.get(mood, mood or "未限定"),
         "artist": artist or "未指定",
         "song": song or "未指定",
         "target_type": target_map.get(target, target),
         "raw": {
             "action": act,
             "mood": mood,
-            "artist_choice": artist_choice,
             "target": target,
         },
     }
@@ -303,12 +315,12 @@ def extract_climate_slots(text):
 
 
 DOMAIN_KEYWORDS = {
-    "seat": ["座椅加热", "座椅通风", "座椅按摩", "座椅", "加热", "通风"],
-    "climate": ["空调", "暖气", "暖风", "冷气", "冷风", "除雾", "除霜", "温度", "风量", "外循环", "内循环"],
-    "window": ["车窗", "天窗", "后排窗", "主驾窗", "副驾窗", "窗户"],
-    "music": ["音乐", "歌", "歌曲", "收音机", "广播", "音频", "电台"],
-    "navigation": ["导航", "路线", "地图", "路况", "目的地"],
-    "phone": ["电话", "呼叫", "拨号", "联系人"],
+    "seat": ["座椅加热", "座椅通风", "座椅按摩", "座椅", "加热", "通风", "屁股", "座"],
+    "climate": ["空调", "暖气", "暖风", "冷气", "冷风", "除雾", "除霜", "温度", "风量", "外循环", "内循环", "制热", "制冷", "太热", "太冷", "热一点", "冷一点", "有点冷", "有点热", "降温", "升温", "吹风"],
+    "window": ["车窗", "天窗", "后排窗", "主驾窗", "副驾窗", "窗户", "开窗", "关窗"],
+    "music": ["音乐", "歌", "歌曲", "曲子", "曲", "首", "收音机", "广播", "音频", "电台", "听", "放", "唱", "点播", "来点", "周董", "周杰伦", "陈奕迅", "林俊杰", "邓紫棋", "五月天", "摇滚", "民谣", "流行", "切歌", "下一首", "上一首", "别放了", "单曲循环", "随机播放", "音量"],
+    "navigation": ["导航", "路线", "地图", "路况", "目的地", "带我", "回公司", "回家", "怎么走", "堵车", "去哪", "查路线"],
+    "phone": ["电话", "呼叫", "拨号", "联系人", "打给", "接听", "挂断", "接电话"],
 }
 
 
@@ -320,15 +332,18 @@ def analyze_negation(text):
     turn_offs = set()    # 关闭性否定：明确要求“不要X / 关掉X / 停止X”，必须执行关闭操作！
     turn_ons = set()     # 开启/调节性指令
 
+    domain_order = ["seat", "window", "climate", "music", "navigation", "phone"]
+
     for c in clauses:
         # 1. 排除性否定模式（如：不要动空调、不要关座椅加热、音乐不要停、天窗别动）
         m_ex = (re.search(r"(?:不要|别|不用|切勿|请勿)(?:动|关|开|停|改|碰|调整)(.+)", c) or
                 re.search(r"(.+?)(?:不要|别|不用)(?:动|停|关|开|断|调整)", c))
         if m_ex:
             target_str = m_ex.group(1)
-            for d, kws in DOMAIN_KEYWORDS.items():
-                if any(kw in target_str for kw in kws):
+            for d in domain_order:
+                if any(kw in target_str for kw in DOMAIN_KEYWORDS[d]):
                     exclusions.add(d)
+                    break
             continue
 
         # 2. 关闭性否定（如：不要座椅加热、不要空调、关掉车窗、别放歌了、退出导航）
@@ -336,14 +351,15 @@ def analyze_negation(text):
                  re.search(r"(.+?)(?:关掉|关闭|停掉|停了|关了)$", c))
         if m_off:
             target_str = m_off.group(1)
-            for d, kws in DOMAIN_KEYWORDS.items():
-                if any(kw in target_str for kw in kws):
+            for d in domain_order:
+                if any(kw in target_str for kw in DOMAIN_KEYWORDS[d]):
                     turn_offs.add(d)
+                    break
             continue
 
         # 3. 普通正向指令（如：把车窗打开、导航去公司、打开空调）
-        for d, kws in DOMAIN_KEYWORDS.items():
-            if any(kw in c for kw in kws):
+        for d in domain_order:
+            if any(kw in c for kw in DOMAIN_KEYWORDS[d]):
                 turn_ons.add(d)
 
     return {
@@ -353,23 +369,38 @@ def analyze_negation(text):
     }
 
 
-def build_questions(intents):
+def build_smart_questions(text, intents):
     choice = {x["name"]: x["desc"] for x in intents if x["in_choice"]}
-    noul = [x for x in intents if x["in_noul"]]
     qs = {"intent": {"type": "choice",
                      "instructions": "判断这条车机语音指令属于哪一种功能",
                      "criteria": choice}}
-    for x in noul:
+
+    # 动态分析候选功能域
+    candidate_domains = set()
+    text_lower = text.lower()
+    for d, kws in DOMAIN_KEYWORDS.items():
+        if any(kw in text_lower for kw in kws):
+            candidate_domains.add(d)
+
+    noul_intents = [x for x in intents if x["in_noul"]]
+    # 如果命中特定候选领域，仅评估命中的领域（大幅削减模型前向计算量）；
+    # 未命中任何关键词（隐式意图，如"车里好闷"）则兜底评估全部配置领域
+    active_noul = [x for x in noul_intents if x["name"] in candidate_domains] if candidate_domains else noul_intents
+
+    for x in active_noul:
         qs[x["name"]] = {"type": "noul",
                          "instructions": f"这条指令是否要求处理{x['desc']}？"}
-    return qs
+
+    # 仅当命中音乐相关语义时，才按需挂载精简版音乐细分维度问题（节省约1~2秒计算）
+    if "music" in candidate_domains:
+        qs.update(MUSIC_QUESTIONS)
+
+    return qs, candidate_domains
 
 
 def call_ollaya(text):
     intents = load_intents()
-    qs = build_questions(intents)
-    # 并行加入音乐维度细粒度决策问题
-    qs.update(MUSIC_QUESTIONS)
+    qs, candidate_domains = build_smart_questions(text, intents)
     body = {"model": "decision:eos", "state": text,
             "questions": qs}
     req = urllib.request.Request(
@@ -382,7 +413,22 @@ def call_ollaya(text):
         resp = json.loads(r.read())
     wall_ms = (time.perf_counter() - t0) * 1000
     ans = resp["answers"]
-    domains = {x["name"]: ans[x["name"]]["noul"] for x in intents if x["in_noul"]}
+
+    main_choice = ans["intent"]["choice"]
+
+    # 动态组装多标签 domains：已评估的使用实测置信度，未被评估且未命中的域直接赋 0.0
+    domains = {}
+    for x in intents:
+        if not x["in_noul"]:
+            continue
+        d_name = x["name"]
+        if d_name in ans and "noul" in ans[d_name]:
+            domains[d_name] = ans[d_name]["noul"]
+        elif d_name == main_choice:
+            domains[d_name] = round(ans["intent"]["probabilities"].get(d_name, 0.85), 3)
+        else:
+            domains[d_name] = 0.0
+
     music_slots = extract_music_slots(text, ans)
     climate_slots = extract_climate_slots(text)
     negation = analyze_negation(text)
@@ -401,7 +447,6 @@ def call_ollaya(text):
 
     # 若主意图刚好命中被排除的领域（如"关闭空调，但是不要关座椅加热"误将主意图判定为seat），
     # 自动重定向到有效执行的实际动作域
-    main_choice = ans["intent"]["choice"]
     if main_choice in negation["exclusions"]:
         valid_candidates = [
             k for k, v in domains.items()
