@@ -256,6 +256,40 @@ def extract_music_slots(text, answers=None):
             "raw": {"action": action, "mood": mood_display, "target": "random"}
         }
 
+    # 5. 纯曲风/风格优先判定（如 '我想听放克'、'放点爵士'、'来首古典音乐'、'play funk'）
+    ALL_GENRES_ORDERED = []
+    for code, (lbl, kws) in GENRE_MAP.items():
+        for kw in kws:
+            ALL_GENRES_ORDERED.append((kw, lbl))
+    ALL_GENRES_ORDERED.sort(key=lambda x: len(x[0]), reverse=True)
+
+    matched_pure_genre_lbl = None
+    for kw, lbl in ALL_GENRES_ORDERED:
+        pattern = re.compile(re.escape(kw), re.I)
+        m = pattern.search(music_clause)
+        if m:
+            prefix = music_clause[:m.start()].strip()
+            suffix = music_clause[m.end():].strip()
+            suffix_clean = re.sub(r"^(?:的)?(?:音乐|歌|歌曲|曲子|music|songs?)$", "", suffix, flags=re.I).strip()
+            prefix_match = re.match(r"^(?:[我你他]?\s*(?:还|又|也|就|再|顺便|接着|然后|先|麻烦|请)?\s*(?:想要|想|要|打算|希望能?|帮我|给我|替我|为我)?\s*(?:播放|点播|放|听|播|唱|来|搜|查)?\s*(?:一?[首曲支]|首歌曲|首歌|首曲子|点|下|个)?\s*|play|listen to|hear|play\s+some|listen\s+to\s+some)*$", prefix, flags=re.I)
+            if not suffix_clean and prefix_match:
+                matched_pure_genre_lbl = lbl
+                break
+
+    if matched_pure_genre_lbl:
+        tag_desc = [matched_pure_genre_lbl]
+        if detected_mood:
+            tag_desc.append(detected_mood)
+        desc_str = " + ".join(tag_desc)
+        return {
+            "action": action,
+            "mood": mood_display,
+            "artist": "未指定 / Unspecified",
+            "song": f"未指定（按 {desc_str} 智能推荐） / Recommendation",
+            "target_type": "风格/情绪智能推荐 / Genre & Mood Mix",
+            "raw": {"action": action, "mood": mood_display, "target": "genre_mood_all"},
+        }
+
     artist = None
     song = None
     target = "random"
@@ -280,9 +314,9 @@ def extract_music_slots(text, answers=None):
                     target = "artist_all"
                     break
 
-    # 中文语法规则解析
+    # 中文语法规则解析（非循环单次前向匹配，避免贪婪将 '放克' 中的 '放' 当作动词误吞，留下 '克'）
     if not artist and not song:
-        pattern = r"^(?:[我你他]?\s*(?:还|又|也|就|再|顺便|接着|然后|先|麻烦|请)?\s*(?:想要|想|要|打算|希望能?|帮我|给我|替我|为我)?\s*(?:播放|点播|放|听|播|唱|来|搜|查)?\s*(?:一?[首曲支]|首歌曲|首歌|首曲子|点|下|个)?\s*)+"
+        pattern = r"^(?:[我你他]?\s*(?:还|又|也|就|再|顺便|接着|然后|先|麻烦|请)?\s*(?:想要|想|要|打算|希望能?|帮我|给我|替我|为我)?\s*(?:播放|点播|放|听|播|唱|来|搜|查)\s*(?:一?[首曲支]|首歌曲|首歌|首曲子|点|下|个)?\s*)"
         cleaned = re.sub(pattern, "", music_clause).strip()
         cleaned = re.sub(r"(?:的?(?:音乐|歌|歌曲|曲子))$", "", cleaned).strip()
         cleaned = re.sub(r"^(?:play|listen to|hear)?\s*(?:some|a\s+song|a\s+track|a\s+piece\s+of)?\s*", "", cleaned, flags=re.I).strip()
@@ -1167,7 +1201,7 @@ table.cfg .op[disabled] { opacity: .35; cursor: not-allowed; }
     <div class="tiles">
       <div class="tile"><div class="label" id="lblWall">端到端耗时 / Latency</div><div class="value"><span id="tWall">–</span><span class="unit">ms</span></div></div>
       <div class="tile"><div class="label" id="lblModel">模型耗时 / Model Time</div><div class="value"><span id="tModel">–</span><span class="unit">ms</span></div></div>
-      <div class="tile"><div class="label" id="lblTok">输入 tokens / Tokens</div><div class="value"><span id="tTok">–</span></div></div>
+      <div class="tile" title="模型单次前向评估的总输入 Tokens（包含模型系统指令模板、功能域问题及用户语音文本）"><div class="label" id="lblTok">模型输入 Tokens / Prompt Tokens</div><div class="value"><span id="tTok">–</span><span class="unit" style="font-size:11.5px;color:var(--muted);font-weight:normal;margin-left:4px;" title="包含 decision:eos 系统模板与分类假设">(含指令模板)</span></div></div>
     </div>
     <div class="workspace-grid">
       <!-- 左栏：意图分类与概率分布 -->
