@@ -9,9 +9,26 @@ Backend: Ollaya daemon (127.0.0.1:11435) with decision:eos model.
 import json
 import os
 import re
+import threading
 import time
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+_decision_engine = None
+_engine_status = "unloaded"
+
+def init_neural_engine():
+    global _decision_engine, _engine_status
+    _engine_status = "loading"
+    print("[NEURA EDIT] Background loading Decision 1.0 Eos neural engine...")
+    try:
+        from engine import DecisionEngine
+        _decision_engine = DecisionEngine()
+        _engine_status = "ready"
+        print("[NEURA EDIT] Decision 1.0 Eos neural engine is ONLINE and READY!")
+    except Exception as e:
+        _engine_status = f"failed: {e}"
+        print(f"[NEURA EDIT] Failed to load neural engine: {e}")
 
 HOST, PORT = "127.0.0.1", 8080
 OLLAYA_URL = "http://127.0.0.1:11435/api/decide"
@@ -1167,22 +1184,43 @@ def fallback_evaluate(text, candidate_domains, intents):
 def call_ollaya(text):
     intents = load_intents()
     qs, candidate_domains, use_choice = build_smart_questions(text, intents)
-    body = {"model": "decision:eos", "state": text,
-            "questions": qs}
-    req = urllib.request.Request(
-        OLLAYA_URL, data=json.dumps(body).encode("utf-8"),
-        headers={"Content-Type": "application/json"})
-    direct = urllib.request.build_opener(urllib.request.ProxyHandler({}))
     t0 = time.perf_counter()
-    try:
-        with direct.open(req, timeout=3) as r:
-            resp = json.loads(r.read())
-        wall_ms = (time.perf_counter() - t0) * 1000
-        ans = resp["answers"]
-    except Exception:
+    resp = None
+    ans = None
+    engine_name = "neural:onnx (Decision-1.0-Eos 0.75B)"
+
+    # Priority 1: In-process native neural DecisionEngine
+    if _decision_engine is not None:
+        try:
+            resp = _decision_engine.decide(text, qs)
+            wall_ms = (time.perf_counter() - t0) * 1000
+            ans = resp["answers"]
+            engine_name = "neural:onnx (Decision-1.0-Eos 0.75B)"
+        except Exception as e:
+            print(f"[NEURA EDIT] Neural inference error: {e}")
+
+    # Priority 2: Local/remote Ollaya daemon
+    if ans is None:
+        try:
+            body = {"model": "decision:eos", "state": text, "questions": qs}
+            req = urllib.request.Request(
+                OLLAYA_URL, data=json.dumps(body).encode("utf-8"),
+                headers={"Content-Type": "application/json"})
+            direct = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+            with direct.open(req, timeout=1.5) as r:
+                resp = json.loads(r.read())
+            wall_ms = (time.perf_counter() - t0) * 1000
+            ans = resp["answers"]
+            engine_name = "neural:ollaya (Decision-1.0-Eos 0.75B)"
+        except Exception:
+            pass
+
+    # Priority 3: Fallback rule engine (active only while neural model downloads/loads)
+    if ans is None:
         wall_ms = (time.perf_counter() - t0) * 1000
         resp = {"total_duration": int(wall_ms * 1e6), "usage": {"input_tokens": len(text)}}
         ans = fallback_evaluate(text, candidate_domains, intents)
+        engine_name = "heuristic:rules (booting neural engine...)"
 
     negation = analyze_negation(text)
 
@@ -1248,6 +1286,7 @@ def call_ollaya(text):
         "timing": {"wall_ms": round(wall_ms, 1),
                    "model_ms": round(resp.get("total_duration", 0) / 1e6, 1),
                    "input_tokens": resp.get("usage", {}).get("input_tokens", 0)},
+        "engine_info": {"name": engine_name, "status": _engine_status},
     }
 
 
@@ -3478,6 +3517,10 @@ class Handler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     if not os.path.exists(CONFIG_PATH):
         save_intents([dict(x) for x in DEFAULT_INTENTS])
+
+    t = threading.Thread(target=init_neural_engine, daemon=True)
+    t.start()
+
     srv = ThreadingHTTPServer((HOST, PORT), Handler)
     print(f"[NEURA EDIT] OmniIntent Engine running on http://127.0.0.1:{PORT}")
     srv.serve_forever()
