@@ -28,29 +28,15 @@
 
 **OmniIntent** is an on-device decision engine designed for next-generation automotive voice intelligence. By coupling single-pass forward neural routing (`decision:eos`) with deterministic slot extraction, it processes compound, multi-domain voice commands in **~140ms** without autoregressive generation latency, token waste, or hallucination risks.
 
-```
-[Voice Query]
-     │
-     ▼
-┌────────────────────────────────────────────────────────┐
-│ 1. Neural Routing: decision:eos (~140ms forward pass) │
-│    ├── Multi-Label Concurrency (noul)                  │
-│    └── Intent Probability Distribution (choice)        │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-     ┌─────────────────────┴─────────────────────┐
-     ▼                                           ▼
-┌─────────────────────────┐          ┌─────────────────────────┐
-│ 2. Deterministic Slots  │          │ 3. Negation Engine      │
-│    ├── Climate (Zones/℃)│          │    ├── Preservation     │
-│    ├── Music (21 Genres)│          │    │   (Keep as-is)     │
-│    ├── Navigation (GPS) │          │    └── Deactivation     │
-│    └── Telephony / Q&A  │          │        (Turn off)       │
-└────────────┬────────────┘          └────────────┬────────────┘
-             │                                    │
-             └─────────────────┬──────────────────┘
-                               ▼
-                    [Structured CAN Signals]
+```mermaid
+flowchart TD
+    A["Voice Command"] --> B["1. Neural Routing: decision:eos (~140ms)<br/>• Multi-Label Concurrency (noul)<br/>• Intent Distribution (choice)"]
+    B --> C["2. Deterministic Slot Extraction<br/>• Climate (Target Temp / Zones)<br/>• Music (21 Acoustic Genres)<br/>• Navigation (Destination / Route)<br/>• Telephony & Assistant Q&A"]
+    B --> D["3. Negation & Conflict Filter<br/>• Preservation (Keep as-is / Exclude)<br/>• Deactivation (Turn Off Action)"]
+    C --> E{"Dual-Path Action Dispatcher"}
+    D --> E
+    E --> F["Vehicle Bus (CAN / CAN-FD)<br/>• HVAC, Windows, Heated Seats"]
+    E --> G["Cockpit Apps & SDKs (IPC / APIs)<br/>• Media Player SDK (Music)<br/>• Map Navigation SDK (Routing)<br/>• Telephony & Voice Assistant TTS"]
 ```
 
 ## Key Capabilities
