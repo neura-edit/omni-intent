@@ -29,7 +29,7 @@ DEFAULT_INTENTS = [
     {"name": "seat",       "desc": "座椅控制（含座椅加热、通风）",                  "in_choice": True,  "in_noul": True},
     {"name": "window",     "desc": "车窗控制",                                    "in_choice": True,  "in_noul": True},
     {"name": "phone",      "desc": "电话操作（含拨打电话、联系人）",                "in_choice": True,  "in_noul": True},
-    {"name": "query",      "desc": "时间、日期、天气等车辆状态或信息查询，不是控制指令", "in_choice": True,  "in_noul": False},
+    {"name": "query",      "desc": "时间、日期、天气等信息查询或问答",                "in_choice": True,  "in_noul": True},
     {"name": "other",      "desc": "以上都不属于（兜底类）",                        "in_choice": True,  "in_noul": False},
 ]
 PROTECTED = {"other"}  # 不可删除；主意图必留
@@ -355,13 +355,180 @@ def extract_climate_slots(text):
     }
 
 
+def extract_nav_slots(text):
+    has_nav_cue = any(w in text for w in [
+        "导航", "路线", "地图", "路况", "目的地", "带我", "回公司", "回家", "怎么走", "堵车", "去哪", "查路线",
+        "加油站", "充电桩", "前往", "带我去", "送我到", "开车去", "开车到", "导到", "导去"
+    ]) or bool(re.search(r"(?:^|[，,；;。！!？?\s])(?:我想|我要|帮我|请)?(?:去|到|回|前往)\s*[\u4e00-\u9fa5]{2,15}", text))
+
+    if not has_nav_cue:
+        return {
+            "destination": "未指定",
+            "action": "未指定",
+            "preference": "未指定",
+        }
+
+    if any(w in text for w in ["退出导航", "关闭导航", "停掉导航", "取消导航", "不导了"]):
+        action = "退出导航"
+    elif any(w in text for w in ["查路线", "看路线", "路线怎么走", "怎么去", "怎么走"]):
+        action = "查询路线"
+    elif any(w in text for w in ["路况", "堵不堵", "堵车吗"]):
+        action = "查询路况"
+    elif any(w in text for w in ["附近的", "周围的", "搜一下附近的", "沿途搜", "找个"]):
+        action = "周边/沿途搜索"
+    else:
+        action = "设置目的地导航"
+
+    pref = "系统推荐"
+    if "不走高速" in text or "避开高速" in text:
+        pref = "不走高速"
+    elif "躲避拥堵" in text or "避开拥堵" in text:
+        pref = "躲避拥堵"
+    elif "高速优先" in text:
+        pref = "高速优先"
+    elif "距离最短" in text or "少走" in text:
+        pref = "距离最短"
+    elif "最快" in text:
+        pref = "时间最快"
+
+    clauses = re.split(r"[，,；;并且但但是然后同时]", text)
+    dest = None
+
+    patterns = [
+        r"(?:^|\s)(?:导航|带我|我想|送我|开车|开去|帮我导?到|请帮我导?到|导到|导去)?(?:去|到|至|向|前往)\s*([^，,；;。！!？?]+?)(?:怎么走|的路线|的路况|路线|路况|导航)?$",
+        r"(?:^|\s)(?:查一下|查询|看看)?(?:去|到|前往)\s*([^，,；;。！!？?]+?)(?:的路线|的路况|怎么走)?$",
+        r"(?:回|去)(公司|家|学校|办公室|机场|车站|酒店|医院|超市)",
+    ]
+
+    for c in clauses:
+        c = c.strip()
+        cleaned_c = re.sub(r"(?:躲避拥堵|不走高速|避开高速|避开拥堵|高速优先|距离最短|走最近的路|推荐路线)", "", c).strip()
+        for p in patterns:
+            m = re.search(p, cleaned_c)
+            if m and m.group(1):
+                cand = m.group(1).strip()
+                cand = re.sub(r"^(?:一下|看下|帮我|查下|一个)?", "", cand).strip()
+                cand = re.sub(r"(?:怎么走|的路线|的路况|路线|路况)$", "", cand).strip()
+                if cand and cand not in ["哪", "哪里", "什么地方", "导航"]:
+                    if re.search(r"^\d+(?:\.\d+)?度$|^[一二两三四五六七八九十百]+度$|^[0-9一二两三四五六七八九十]+%?$|^最大$|^最小$", cand):
+                        continue
+                    if any(w in cand for w in ["空调", "音乐", "车窗", "座椅", "天窗", "音量", "风量"]):
+                        continue
+                    dest = cand
+                    break
+        if dest:
+            break
+
+    if not dest:
+        if "回家" in text:
+            dest = "家"
+        elif "回公司" in text:
+            dest = "公司"
+
+    return {
+        "destination": dest or "未指定",
+        "action": action,
+        "preference": pref,
+    }
+
+
+def extract_phone_slots(text):
+    m_num = re.search(r"([0-9]{3,12})", text)
+    number = m_num.group(1) if m_num else None
+
+    has_phone_cue = bool(number) or any(w in text for w in [
+        "电话", "呼叫", "拨号", "联系人", "打给", "接听", "挂断", "接电话", "拨打", "打电话", "拨通", "重拨", "回拨"
+    ])
+    if not has_phone_cue:
+        return {
+            "contact": "未指定",
+            "phone_number": "未指定",
+            "action": "未指定",
+        }
+
+    if any(w in text for w in ["挂断", "别接", "挂了", "挂掉", "不接"]):
+        action = "挂断电话"
+    elif any(w in text for w in ["接听", "接电话", "接通", "接一下"]):
+        action = "接听电话"
+    elif any(w in text for w in ["重拨", "回拨", "打回去"]):
+        action = "重拨电话"
+    else:
+        action = "拨打电话"
+
+    contact = None
+    if action == "拨打电话":
+        clauses = re.split(r"[，,；;并且但但是然后同时]", text)
+        for c in clauses:
+            c = c.strip()
+            if not (number and number in c) and not any(kw in c for kw in ["电话", "呼叫", "拨", "打给", "联系", "联系人"]) and not re.search(r"给.+打", c):
+                continue
+            c_clean = re.sub(r"^(?:请?帮我|我想)?(?:打电话给|给|呼叫|拨打?电话?给|打给|联系|拨通|拨打?)\s*", "", c).strip()
+            c_clean = re.sub(r"(?:打[一一个俩几]?个?电话|的?电话|打电话|呼叫|拨通)$", "", c_clean).strip()
+            c_clean = re.sub(r"^(?:一个|一下|个)?", "", c_clean).strip()
+            c_clean = re.sub(r"(?:打个?|一下)?$", "", c_clean).strip()
+            if c_clean and c_clean not in ["谁", "哪个", "电话"]:
+                if number and c_clean == number:
+                    contact = f"指定号码 ({number})"
+                else:
+                    contact = c_clean
+                break
+
+    if number and not contact:
+        contact = f"指定号码 ({number})"
+
+    return {
+        "contact": contact or "未指定",
+        "phone_number": number or "未指定",
+        "action": action,
+    }
+
+
+def extract_query_slots(text):
+    has_query_cue = any(w in text for w in [
+        "天气", "气温", "下雨", "降雨", "温度如何", "几点", "时间", "星期", "礼拜", "日期",
+        "限行", "尾号", "续航", "电量", "油量", "胎压", "笑话", "百科", "谁", "怎么样", "如何"
+    ])
+    if not has_query_cue:
+        return {
+            "query_type": "未指定",
+            "query_target": "未指定",
+            "channel": "未指定",
+        }
+
+    q_type = "智能问答 / 百科"
+    target = "通用信息"
+
+    if any(w in text for w in ["天气", "气温", "下雨", "降雨", "阴天", "晴天", "刮风", "冷不冷", "热不热", "下雪"]):
+        q_type = "天气与环境查询"
+        target = "天气状况 / 温度趋势"
+    elif any(w in text for w in ["几点", "时间", "星期", "礼拜", "日期", "哪一年", "几号"]):
+        q_type = "时间与日期查询"
+        target = "当前标准时间 / 日历"
+    elif any(w in text for w in ["限行", "限号", "尾号"]):
+        q_type = "交通限行查询"
+        target = "机动车尾号限行规则"
+    elif any(w in text for w in ["续航", "还能开", "多少公里", "电量", "油量", "胎压", "车门关了吗"]):
+        q_type = "车辆状态查询"
+        target = "三电 / 胎压 / 续航里程"
+    elif any(w in text for w in ["笑话", "讲个故事", "你是谁", "聊天"]):
+        q_type = "车载闲聊问答"
+        target = "语音助手交互"
+
+    return {
+        "query_type": q_type,
+        "query_target": target,
+        "channel": "TTS 语音助手播报",
+    }
+
+
 DOMAIN_KEYWORDS = {
     "seat": ["座椅加热", "座椅通风", "座椅按摩", "座椅", "加热", "通风", "屁股", "座"],
     "climate": ["空调", "暖气", "暖风", "冷气", "冷风", "除雾", "除霜", "温度", "风量", "外循环", "内循环", "制热", "制冷", "太热", "太冷", "热一点", "冷一点", "有点冷", "有点热", "降温", "升温", "吹风"],
     "window": ["车窗", "天窗", "后排窗", "主驾窗", "副驾窗", "窗户", "开窗", "关窗"],
     "music": ["音乐", "歌", "歌曲", "曲子", "曲", "首", "收音机", "广播", "音频", "电台", "听", "放", "唱", "点播", "来点", "周董", "周杰伦", "陈奕迅", "林俊杰", "邓紫棋", "五月天", "摇滚", "民谣", "流行", "切歌", "下一首", "上一首", "别放了", "单曲循环", "随机播放", "音量"],
-    "navigation": ["导航", "路线", "地图", "路况", "目的地", "带我", "回公司", "回家", "怎么走", "堵车", "去哪", "查路线"],
-    "phone": ["电话", "呼叫", "拨号", "联系人", "打给", "接听", "挂断", "接电话"],
+    "navigation": ["导航", "路线", "地图", "路况", "目的地", "带我", "回公司", "回家", "怎么走", "堵车", "去哪", "查路线", "带我去", "送我去", "开车去", "开车到", "前往", "导到", "导去", "加油站", "充电桩"],
+    "phone": ["电话", "呼叫", "拨号", "联系人", "打给", "接听", "挂断", "接电话", "拨打", "打电话"],
+    "query": ["天气", "气温", "下雨", "降雨", "温度如何", "几点", "时间", "星期", "礼拜", "日期", "限行", "尾号", "续航", "电量", "油量", "胎压", "笑话", "百科", "谁", "吗", "怎么样", "如何"],
 }
 
 
@@ -373,7 +540,7 @@ def analyze_negation(text):
     turn_offs = set()    # 关闭性否定：明确要求“不要X / 关掉X / 停止X”，必须执行关闭操作！
     turn_ons = set()     # 开启/调节性指令
 
-    domain_order = ["seat", "window", "climate", "music", "navigation", "phone"]
+    domain_order = ["seat", "window", "climate", "music", "navigation", "phone", "query"]
 
     for c in clauses:
         # 1. 排除性否定模式（如：不要动空调、不要关座椅加热、音乐不要停、天窗别动）
@@ -417,6 +584,11 @@ def build_smart_questions(text, intents):
     for d, kws in DOMAIN_KEYWORDS.items():
         if any(kw in text_lower for kw in kws):
             candidate_domains.add(d)
+
+    if re.search(r"(?:^|[，,；;。！!？?\s])(?:我想|我要|帮我|请)?(?:去|到|回|前往)\s*[\u4e00-\u9fa5]{2,15}", text_lower):
+        # 排除温度调到XX度
+        if not re.search(r"(?:调到|升到|降到|吹到|开到)\s*[0-9一二两三四五六七八九十]+度?", text_lower):
+            candidate_domains.add("navigation")
 
     noul_intents = [x for x in intents if x["in_noul"]]
     qs = {}
@@ -493,6 +665,9 @@ def call_ollaya(text):
 
     music_slots = extract_music_slots(text, ans)
     climate_slots = extract_climate_slots(text)
+    nav_slots = extract_nav_slots(text)
+    phone_slots = extract_phone_slots(text)
+    query_slots = extract_query_slots(text)
 
     # 功能域动作极性标注与排除处理
     domain_actions = {}
@@ -512,6 +687,9 @@ def call_ollaya(text):
         "domains": domains,
         "music_slots": music_slots,
         "climate_slots": climate_slots,
+        "nav_slots": nav_slots,
+        "phone_slots": phone_slots,
+        "query_slots": query_slots,
         "negation": negation,
         "domain_actions": domain_actions,
         "timing": {"wall_ms": round(wall_ms, 1),
@@ -659,6 +837,12 @@ button.go:disabled { opacity: .55; cursor: wait; }
 }
 .climate-theme { border-left-color: #009688 !important; }
 .climate-theme .slot-tag { background: rgba(0, 150, 136, 0.12); color: #00796b; }
+.nav-theme { border-left-color: #ff9800 !important; }
+.nav-theme .slot-tag { background: rgba(255, 152, 0, 0.12); color: #e65100; }
+.phone-theme { border-left-color: #4caf50 !important; }
+.phone-theme .slot-tag { background: rgba(76, 175, 80, 0.12); color: #2e7d32; }
+.query-theme { border-left-color: #9c27b0 !important; }
+.query-theme .slot-tag { background: rgba(156, 39, 176, 0.12); color: #6a1b9a; }
 
 /* ── 意图管理 ── */
 .mgmt { margin-top: 22px; }
@@ -716,9 +900,13 @@ table.cfg .op[disabled] { opacity: .35; cursor: not-allowed; }
     <button class="go" id="go" type="submit">判断</button>
   </form>
   <div class="examples" id="ex">示例：
-    <button>空调调至二十四度</button><button>温度调到二十六点五度</button><button>主驾温度调高两度</button>
-    <button>关闭空调，但是不要关座椅加热</button><button>不要座椅加热</button>
-    <button>把车窗打开，但是空调不要动</button><button>我要听周杰伦的晴天</button>
+    <button>空调调至二十四度</button>
+    <button>关闭空调，但是不要关座椅加热</button>
+    <button>把车窗打开，把音乐打开，空调调到二十度</button>
+    <button>导航去上海虹桥火车站，躲避拥堵</button>
+    <button>给张三打电话</button>
+    <button>今天天气怎么样</button>
+    <button>打开空调，今天天气怎么样</button>
   </div>
 
   <div id="status"></div>
@@ -787,6 +975,66 @@ table.cfg .op[disabled] { opacity: .35; cursor: not-allowed; }
         </div>
       </div>
       <div class="slot-details" id="climateDetails"></div>
+    </section>
+
+    <!-- 导航槽位分析面板 -->
+    <section class="card slot-card nav-theme" id="navCard" hidden>
+      <h2>🧭 车机导航槽位抽取<small>目的地与路径偏好解析 · 毫秒级单次前向</small></h2>
+      <div class="slot-grid">
+        <div class="slot-box">
+          <div class="slot-lbl">📍 导航目的地 (Destination)</div>
+          <div class="slot-val" id="slotNavDest">–</div>
+        </div>
+        <div class="slot-box">
+          <div class="slot-lbl">🚦 导航动作 (Action)</div>
+          <div class="slot-val" id="slotNavAction">–</div>
+        </div>
+        <div class="slot-box">
+          <div class="slot-lbl">🛣️ 路线偏好 (Preference)</div>
+          <div class="slot-val" id="slotNavPref">–</div>
+        </div>
+      </div>
+      <div class="slot-details" id="navDetails"></div>
+    </section>
+
+    <!-- 电话槽位分析面板 -->
+    <section class="card slot-card phone-theme" id="phoneCard" hidden>
+      <h2>📞 车机电话槽位抽取<small>联系人与号码识别 · 毫秒级单次前向</small></h2>
+      <div class="slot-grid">
+        <div class="slot-box">
+          <div class="slot-lbl">👤 呼叫联系人 (Contact)</div>
+          <div class="slot-val" id="slotPhoneContact">–</div>
+        </div>
+        <div class="slot-box">
+          <div class="slot-lbl">🔢 目标电话号码 (Number)</div>
+          <div class="slot-val" id="slotPhoneNumber">–</div>
+        </div>
+        <div class="slot-box">
+          <div class="slot-lbl">📲 呼叫动作 (Action)</div>
+          <div class="slot-val" id="slotPhoneAction">–</div>
+        </div>
+      </div>
+      <div class="slot-details" id="phoneDetails"></div>
+    </section>
+
+    <!-- 信息查询分流面板 -->
+    <section class="card slot-card query-theme" id="queryCard" hidden>
+      <h2>💬 信息查询与问答分流<small>天气/时间/车况智能分流 · 语音助手联动</small></h2>
+      <div class="slot-grid">
+        <div class="slot-box">
+          <div class="slot-lbl">📋 查询类型 (Type)</div>
+          <div class="slot-val" id="slotQueryType">–</div>
+        </div>
+        <div class="slot-box">
+          <div class="slot-lbl">🎯 查询目标 (Target)</div>
+          <div class="slot-val" id="slotQueryTarget">–</div>
+        </div>
+        <div class="slot-box">
+          <div class="slot-lbl">📢 响应通道 (Channel)</div>
+          <div class="slot-val" id="slotQueryChannel">–</div>
+        </div>
+      </div>
+      <div class="slot-details" id="queryDetails"></div>
     </section>
   </section>
 
@@ -1009,6 +1257,53 @@ function render(d, text) {
     $('climateCard').hidden = false;
   } else {
     $('climateCard').hidden = true;
+  }
+
+  // 渲染车机导航槽位抽取卡片
+  if (d.nav_slots && !exclusions.includes('navigation') && (d.intent.choice === 'navigation' || (d.domains && d.domains.navigation >= 0.35) || d.nav_slots.destination !== '未指定')) {
+    $('slotNavDest').textContent = d.nav_slots.destination;
+    $('slotNavAction').textContent = d.nav_slots.action;
+    $('slotNavPref').textContent = d.nav_slots.preference;
+    $('navDetails').innerHTML = `
+      <span class="slot-tag">目标地点：${esc(d.nav_slots.destination)}</span>
+      <span class="slot-tag">规划偏好：${esc(d.nav_slots.preference)}</span>
+      <span class="slot-tag">动作语义：${esc(d.nav_slots.action)}</span>
+      <span class="slot-tag">JEV 并行单次前向 · 零生成等待</span>
+    `;
+    $('navCard').hidden = false;
+  } else {
+    $('navCard').hidden = true;
+  }
+
+  // 渲染车机电话槽位抽取卡片
+  if (d.phone_slots && !exclusions.includes('phone') && (d.intent.choice === 'phone' || (d.domains && d.domains.phone >= 0.35) || d.phone_slots.contact !== '未指定' || d.phone_slots.phone_number !== '未指定')) {
+    $('slotPhoneContact').textContent = d.phone_slots.contact;
+    $('slotPhoneNumber').textContent = d.phone_slots.phone_number;
+    $('slotPhoneAction').textContent = d.phone_slots.action;
+    $('phoneDetails').innerHTML = `
+      <span class="slot-tag">呼叫对象：${esc(d.phone_slots.contact)}</span>
+      <span class="slot-tag">拨号号码：${esc(d.phone_slots.phone_number)}</span>
+      <span class="slot-tag">电话动作：${esc(d.phone_slots.action)}</span>
+      <span class="slot-tag">JEV 并行单次前向 · 零生成等待</span>
+    `;
+    $('phoneCard').hidden = false;
+  } else {
+    $('phoneCard').hidden = true;
+  }
+
+  // 渲染信息查询与问答分流卡片
+  if (d.query_slots && (d.intent.choice === 'query' || (d.domains && d.domains.query >= 0.35) || hasQueryCue)) {
+    $('slotQueryType').textContent = d.query_slots.query_type;
+    $('slotQueryTarget').textContent = d.query_slots.query_target;
+    $('slotQueryChannel').textContent = d.query_slots.channel;
+    $('queryDetails').innerHTML = `
+      <span class="slot-tag">问答类别：${esc(d.query_slots.query_type)}</span>
+      <span class="slot-tag">查询目标：${esc(d.query_slots.query_target)}</span>
+      <span class="slot-tag">响应方式：TTS 语音助手播报</span>
+    `;
+    $('queryCard').hidden = false;
+  } else {
+    $('queryCard').hidden = true;
   }
 
   $('result').hidden = false;

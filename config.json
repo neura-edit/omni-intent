@@ -37,9 +37,9 @@
   },
   {
     "name": "query",
-    "desc": "时间、日期、天气等车辆状态或信息查询，不是控制指令",
+    "desc": "时间、日期、天气等信息查询或问答",
     "in_choice": true,
-    "in_noul": false
+    "in_noul": true
   },
   {
     "name": "other",
