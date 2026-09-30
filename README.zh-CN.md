@@ -16,8 +16,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.8%2B-blue.svg" alt="Python Version" />
-  <img src="https://img.shields.io/badge/依赖-纯标准库零依赖-success.svg" alt="Dependencies" />
+  <a href="https://modelscope.cn/studios/neuraedit/omni-intent"><img src="https://img.shields.io/badge/ModelScope-在线体验-624aff.svg" alt="魔搭创空间 在线演示" /></a>
+  <a href="https://huggingface.co/neura-edit/decision-eos"><img src="https://img.shields.io/badge/HuggingFace-decision%3Aeos-ffd21e.svg" alt="Hugging Face 模型" /></a>
   <img src="https://img.shields.io/badge/推理耗时-~140ms-brightgreen.svg" alt="Inference Latency" />
   <img src="https://img.shields.io/badge/开源协议-MIT-black.svg" alt="License" />
 </p>
@@ -27,6 +27,11 @@
 ## 项目概述
 
 **OmniIntent** 是一款专为下一代车载智能座舱设计的端侧决策引擎。通过将单次前向神经路由（基于 `decision:eos` 模型）与确定性槽位抽取解耦协同，可在 **~140ms** 内并发解析一句话中的复合多域指令，彻底消除传统小模型逐字生成的迟滞、Token 浪费与格式幻觉。
+
+### 🚀 开箱即用在线体验 (免安装)
+无需在本地配置运行环境，24 小时开箱即用：
+- **阿里云魔搭社区 (8核 CPU / 32GB 内存)**: [https://modelscope.cn/studios/neuraedit/omni-intent](https://modelscope.cn/studios/neuraedit/omni-intent)
+- **Hugging Face 官方模型主页**: [https://huggingface.co/neura-edit/decision-eos](https://huggingface.co/neura-edit/decision-eos)
 
 ```mermaid
 flowchart TD

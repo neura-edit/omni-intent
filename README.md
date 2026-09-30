@@ -16,8 +16,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.8%2B-blue.svg" alt="Python Version" />
-  <img src="https://img.shields.io/badge/Dependencies-Zero%20(Standard%20Lib)-success.svg" alt="Dependencies" />
+  <a href="https://modelscope.cn/studios/neuraedit/omni-intent"><img src="https://img.shields.io/badge/ModelScope-Live%20Demo-624aff.svg" alt="ModelScope Live Demo" /></a>
+  <a href="https://huggingface.co/neura-edit/decision-eos"><img src="https://img.shields.io/badge/HuggingFace-decision%3Aeos-ffd21e.svg" alt="Hugging Face Model" /></a>
   <img src="https://img.shields.io/badge/Latency-~140ms-brightgreen.svg" alt="Inference Latency" />
   <img src="https://img.shields.io/badge/License-MIT-black.svg" alt="License" />
 </p>
@@ -27,6 +27,11 @@
 ## Overview
 
 **OmniIntent** is an on-device decision engine designed for next-generation automotive voice intelligence. By coupling single-pass forward neural routing (`decision:eos`) with deterministic slot extraction, it processes compound, multi-domain voice commands in **~140ms** without autoregressive generation latency, token waste, or hallucination risks.
+
+### 🚀 Live Cloud Demo (Out-of-the-Box)
+Experience the full-featured interactive cockpit HUD without installing anything locally:
+- **Interactive Cloud Web HUD (ModelScope)**: [https://modelscope.cn/studios/neuraedit/omni-intent](https://modelscope.cn/studios/neuraedit/omni-intent)
+- **Official Model Hub (Hugging Face)**: [https://huggingface.co/neura-edit/decision-eos](https://huggingface.co/neura-edit/decision-eos)
 
 ```mermaid
 flowchart TD
