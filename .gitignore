@@ -2,3 +2,9 @@ app.log
 __pycache__/
 *.pyc
 .DS_Store
+*.onnx
+*.onnx.data
+*.data
+*.safetensors
+*.ses
+:memory:.ses
