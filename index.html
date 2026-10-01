@@ -1155,6 +1155,10 @@ table.cfg .op[disabled] {
         <div class="label" id="lblTok">输入 Tokens</div>
         <div class="value"><span id="tTok">–</span><span class="unit" id="tokNote" style="font-size:11px;color:var(--ink-mute);font-weight:normal;margin-left:4px;">(含指令模板)</span></div>
       </div>
+      <div class="tile" title="推理后端架构与计算引擎">
+        <div class="label" id="lblEngine">推理引擎</div>
+        <div class="value" style="font-size:14px;letter-spacing:-0.2px;"><span id="tEngine">–</span></div>
+      </div>
     </div>
 
     <div class="verdict-banner">
@@ -1374,6 +1378,7 @@ const I18N = {
     lblModel: '模型计算耗时',
     lblTok: '输入 Tokens',
     tokNote: '(含指令模板)',
+    lblEngine: '推理引擎',
     emptyTitle: '直接执行控制',
     emptyDesc: '当前指令已直接分发执行，无需额外提取槽位参数。',
     judging: '正在通过 decision:eos 神经计算判定中…',
@@ -1460,6 +1465,7 @@ const I18N = {
     lblModel: 'Model Compute Time',
     lblTok: 'Input Tokens',
     tokNote: '(incl. prompt template)',
+    lblEngine: 'Inference Engine',
     emptyTitle: 'Direct Execution',
     emptyDesc: 'Command dispatched directly for execution without additional slot parameters.',
     judging: 'Evaluating forward pass with decision:eos…',
@@ -1694,7 +1700,14 @@ function setLanguage(lang) {
   setText('heroCtaDemo', t.heroCtaDemo);
   setText('heroCtaCfg', t.heroCtaCfg);
   setText('consoleTitle', t.consoleTitle);
-  setText('consoleMeta', t.consoleMeta);
+  const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+  if (isLocal) {
+    setText('consoleMeta', t.consoleMeta);
+  } else {
+    setText('consoleMeta', lang === 'zh'
+      ? '[状态: 24/7 在线] // 云端神经网络 (ModelScope Eos-0.75B)'
+      : '[STATUS: 24/7 ONLINE] // CLOUD NEURAL ENGINE (ModelScope Eos-0.75B)');
+  }
 
   const qEl = $('q');
   if (qEl) qEl.placeholder = t.placeholder;
@@ -1705,6 +1718,7 @@ function setLanguage(lang) {
   setText('lblModel', t.lblModel);
   setText('lblTok', t.lblTok);
   setText('tokNote', t.tokNote);
+  setText('lblEngine', t.lblEngine);
   setText('emptyTitle', t.emptyTitle);
   setText('emptyDesc', t.emptyDesc);
   setText('noulTitle', t.noulTitle);
@@ -1924,6 +1938,17 @@ function render(d, text) {
   $('tWall').textContent = d.timing.wall_ms;
   $('tModel').textContent = d.timing.model_ms;
   $('tTok').textContent = d.timing.input_tokens;
+
+  const engineInfo = d.engine_info || {};
+  const isNeural = (engineInfo.name && (engineInfo.name.includes('neural') || engineInfo.name.includes('onnx') || engineInfo.name.includes('eos'))) || (d.timing && d.timing.model_ms > 150);
+  const tEng = $('tEngine');
+  if (tEng) {
+    if (isNeural) {
+      tEng.innerHTML = `<span style="color:var(--success);font-weight:700;">● ${CURRENT_LANG === 'en' ? '0.75B Neural (ONNX)' : '0.75B 神经网络 (ONNX)'}</span>`;
+    } else {
+      tEng.innerHTML = `<span style="color:var(--warn);font-weight:600;">○ ${CURRENT_LANG === 'en' ? 'Client Heuristic Fallback' : '本地规则降级'}</span>`;
+    }
+  }
 
   const exclusions = (d.negation && d.negation.exclusions) || [];
   const turnOffs = (d.negation && d.negation.turn_offs) || [];
@@ -2229,10 +2254,35 @@ function clientDecide(text, lang) {
 async function judge(text) {
   const st = $('status'), go = $('go');
   st.className = ''; st.textContent = I18N[CURRENT_LANG].judging; go.disabled = true;
+  $('result').hidden = false;
   try {
-    // Zero-latency deterministic evaluation directly in browser
-    await new Promise(r => setTimeout(r, 60)); // smooth visual tick
-    const d = clientDecide(text, CURRENT_LANG);
+    let d = null;
+    const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+    const decideEndpoint = isLocal ? '/api/decide' : 'https://neuraedit-omni-intent.ms.show/api/decide';
+
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 12000);
+      const res = await fetch(decideEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, lang: CURRENT_LANG }),
+        signal: controller.signal
+      });
+      clearTimeout(timer);
+      if (res.ok) {
+        d = await res.json();
+      }
+    } catch (netErr) {
+      console.warn('Neural API request error or timeout, falling back to local client heuristic:', netErr);
+    }
+
+    if (!d || !d.ok) {
+      await new Promise(r => setTimeout(r, 60));
+      d = clientDecide(text, CURRENT_LANG);
+      d.engine_info = { name: 'client:heuristic', status: 'fallback' };
+    }
+
     st.textContent = '';
     render(d, text);
   } catch (e) {

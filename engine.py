@@ -30,6 +30,18 @@ class DecisionEngine:
             tok_file = os.path.join(model_dir, 'sha256-06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523')
 
         self.tokenizer = Tokenizer.from_file(tok_file)
+
+        backbone_weights = os.path.join(model_dir, 'sha256-613f491da2794c5d22f68e81bd2d41000c5675bc4538180148e6e453e8198abd')
+        if not os.path.exists(backbone_weights):
+            print(f"[DecisionEngine] Backbone weights missing at {backbone_weights}, downloading from mirror...")
+            try:
+                import urllib.request
+                url = "https://hf-mirror.com/llm-semantic-router/Decision-1.0-Eos-0.8B/resolve/3c2d632609ceb66f3a13bbc5f77f3ab8cdeebcdd/backbone/model.safetensors"
+                urllib.request.urlretrieve(url, backbone_weights)
+                print("[DecisionEngine] Downloaded backbone weights successfully from mirror!")
+            except Exception as e:
+                print(f"[DecisionEngine] Mirror download exception: {e}")
+
         sess_options = ort.SessionOptions()
         sess_options.intra_op_num_threads = min(8, os.cpu_count() or 4)
         sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
