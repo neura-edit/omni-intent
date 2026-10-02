@@ -1057,7 +1057,9 @@ table.cfg .op[disabled] {
     <div class="nav-actions">
       <button class="nav-btn" id="themeBtn" type="button" title="Toggle Light/Dark Theme">◐ <span id="themeLabel">THEME</span></button>
       <div class="lang-switcher" id="langSwitch" role="group" aria-label="Language selection">
-        <button type="button" class="lang-pill active" id="btnLangZh" title="切换至中文">中文</button>
+        <button type="button" class="lang-pill active" id="btnLangZh" title="切换至简体中文">简体</button>
+        <span class="lang-divider">/</span>
+        <button type="button" class="lang-pill" id="btnLangZhTw" title="切換至繁體中文">繁體</button>
         <span class="lang-divider">/</span>
         <button type="button" class="lang-pill" id="btnLangEn" title="Switch to English">EN</button>
       </div>
@@ -1433,6 +1435,93 @@ const I18N = {
     langLabel: 'ENGLISH',
     themeLabel: CURRENT_THEME === 'dark' ? '浅色' : '深色'
   },
+  zhtw: {
+    heroTitle: '車機多意圖並行決策引擎',
+    heroTagline: '告別端側小模型（SLM）自回歸逐字生成的遲滯，突破傳統 NLU「單句僅能單意圖」的瓶頸。<b>NEURA EDIT (N/E) 車機多意圖並行決策引擎</b>，基於單次前向神經計算，實現 <b>~140ms 極速響應</b> 與 <b>多域指令同句並發解析</b>。一句話同時調度空調溫控、多曲風音樂、導航路徑並完成確定性槽位直出；原生支持否定指令排除，兼具大模型的泛化理解與車規級控制的高確定性。',
+    heroAttr: '系統設計與工程構建：<b>N/E · NEURA EDIT</b>',
+    heroCtaGo: '⚡ 進入控制台',
+    heroCtaDemo: '📋 運行多指令示例',
+    heroCtaCfg: '⚙️ 功能域配置',
+    spec1: '⚡ <b>~140ms</b> 零生成等待',
+    spec2: '🎯 <b>多指令同句並發</b>',
+    spec3: '🎵 <b>21 種曲風/情緒全覆蓋</b>',
+    spec4: '🛡️ <b>智能否定排除</b>',
+    spec5: '🔒 <b>確定性槽位直出</b>',
+    consoleTitle: '車機多意圖並行控制台',
+    consoleMeta: '[狀態: 正常連接] // 本地端口 8080',
+    placeholder: '輸入車機語音指令，如：打開空調，放一首八三夭的外婆的告別式，再導航去香港',
+    go: '開始判定',
+    exLabel: '推薦示例：',
+    examples: [
+      '打開空調，放一首八三夭的外婆的告別式，再導航去香港',
+      '空調調至二十四度',
+      '關閉空調，但是不要關座椅加熱',
+      '把車窗打開，把音樂打開，空調調到二十度',
+      '我們要聽放克',
+      '導航去上海虹橋火車站，躲避擁堵',
+      '今天天氣怎麼樣'
+    ],
+    dCapPre: '支持的功能域（',
+    dCapPost: '）：',
+    lblWall: '端到端耗時',
+    lblModel: '模型計算耗時',
+    lblTok: '輸入 Tokens',
+    tokNote: '(含指令模板)',
+    lblEngine: '推理引擎',
+    emptyTitle: '直接執行控制',
+    emptyDesc: '當前指令已直接分發執行，無需額外提取槽位參數。',
+    judging: '正在通過 decision:eos 神經計算判定中…',
+    noulTitle: '多標籤檢出',
+    noulSub: 'noul · YES ≥ 0.70 · 灰區 0.50–0.70',
+    choiceTitle: '主意圖概率分佈',
+    choiceSub: 'choice · 全類別歸一化概率',
+    cardTitleMusic: '車機音樂槽位抽取',
+    cardSubMusic: '21 種全曲風覆蓋 · 歌手與歌名解析 · 零生成等待',
+    lblSlotArtist: '歌手偏好',
+    lblSlotSong: '點播目標',
+    lblSlotMood: '曲風與情緒',
+    lblSlotAction: '控制動作',
+    cardTitleClimate: '車機空調槽位抽取',
+    cardSubClimate: '多溫區與工作模式解析 · 零生成等待',
+    lblSlotTemp: '設定目標溫度',
+    lblSlotTempType: '調節方式',
+    lblSlotZone: '控制溫區',
+    lblSlotClimateMode: '工作模式',
+    cardTitleNav: '車機導航槽位抽取',
+    cardSubNav: '目的地與路線偏好解析 · 零生成等待',
+    lblSlotNavDest: '導航目的地',
+    lblSlotNavAction: '導航動作',
+    lblSlotNavPref: '路線規劃偏好',
+    cardTitlePhone: '車機電話槽位抽取',
+    cardSubPhone: '聯繫人與號碼識別 · 零生成等待',
+    lblSlotPhoneContact: '呼叫聯繫人',
+    lblSlotPhoneNumber: '目標電話號碼',
+    lblSlotPhoneAction: '通話動作',
+    cardTitleQuery: '信息查詢與問答分流',
+    cardSubQuery: '天氣/時間/車況語音助手聯動',
+    lblSlotQueryType: '查詢類型',
+    lblSlotQueryTarget: '查詢目標',
+    lblSlotQueryChannel: '響應通道',
+    mgmtTitle: '功能域管理與配置中心',
+    mgmtSub: '添加或編輯後立即對下一次判斷生效（寫入 config.json）。● 表示參與多標籤檢出；other 為兜底類不可刪除。',
+    thName: '域名',
+    thDesc: '類別描述',
+    thChoice: '主意圖',
+    thNoul: '多標籤',
+    thOps: '操作',
+    iNamePlaceholder: '域名 如 defroster',
+    iDescPlaceholder: '描述，如：除霧、除霜相關控制',
+    lblChoice: '主意圖',
+    lblNoul: '多標籤',
+    iSaveAdd: '添加',
+    iSaveEdit: '保存修改',
+    iCancel: '取消',
+    btnEdit: '編輯',
+    btnDel: '刪除',
+    delConfirm: '確認刪除功能域「{name}」？',
+    langLabel: '繁體中文',
+    themeLabel: CURRENT_THEME === 'dark' ? '淺色' : '深色'
+  },
   en: {
     heroTitle: 'OMNIINTENT DECISION ENGINE',
     heroTagline: 'Moving beyond the token-by-token generation latency of SLMs, and transcending the single-intent bottlenecks of conventional in-cabin NLU. <b>NEURA EDIT (N/E) OmniIntent Engine</b> leverages single-pass neural decision computation to achieve <b>sub-150ms low-latency dispatch</b> with <b>true multi-domain concurrency</b>. In a single breath, it seamlessly coordinates climate control, multi-genre music, and navigation routing with deterministic slot extraction and smart negation filtering.',
@@ -1523,14 +1612,14 @@ const I18N = {
 };
 
 const DOMAIN_I18N = {
-  climate: { zh: '空调控制（含温度、风量、制冷制热）', en: 'Climate control (temp, fan speed, A/C & heater)' },
-  music: { zh: '音乐控制（含播放、暂停、切歌、音量与曲风）', en: 'Music playback (play, pause, track, volume & genres)' },
-  navigation: { zh: '导航操作（含设目的地、路线、路况）', en: 'Navigation (destination, routing & traffic)' },
-  seat: { zh: '座椅控制（含座椅加热、通风）', en: 'Seat comfort (seat heating & ventilation)' },
-  window: { zh: '车窗控制（含车窗、天窗）', en: 'Window & sunroof control' },
-  phone: { zh: '电话操作（含拨打电话、呼叫联系人）', en: 'Phone calls (dial, contacts & redial)' },
-  query: { zh: '时间、日期、天气等信息查询或问答', en: 'Information & assistant queries (weather, time, vehicle)' },
-  other: { zh: '以上都不属于（兜底类）', en: 'Out-of-domain / Fallback category' }
+  climate: { zh: '空调控制（含温度、风量、制冷制热）', zhtw: '空調控制（含溫度、風量、製冷製熱）', en: 'Climate control (temp, fan speed, A/C & heater)' },
+  music: { zh: '音乐控制（含播放、暂停、切歌、音量与曲风）', zhtw: '音樂控制（含播放、暫停、切歌、音量與曲風）', en: 'Music playback (play, pause, track, volume & genres)' },
+  navigation: { zh: '导航操作（含设目的地、路线、路况）', zhtw: '導航操作（含設目的地、路線、路況）', en: 'Navigation (destination, routing & traffic)' },
+  seat: { zh: '座椅控制（含座椅加热、通风）', zhtw: '座椅控制（含座椅加熱、通風）', en: 'Seat comfort (seat heating & ventilation)' },
+  window: { zh: '车窗控制（含车窗、天窗）', zhtw: '車窗控制（含車窗、天窗）', en: 'Window & sunroof control' },
+  phone: { zh: '电话操作（含拨打电话、呼叫联系人）', zhtw: '電話操作（含撥打電話、呼叫聯絡人）', en: 'Phone calls (dial, contacts & redial)' },
+  query: { zh: '时间、日期、天气等信息查询或问答', zhtw: '時間、日期、天氣等資訊查詢或問答', en: 'Information & assistant queries (weather, time, vehicle)' },
+  other: { zh: '以上都不属于（兜底类）', zhtw: '以上都不屬於（兜底類）', en: 'Out-of-domain / Fallback category' }
 };
 
 function localizeSlotValue(val, lang) {
@@ -1692,8 +1781,9 @@ function setLanguage(lang) {
   setHtml('spec4', t.spec4);
   setHtml('spec5', t.spec5);
 
-  const bZh = $('btnLangZh'), bEn = $('btnLangEn');
+  const bZh = $('btnLangZh'), bZhTw = $('btnLangZhTw'), bEn = $('btnLangEn');
   if (bZh) bZh.classList.toggle('active', lang === 'zh');
+  if (bZhTw) bZhTw.classList.toggle('active', lang === 'zhtw');
   if (bEn) bEn.classList.toggle('active', lang === 'en');
 
   setText('heroCtaGo', t.heroCtaGo);
@@ -1704,9 +1794,13 @@ function setLanguage(lang) {
   if (isLocal) {
     setText('consoleMeta', t.consoleMeta);
   } else {
-    setText('consoleMeta', lang === 'zh'
-      ? '[状态: 24/7 在线] // 云端神经网络 (ModelScope Eos-0.75B)'
-      : '[STATUS: 24/7 ONLINE] // CLOUD NEURAL ENGINE (ModelScope Eos-0.75B)');
+    if (lang === 'zh') {
+      setText('consoleMeta', '[状态: 24/7 在线] // 云端神经网络 (ModelScope Eos-0.75B)');
+    } else if (lang === 'zhtw') {
+      setText('consoleMeta', '[狀態: 24/7 在線] // 雲端神經網絡 (ModelScope Eos-0.75B)');
+    } else {
+      setText('consoleMeta', '[STATUS: 24/7 ONLINE] // CLOUD NEURAL ENGINE (ModelScope Eos-0.75B)');
+    }
   }
 
   const qEl = $('q');
@@ -1811,12 +1905,16 @@ function toggleTheme() {
 
 $('themeBtn').addEventListener('click', toggleTheme);
 $('btnLangZh').addEventListener('click', () => setLanguage('zh'));
+const bZhTw = $('btnLangZhTw');
+if (bZhTw) bZhTw.addEventListener('click', () => setLanguage('zhtw'));
 $('btnLangEn').addEventListener('click', () => setLanguage('en'));
 
 $('heroCtaDemo').addEventListener('click', () => {
   const demoQuery = CURRENT_LANG === 'en'
     ? 'Turn on the AC, play a song by Celine Dion, and navigate to Seattle'
-    : '打开空调，放一首八三夭的外婆的告别式，再导航去香港';
+    : (CURRENT_LANG === 'zhtw'
+      ? '打開空調，放一首八三夭的外婆的告別式，再導航去香港'
+      : '打开空调，放一首八三夭的外婆的告别式，再导航去香港');
   $('q').value = demoQuery;
   $('console').scrollIntoView({ behavior: 'smooth' });
   judge(demoQuery);
@@ -1963,30 +2061,36 @@ function render(d, text) {
   let verdictHtml = '';
   const hasQueryCue = /天气|气温|下雨|几点|时间|星期|日期|限行|讲个笑话|weather|rain|time|battery|joke/.test(text.toLowerCase());
 
+  const getActLabel = (act, lang) => {
+    if (act === 'turn_off') return lang === 'en' ? ' · OFF' : (lang === 'zhtw' ? ' · 關閉' : ' · 关闭');
+    if (act === 'turn_on') return lang === 'en' ? ' · ON' : (lang === 'zhtw' ? ' · 開啟' : ' · 开启');
+    return '';
+  };
+
   if (hit.length >= 2) {
     const labels = hit.map(h => {
       const act = domainActions[h] ? domainActions[h].action : '';
-      return h + (act === 'turn_off' ? (CURRENT_LANG === 'en' ? ' (OFF)' : ' (关闭)') : (act === 'turn_on' ? (CURRENT_LANG === 'en' ? ' (ON)' : ' (开启)') : ''));
+      return h + getActLabel(act, CURRENT_LANG);
     });
-    verdictHtml = `<span class="verdict-tag">${CURRENT_LANG === 'en' ? 'MULTI-INTENT' : '多指令并发'} · ${esc(labels.join(' + '))}</span>`;
+    verdictHtml = `<span class="verdict-tag">${CURRENT_LANG === 'en' ? 'MULTI-INTENT' : (CURRENT_LANG === 'zhtw' ? '多指令並發' : '多指令并发')} · ${esc(labels.join(' + '))}</span>`;
   } else if (hit.length === 1) {
     const act = domainActions[hit[0]] ? domainActions[hit[0]].action : '';
-    const actLabel = act === 'turn_off' ? (CURRENT_LANG === 'en' ? ' (OFF)' : ' (关闭)') : (act === 'turn_on' ? (CURRENT_LANG === 'en' ? ' (ON)' : ' (开启)') : '');
-    verdictHtml = `<span class="verdict-tag">${CURRENT_LANG === 'en' ? 'SINGLE INTENT' : '单指令'} · ${esc(hit[0] + actLabel)}</span>`;
+    const actLabel = getActLabel(act, CURRENT_LANG);
+    verdictHtml = `<span class="verdict-tag">${CURRENT_LANG === 'en' ? 'SINGLE INTENT' : (CURRENT_LANG === 'zhtw' ? '單指令' : '单指令')} · ${esc(hit[0] + actLabel)}</span>`;
   } else if (d.intent && d.intent.choice === 'query') {
-    verdictHtml = `<span class="verdict-tag query">💬 ${CURRENT_LANG === 'en' ? 'VOICE ASSISTANT · INFO BROADCAST' : '语音问答分流 · 助手信息播报'}</span>`;
+    verdictHtml = `<span class="verdict-tag query">💬 ${CURRENT_LANG === 'en' ? 'VOICE ASSISTANT · INFO BROADCAST' : (CURRENT_LANG === 'zhtw' ? '語音問答分流 · 助手信息播報' : '语音问答分流 · 助手信息播报')}</span>`;
   } else if (d.intent && d.intent.choice !== 'other') {
-    verdictHtml = `<span class="verdict-tag">${CURRENT_LANG === 'en' ? 'TOP INTENT' : '主意图'} · ${esc(d.intent.choice)}</span>`;
+    verdictHtml = `<span class="verdict-tag">${CURRENT_LANG === 'en' ? 'TOP INTENT' : (CURRENT_LANG === 'zhtw' ? '主意圖' : '主意图')} · ${esc(d.intent.choice)}</span>`;
   } else {
-    verdictHtml = `<span class="verdict-tag uncertain">${CURRENT_LANG === 'en' ? 'FALLBACK / UNCERTAIN' : '兜底 / 未明确'}${gray.length ? ' (' + gray.join(', ') + ')' : ''}</span>`;
+    verdictHtml = `<span class="verdict-tag uncertain">${CURRENT_LANG === 'en' ? 'FALLBACK / UNCERTAIN' : (CURRENT_LANG === 'zhtw' ? '兜底 / 未明確' : '兜底 / 未明确')}${gray.length ? ' (' + gray.join(', ') + ')' : ''}</span>`;
   }
 
   if (hit.length >= 1 && (hasQueryCue || d.intent.choice === 'query')) {
-    verdictHtml += `<span class="ex-tag">💬 ${CURRENT_LANG === 'en' ? 'TTS Info Broadcast (Dual-Track)' : '双轨分流：语音助手播报'}</span>`;
+    verdictHtml += `<span class="ex-tag">💬 ${CURRENT_LANG === 'en' ? 'TTS Info Broadcast (Dual-Track)' : (CURRENT_LANG === 'zhtw' ? '雙軌分流：語音助手播報' : '双轨分流：语音助手播报')}</span>`;
   }
 
   if (excludedHits.length) {
-    verdictHtml += `<span class="ex-tag" style="border-color:var(--danger);color:var(--danger);">⏸️ ${CURRENT_LANG === 'en' ? 'Negation Excluded: ' : '否定词已排除：'}${esc(excludedHits.join(', '))}</span>`;
+    verdictHtml += `<span class="ex-tag" style="border-color:var(--danger);color:var(--danger);">⏸️ ${CURRENT_LANG === 'en' ? 'Negation Excluded: ' : (CURRENT_LANG === 'zhtw' ? '否定詞已排除：' : '否定词已排除：')}${esc(excludedHits.join(', '))}</span>`;
   }
   vd.innerHTML = verdictHtml;
 
@@ -2010,9 +2114,9 @@ function render(d, text) {
     }),
     r => {
       if (r.isEx) return CURRENT_LANG === 'en' ? 'EXCLUDED' : '已排除';
-      if (r.isOff && r.v >= 0.70) return CURRENT_LANG === 'en' ? 'YES (OFF)' : 'YES (关)';
-      if (r.v >= 0.70) return CURRENT_LANG === 'en' ? 'YES (ON)' : 'YES (开)';
-      if (r.v >= 0.50) return CURRENT_LANG === 'en' ? 'GRAY' : '灰区';
+      if (r.isOff && r.v >= 0.70) return CURRENT_LANG === 'en' ? 'OFF' : (CURRENT_LANG === 'zhtw' ? '關閉' : '关闭');
+      if (r.v >= 0.70) return CURRENT_LANG === 'en' ? 'ON' : (CURRENT_LANG === 'zhtw' ? '開啟' : '开启');
+      if (r.v >= 0.50) return CURRENT_LANG === 'en' ? 'GRAY' : (CURRENT_LANG === 'zhtw' ? '灰區' : '灰区');
       return '—';
     }
   ) : '<p style="color:var(--ink-mute);font-family:var(--font-mono);font-size:12px;">No active domains</p>';
@@ -2112,14 +2216,14 @@ function clientDecide(text, lang) {
 
   // 1. Negation & Conflict Resolution
   const exclPatterns = [
-    /(?:不(?:要|用|需)?(?:关|停|动|改|换|切|调)|别(?:关|停|动|改|换|切|调)|维持|保持|保留|别动|不要动)(?:.*?)(空调|暖气|冷气|座椅|车窗|天窗|音乐|导航)/i,
-    /(空调|暖气|冷气|座椅|车窗|天窗|音乐|导航)(?:.*?)(?:不要关|别关|不要动|别动|维持现状|保持现状|别动它)/i,
+    /(?:不(?:要|用|需)?(?:关|關|停|动|動|改|换|換|切|调|調)|别|別(?:关|關|停|动|動|改|换|換|切|调|調)|维持|維持|保持|保留|别动|別動|不要动|不要動)(?:.*?)(空调|空調|暖气|暖氣|冷气|冷氣|座椅|车窗|車窗|天窗|音乐|音樂|导航|導航)/i,
+    /(空调|空調|暖气|暖氣|冷气|冷氣|座椅|车窗|車窗|天窗|音乐|音樂|导航|導航)(?:.*?)(?:不要关|不要關|别关|別關|不要动|不要動|别动|別動|维持现状|維持現狀|保持现状|保持現狀|别动它|別動它)/i,
     /(?:don't|do not|never|leave|keep)(?:.*?)(?:touch|change|alter|turn off|stop|close)(?:.*?)(ac|climate|seat|music|window|sunroof|nav|navigation)/i,
     /(ac|climate|seat|music|window|sunroof|nav|navigation)(?:.*?)(?:alone|as is|untouched)/i
   ];
   const offPatterns = [
-    /(?:关掉|关闭|关上|停掉|停止|切断|退掉|撤销|取消)(?:.*?)(空调|暖气|冷气|座椅|车窗|天窗|音乐|导航)/i,
-    /(空调|暖气|冷气|座椅|车窗|天窗|音乐|导航)(?:.*?)(?:关掉|关闭|关上|停掉|停止)/i,
+    /(?:关掉|關掉|关闭|關閉|关上|關上|停掉|停止|切断|切斷|退掉|撤销|撤銷|取消)(?:.*?)(空调|空調|暖气|暖氣|冷气|冷氣|座椅|车窗|車窗|天窗|音乐|音樂|导航|導航)/i,
+    /(空调|空調|暖气|暖氣|冷气|冷氣|座椅|车窗|車窗|天窗|音乐|音樂|导航|導航)(?:.*?)(?:关掉|關掉|关闭|關閉|关上|關上|停掉|停止)/i,
     /(?:turn off|shut down|switch off|disable|stop|cancel|close)(?:.*?)(ac|climate|seat|music|window|sunroof|nav|navigation)/i
   ];
 
@@ -2128,12 +2232,12 @@ function clientDecide(text, lang) {
   const turnOns = [];
 
   const domainMap = {
-    '空调': 'climate', '暖气': 'climate', '冷气': 'climate', 'ac': 'climate', 'climate': 'climate',
-    '音乐': 'music', '歌': 'music', 'music': 'music', 'song': 'music',
-    '导航': 'navigation', 'nav': 'navigation', 'navigation': 'navigation',
+    '空调': 'climate', '空調': 'climate', '暖气': 'climate', '暖氣': 'climate', '冷气': 'climate', '冷氣': 'climate', 'ac': 'climate', 'climate': 'climate',
+    '音乐': 'music', '音樂': 'music', '歌': 'music', 'music': 'music', 'song': 'music',
+    '导航': 'navigation', '導航': 'navigation', 'nav': 'navigation', 'navigation': 'navigation',
     '座椅': 'seat', 'seat': 'seat',
-    '车窗': 'window', '天窗': 'window', 'window': 'window', 'sunroof': 'window',
-    '电话': 'phone', 'phone': 'phone'
+    '车窗': 'window', '車窗': 'window', '天窗': 'window', 'window': 'window', 'sunroof': 'window',
+    '电话': 'phone', '電話': 'phone', 'phone': 'phone'
   };
 
   exclPatterns.forEach(p => {
@@ -2154,13 +2258,13 @@ function clientDecide(text, lang) {
 
   // 2. Domain Recognition (Multi-Label Noul)
   const DOMAIN_PATS = {
-    climate: [/空调/, /温度/, /度/, /暖风/, /冷气/, /制冷/, /制热/, /除霜/, /除雾/, /风量/, /风速/, /冷了/, /热了/, /\bac\b/i, /climate/i, /temperature/i, /heating/i, /cooling/i],
-    music: [/歌/, /音乐/, /播放/, /听/, /切歌/, /下一首/, /上一首/, /暂停/, /音量/, /交响乐/, /周杰伦/, /陈奕迅/, /\bplay\b/i, /\bsong\b/i, /\bmusic\b/i, /jazz/i, /rock/i],
-    navigation: [/导航/, /带我到/, /带我去/, /去/, /到/, /怎么走/, /路线/, /路况/, /回公司/, /回家/, /高速/, /拥堵/, /navigate/i, /route/i, /traffic/i],
-    seat: [/座椅/, /加热/, /通风/, /按摩/, /靠背/, /主驾/, /副驾/, /seat/i, /ventilation/i],
-    window: [/车窗/, /天窗/, /遮阳帘/, /升起/, /降下/, /开窗/, /关窗/, /留一条缝/, /window/i, /sunroof/i],
-    phone: [/电话/, /打电话/, /拨打/, /呼叫/, /联系人/, /\bcall\b/i, /\bdial\b/i, /\bphone\b/i],
-    query: [/天气/, /几点/, /时间/, /今天几号/, /星期几/, /电量/, /续航/, /weather/i, /time/i, /battery/i]
+    climate: [/空[调調]/, /温度/, /溫度/, /度/, /暖风/, /暖風/, /冷[气氣]/, /制冷/, /製冷/, /制热/, /製熱/, /除霜/, /除[雾霧]/, /风量/, /風量/, /冷了/, /热了/, /熱了/, /\bac\b/i, /climate/i, /temperature/i, /heating/i, /cooling/i],
+    music: [/歌/, /[音聲][乐樂]/, /播放/, /聽/, /听/, /切歌/, /下一首/, /上一首/, /暂停/, /暫停/, /[音聲]量/, /交响乐/, /交響樂/, /周杰伦/, /周杰倫/, /八三夭/, /\bplay\b/i, /\bsong\b/i, /\bmusic\b/i, /jazz/i, /rock/i],
+    navigation: [/[导導]航/, /带我到/, /帶我到/, /带我去/, /帶我去/, /去/, /到/, /怎么走/, /怎麼走/, /路[线線]/, /路[况況]/, /回公司/, /回家/, /高速/, /[拥擁]堵/, /避开/, /避開/, /香港/, /navigate/i, /route/i, /traffic/i],
+    seat: [/座椅/, /加[热熱]/, /通风/, /通風/, /按摩/, /靠背/, /主[驾駕]/, /副[驾駕]/, /seat/i, /ventilation/i],
+    window: [/[车車]窗/, /天窗/, /遮[阳陽][帘簾]/, /升起/, /降下/, /[开開]窗/, /[关關]窗/, /留一条缝/, /留一條縫/, /window/i, /sunroof/i],
+    phone: [/[电電][话話]/, /打电话/, /打電話/, /[拨撥]打/, /呼叫/, /[联聯][系絡]人/, /\bcall\b/i, /\bdial\b/i, /\bphone\b/i],
+    query: [/天气/, /天氣/, /几点/, /幾點/, /时间/, /時間/, /今天几号/, /今天幾號/, /星期几/, /星期幾/, /[电電]量/, /[续續]航/, /weather/i, /time/i, /battery/i]
   };
 
   const domains = {};

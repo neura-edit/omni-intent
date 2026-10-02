@@ -955,22 +955,26 @@ def extract_query_slots(text):
 DOMAIN_KEYWORDS = {
     "seat": [
         "座椅加热", "座椅通风", "座椅按摩", "座椅", "加热", "通风", "屁股", "座",
+        "座椅加熱", "座椅通風", "座椅按摩", "加熱", "通風",
         "seat heater", "seat heating", "heated seat", "heated seats", "seat ventilation",
         "ventilated seat", "ventilated seats", "seat massage", "seat", "seats"
     ],
     "climate": [
         "空调", "暖气", "暖风", "冷气", "冷风", "除雾", "除霜", "温度", "风量", "外循环", "内循环",
+        "空調", "暖氣", "暖風", "冷氣", "冷風", "除霧", "溫度", "風量", "外循環", "內循環", "製冷", "製熱",
         "制热", "制冷", "太热", "太冷", "热一点", "冷一点", "有点冷", "有点热", "降温", "升温", "吹风",
-        "ac", "a/c", "air condition", "air conditioning", "climate", "temperature", "temp",
+        "ac", "a/c", "air condition", "air conditioning", "air conditioner", "climate", "temperature", "temp",
         "heater", "heating", "cooler", "warmer", "cool down", "warm up", "fan speed", "fan",
         "defrost", "defogger", "defog", "air recirculation", "circulation"
     ],
     "window": [
         "车窗", "天窗", "后排窗", "主驾窗", "副驾窗", "窗户", "开窗", "关窗",
+        "車窗", "後排窗", "主駕窗", "副駕窗", "開窗", "關窗",
         "window", "windows", "sunroof", "moonroof", "driver window", "passenger window", "open window", "close window"
     ],
     "music": [
         "音乐", "歌", "歌曲", "曲子", "曲", "首", "收音机", "广播", "音频", "电台", "听", "放", "唱",
+        "音樂", "聽", "廣播", "電台", "點播",
         "点播", "播放", "播", "来点", "周董", "周杰伦", "陈奕迅", "林俊杰", "邓紫棋", "五月天", "许巍",
         "古典", "爵士", "轻音乐", "纯音乐", "钢琴", "摇滚", "民谣", "古风", "电音", "老歌",
         "切歌", "下一首", "上一首", "别放了", "单曲循环", "随机播放", "放歌", "听歌", "放点音乐", "来点音乐",
@@ -981,16 +985,19 @@ DOMAIN_KEYWORDS = {
     ],
     "navigation": [
         "导航", "路线", "地图", "路况", "目的地", "带我", "回公司", "回家", "怎么走", "堵车", "去哪", "查路线",
+        "導航", "路線", "地圖", "路況", "帶我", "怎麼走", "堵車", "查路線",
         "加油站", "充电桩", "前往", "带我去", "送我到", "开车去", "开车到", "导到", "导去",
         "navigate", "navigation", "gps", "route", "map", "traffic", "destination", "take me to",
         "drive to", "directions to", "directions", "go to", "head to", "find route", "gas station", "charging station"
     ],
     "phone": [
         "电话", "呼叫", "拨号", "联系人", "打给", "接听", "挂断", "接电话", "拨打", "打电话", "致电", "联系",
+        "電話", "撥號", "聯絡人", "打給", "接聽", "掛斷", "撥打", "打電話", "致電", "聯絡",
         "call", "dial", "phone", "contact", "hang up", "answer call", "pick up", "make a call", "ring"
     ],
     "query": [
         "天气", "气温", "下雨", "降雨", "温度如何", "几点", "时间", "星期", "礼拜", "日期",
+        "天氣", "氣溫", "幾點", "時間", "禮拜",
         "限行", "尾号", "续航", "电量", "油量", "胎压", "笑话", "百科", "谁", "吗", "怎么样", "如何",
         "weather", "temperature outside", "rain", "rainy", "forecast", "what time", "clock", "date",
         "battery", "range", "tire pressure", "joke", "who is", "what is", "how is", "how far", "tell me"
@@ -1005,7 +1012,7 @@ def match_kw(kw, text_lower):
 
 
 def analyze_negation(text):
-    clauses = re.split(r"[,;!?，；！？]|\band\b|\bbut\b|\bthen\b|\bwhile\b|\bas well as\b|\balso\b|并且|但是|然后|同时|顺便|而且|接着", text, flags=re.I)
+    clauses = re.split(r"[,;!?，；！？]|\band\b|\bbut\b|\bthen\b|\bwhile\b|\bas well as\b|\balso\b|并且|而且|但是|但|然后|同時|同时|顺便|順便|接着", text, flags=re.I)
     clauses = [c.strip() for c in clauses if c.strip()]
 
     exclusions = set()   # Preservation intent (e.g. 'keep / do not touch')
@@ -1017,10 +1024,10 @@ def analyze_negation(text):
     for c in clauses:
         c_lower = c.lower()
         # 1. Preservation intent pattern (排除性否定 / 维持现状)
-        m_ex_cn = (re.search(r"(?:不要|别|不用|切勿|请勿)\s*(?:动|关|开|停|改|碰|调整|改变)\s*(.+)", c) or
-                   re.search(r"(.+?)\s*(?:不要|别|不用)\s*(?:动|停|关|开|断|调整|改变)", c) or
-                   re.search(r"(.+?)\s*(?:保持现状|维持现状|维持原样|不要动|别动)", c) or
-                   re.search(r"(?:保持|维持)\s*(.+?)\s*(?:现状|不变|原样)", c))
+        m_ex_cn = (re.search(r"(?:不要|别|別|不用|切勿|请勿|請勿)\s*(?:动|動|关|關|开|開|停|改|碰|调整|調整|改变|改變)\s*(.+)", c) or
+                   re.search(r"(.+?)\s*(?:不要|别|別|不用)\s*(?:动|動|停|关|關|开|開|断|斷|调整|調整|改变|改變)", c) or
+                   re.search(r"(.+?)\s*(?:保持现状|保持現狀|维持现状|維持現狀|维持原样|維持原樣|不要动|不要動|别动|別動)", c) or
+                   re.search(r"(?:保持|维持|維持)\s*(.+?)\s*(?:开启|開啟|开|開|现状|現狀|不变|不變|原样|原樣)", c))
 
         m_ex_en = (re.search(r"(?:don\'t|do not|never)\s+(?:touch|change|alter|modify|turn off|close|shut down)\s+(.+)", c_lower) or
                    re.search(r"leave\s+(.+?)\s+alone", c_lower) or
@@ -1028,7 +1035,10 @@ def analyze_negation(text):
                    re.search(r"(?:except|excluding|but not|without(?: touching)?)\s+(.+)", c_lower))
 
         if m_ex_cn or m_ex_en:
-            target_str = (m_ex_cn.group(1) if m_ex_cn else m_ex_en.group(1)).lower()
+            target_str = (m_ex_cn.group(1) if m_ex_cn else m_ex_en.group(1)).lower().strip()
+            # Circulation mode adjustment should not exclude the climate domain
+            if any(sub in target_str for sub in ["外循环", "内循环", "外循環", "內循環", "recirculation", "fresh air"]):
+                continue
             for d in domain_order:
                 if any(match_kw(kw, target_str) for kw in DOMAIN_KEYWORDS[d]):
                     exclusions.add(d)
@@ -1037,10 +1047,10 @@ def analyze_negation(text):
 
         # 2. Deactivation intent pattern (关闭性否定 / 关闭停止)
         c_clean_en = re.sub(r"^(?:please\s+|can\s+you\s+|could\s+you\s+|would\s+you\s+|i\s+want\s+to\s+|we\s+want\s+to\s+|help\s+me\s+|just\s+)", "", c_lower).strip()
-        c_clean_cn = re.sub(r"^(?:请(?:帮我|给我|麻烦)?|麻烦(?:帮我|给我)?|帮我|给我|替我|我想|我要|咱们|大家|顺便)?\s*", "", c).strip()
+        c_clean_cn = re.sub(r"^(?:请(?:帮我|给我|麻烦)?|麻煩(?:幫我|給我)?|幫我|給我|替我|我想|我要|咱們|大家|顺便|順便)?\s*", "", c).strip()
 
-        m_off_cn = (re.search(r"^(?:不要|别|不用|关掉|关闭|停掉|停止|关了|退出|取消)\s*(.+)$", c_clean_cn) or
-                    re.search(r"^(?:把)?\s*(.+?)\s*(?:关掉|关闭|停掉|停了|关了|退出|取消)$", c_clean_cn))
+        m_off_cn = (re.search(r"^(?:不要|别|別|不用|关掉|關掉|关闭|關閉|停掉|停止|关了|關了|退出|取消)\s*(.+)$", c_clean_cn) or
+                    re.search(r"^(?:把)?\s*(.+?)\s*(?:关掉|關掉|关闭|關閉|停掉|停了|关了|關了|退出|取消)$", c_clean_cn))
 
         m_off_en = (re.search(r"^(?:turn off|switch off|shut down|disable|stop|cancel|exit|quit|pause|close)\s+(.+)$", c_clean_en) or
                     re.search(r"^(?:turn|switch|shut)\s+(.+?)\s+(?:off|down)$", c_clean_en))
@@ -3428,6 +3438,11 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path in ("/", "/index.html"):
+            index_path = os.path.join(BASE_DIR, "index.html")
+            if os.path.exists(index_path):
+                with open(index_path, "rb") as f:
+                    self._send(200, f.read(), "text/html; charset=utf-8")
+                return
             self._send(200, PAGE, "text/html; charset=utf-8")
         elif self.path == "/api/config":
             self._json(200, {"ok": True, "intents": load_intents()})

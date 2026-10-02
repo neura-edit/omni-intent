@@ -1,0 +1,2737 @@
+{
+  "summary": {
+    "total_test_cases": 100,
+    "total_time_seconds": 94.07,
+    "overall_accuracy_percent": 99.0,
+    "negation_filter_accuracy_percent": 100.0,
+    "latency_stats_ms": {
+      "min": 906.25,
+      "mean": 939.76,
+      "p50": 941.04,
+      "p90": 959.0,
+      "p95": 964.38,
+      "max": 1004.46
+    }
+  },
+  "results": [
+    {
+      "id": 1,
+      "query": "把空调调到二十四度",
+      "lang": "zh",
+      "category": "climate",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "navigation",
+        "seat"
+      ],
+      "domain_probabilities": {
+        "climate": 0.8998,
+        "music": 0.279,
+        "navigation": 0.5909,
+        "seat": 0.5514,
+        "window": 0.4484,
+        "phone": 0.4679,
+        "query": 0.3126
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 933.68,
+      "status": "PASS"
+    },
+    {
+      "id": 2,
+      "query": "车里有点冷，把暖气打开",
+      "lang": "zh",
+      "category": "climate",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "navigation",
+        "seat",
+        "window",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.9374,
+        "music": 0.4207,
+        "navigation": 0.5055,
+        "seat": 0.8994,
+        "window": 0.7746,
+        "phone": 0.1243,
+        "query": 0.5677
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 942.41,
+      "status": "PASS"
+    },
+    {
+      "id": 3,
+      "query": "把温度调低两度",
+      "lang": "zh",
+      "category": "climate",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "music",
+        "navigation",
+        "seat"
+      ],
+      "domain_probabilities": {
+        "climate": 0.8379,
+        "music": 0.5963,
+        "navigation": 0.5309,
+        "seat": 0.6516,
+        "window": 0.4892,
+        "phone": 0.3806,
+        "query": 0.2365
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 907.89,
+      "status": "PASS"
+    },
+    {
+      "id": 4,
+      "query": "打开前挡风玻璃除雾",
+      "lang": "zh",
+      "category": "climate",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "navigation",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.6465,
+        "music": 0.0673,
+        "navigation": 0.5395,
+        "seat": 0.1997,
+        "window": 0.7421,
+        "phone": 0.4486,
+        "query": 0.4329
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 924.07,
+      "status": "PASS"
+    },
+    {
+      "id": 5,
+      "query": "主驾驶空调风量调到最大",
+      "lang": "zh",
+      "category": "climate",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat"
+      ],
+      "domain_probabilities": {
+        "climate": 0.9,
+        "music": 0.1427,
+        "navigation": 0.4746,
+        "seat": 0.6664,
+        "window": 0.3927,
+        "phone": 0.1601,
+        "query": 0.1905
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 925.47,
+      "status": "PASS"
+    },
+    {
+      "id": 6,
+      "query": "把空调关掉，有点吹得头疼",
+      "lang": "zh",
+      "category": "climate",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.7181,
+        "music": 0.3827,
+        "navigation": 0.2359,
+        "seat": 0.6598,
+        "window": 0.5385,
+        "phone": 0.0851,
+        "query": 0.3108
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 929.87,
+      "status": "PASS"
+    },
+    {
+      "id": 7,
+      "query": "開啟副駕駛空調，設定為二十二度",
+      "lang": "zhtw",
+      "category": "climate",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.9297,
+        "music": 0.1435,
+        "navigation": 0.3363,
+        "seat": 0.8714,
+        "window": 0.8145,
+        "phone": 0.256,
+        "query": 0.2501
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 939.51,
+      "status": "PASS"
+    },
+    {
+      "id": 8,
+      "query": "將車內溫度調高三度",
+      "lang": "zhtw",
+      "category": "climate",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.8704,
+        "music": 0.3084,
+        "navigation": 0.4898,
+        "seat": 0.8174,
+        "window": 0.7122,
+        "phone": 0.4201,
+        "query": 0.1788
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 928.9,
+      "status": "PASS"
+    },
+    {
+      "id": 9,
+      "query": "後排空調風速減小一檔",
+      "lang": "zhtw",
+      "category": "climate",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.9336,
+        "music": 0.4397,
+        "navigation": 0.4814,
+        "seat": 0.8416,
+        "window": 0.6938,
+        "phone": 0.3511,
+        "query": 0.239
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 958.5,
+      "status": "PASS"
+    },
+    {
+      "id": 10,
+      "query": "Set cabin temperature to 21 degrees Celsius",
+      "lang": "en",
+      "category": "climate",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.9387,
+        "music": 0.4474,
+        "navigation": 0.3115,
+        "seat": 0.7785,
+        "window": 0.7842,
+        "phone": 0.1305,
+        "query": 0.2446
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 931.72,
+      "status": "PASS"
+    },
+    {
+      "id": 11,
+      "query": "Turn on maximum defroster for the windshield",
+      "lang": "en",
+      "category": "climate",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.8416,
+        "music": 0.097,
+        "navigation": 0.2928,
+        "seat": 0.2059,
+        "window": 0.7722,
+        "phone": 0.2379,
+        "query": 0.2326
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 914.57,
+      "status": "PASS"
+    },
+    {
+      "id": 12,
+      "query": "Shut down the air conditioner",
+      "lang": "en",
+      "category": "climate",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.6029,
+        "music": 0.1899,
+        "navigation": 0.495,
+        "seat": 0.2597,
+        "window": 0.5658,
+        "phone": 0.428,
+        "query": 0.2703
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 910.65,
+      "status": "PASS"
+    },
+    {
+      "id": 13,
+      "query": "空调切换为内循环模式",
+      "lang": "zh",
+      "category": "climate",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate"
+      ],
+      "domain_probabilities": {
+        "climate": 0.8878,
+        "music": 0.0888,
+        "navigation": 0.3946,
+        "seat": 0.4062,
+        "window": 0.232,
+        "phone": 0.1742,
+        "query": 0.2302
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 912.33,
+      "status": "PASS"
+    },
+    {
+      "id": 14,
+      "query": "把后排出风口关闭",
+      "lang": "zh",
+      "category": "climate",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "navigation",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.699,
+        "music": 0.231,
+        "navigation": 0.5953,
+        "seat": 0.7754,
+        "window": 0.562,
+        "phone": 0.3612,
+        "query": 0.2848
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 924.53,
+      "status": "PASS"
+    },
+    {
+      "id": 15,
+      "query": "太热了，制冷开到最强",
+      "lang": "zh",
+      "category": "climate",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "music",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.874,
+        "music": 0.6967,
+        "navigation": 0.4691,
+        "seat": 0.8118,
+        "window": 0.7064,
+        "phone": 0.185,
+        "query": 0.4959
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 929.54,
+      "status": "PASS"
+    },
+    {
+      "id": 16,
+      "query": "播放周杰伦的晴天",
+      "lang": "zh",
+      "category": "music",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "music",
+        "navigation",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.1898,
+        "music": 0.8921,
+        "navigation": 0.5613,
+        "seat": 0.1036,
+        "window": 0.2094,
+        "phone": 0.2644,
+        "query": 0.5958
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 933.23,
+      "status": "PASS"
+    },
+    {
+      "id": 17,
+      "query": "放一首八三夭的外婆的告别式这首歌",
+      "lang": "zh",
+      "category": "music",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "music",
+        "navigation",
+        "phone",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.113,
+        "music": 0.8074,
+        "navigation": 0.7199,
+        "seat": 0.1096,
+        "window": 0.2682,
+        "phone": 0.5162,
+        "query": 0.518
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 933.61,
+      "status": "PASS"
+    },
+    {
+      "id": 18,
+      "query": "我们要听放克风格的音乐",
+      "lang": "zh",
+      "category": "music",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "music"
+      ],
+      "domain_probabilities": {
+        "climate": 0.121,
+        "music": 0.8228,
+        "navigation": 0.483,
+        "seat": 0.1058,
+        "window": 0.1766,
+        "phone": 0.1308,
+        "query": 0.117
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 933.27,
+      "status": "PASS"
+    },
+    {
+      "id": 19,
+      "query": "切到下一首歌曲",
+      "lang": "zh",
+      "category": "music",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "music",
+        "navigation"
+      ],
+      "domain_probabilities": {
+        "climate": 0.4583,
+        "music": 0.9178,
+        "navigation": 0.6349,
+        "seat": 0.3992,
+        "window": 0.3911,
+        "phone": 0.3545,
+        "query": 0.2994
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 935.77,
+      "status": "PASS"
+    },
+    {
+      "id": 20,
+      "query": "暂停播放音乐",
+      "lang": "zh",
+      "category": "music",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "music",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.2699,
+        "music": 0.9524,
+        "navigation": 0.384,
+        "seat": 0.3177,
+        "window": 0.5027,
+        "phone": 0.4732,
+        "query": 0.0852
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 1004.46,
+      "status": "PASS"
+    },
+    {
+      "id": 21,
+      "query": "来点欢快提神的车载音乐",
+      "lang": "zh",
+      "category": "music",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "music",
+        "navigation",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.2767,
+        "music": 0.9067,
+        "navigation": 0.5905,
+        "seat": 0.5236,
+        "window": 0.5457,
+        "phone": 0.1384,
+        "query": 0.2861
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 932.05,
+      "status": "PASS"
+    },
+    {
+      "id": 22,
+      "query": "播放陳奕迅的富士山下",
+      "lang": "zhtw",
+      "category": "music",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "music",
+        "navigation"
+      ],
+      "domain_probabilities": {
+        "climate": 0.1233,
+        "music": 0.895,
+        "navigation": 0.6347,
+        "seat": 0.1972,
+        "window": 0.2289,
+        "phone": 0.1496,
+        "query": 0.4068
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 926.49,
+      "status": "PASS"
+    },
+    {
+      "id": 23,
+      "query": "播放古典交響樂放鬆一下",
+      "lang": "zhtw",
+      "category": "music",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "music",
+        "navigation",
+        "seat"
+      ],
+      "domain_probabilities": {
+        "climate": 0.4948,
+        "music": 0.9299,
+        "navigation": 0.5141,
+        "seat": 0.6936,
+        "window": 0.1055,
+        "phone": 0.0849,
+        "query": 0.2494
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 916.65,
+      "status": "PASS"
+    },
+    {
+      "id": 24,
+      "query": "單曲循環當前播放的這首歌",
+      "lang": "zhtw",
+      "category": "music",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "music"
+      ],
+      "domain_probabilities": {
+        "climate": 0.1819,
+        "music": 0.767,
+        "navigation": 0.477,
+        "seat": 0.0942,
+        "window": 0.2331,
+        "phone": 0.1643,
+        "query": 0.2789
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 914.16,
+      "status": "PASS"
+    },
+    {
+      "id": 25,
+      "query": "Play some classic rock tracks",
+      "lang": "en",
+      "category": "music",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "music",
+        "navigation"
+      ],
+      "domain_probabilities": {
+        "climate": 0.0501,
+        "music": 0.8498,
+        "navigation": 0.6264,
+        "seat": 0.0442,
+        "window": 0.0841,
+        "phone": 0.027,
+        "query": 0.0869
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 935.07,
+      "status": "PASS"
+    },
+    {
+      "id": 26,
+      "query": "Play My Heart Will Go On by Celine Dion",
+      "lang": "en",
+      "category": "music",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "music"
+      ],
+      "domain_probabilities": {
+        "climate": 0.0177,
+        "music": 0.86,
+        "navigation": 0.4973,
+        "seat": 0.0258,
+        "window": 0.0383,
+        "phone": 0.0853,
+        "query": 0.2347
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 916.72,
+      "status": "PASS"
+    },
+    {
+      "id": 27,
+      "query": "Skip to the next track please",
+      "lang": "en",
+      "category": "music",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "climate",
+        "music",
+        "navigation",
+        "seat",
+        "window",
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.7794,
+        "music": 0.8729,
+        "navigation": 0.5544,
+        "seat": 0.7664,
+        "window": 0.6259,
+        "phone": 0.6432,
+        "query": 0.3148
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 927.79,
+      "status": "PASS"
+    },
+    {
+      "id": 28,
+      "query": "调大音乐音量到百分之六十",
+      "lang": "zh",
+      "category": "music",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "climate",
+        "music",
+        "navigation",
+        "seat",
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.6346,
+        "music": 0.9286,
+        "navigation": 0.5327,
+        "seat": 0.5425,
+        "window": 0.4019,
+        "phone": 0.5238,
+        "query": 0.1478
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 910.28,
+      "status": "PASS"
+    },
+    {
+      "id": 29,
+      "query": "我想听爵士乐电台",
+      "lang": "zh",
+      "category": "music",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "music",
+        "navigation",
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.0962,
+        "music": 0.8049,
+        "navigation": 0.6481,
+        "seat": 0.0781,
+        "window": 0.0491,
+        "phone": 0.6542,
+        "query": 0.238
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 932.0,
+      "status": "PASS"
+    },
+    {
+      "id": 30,
+      "query": "随机播放我收藏的流行歌单",
+      "lang": "zh",
+      "category": "music",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "music"
+      ],
+      "domain_probabilities": {
+        "climate": 0.3018,
+        "music": 0.8531,
+        "navigation": 0.3957,
+        "seat": 0.1063,
+        "window": 0.3033,
+        "phone": 0.2396,
+        "query": 0.2036
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 908.47,
+      "status": "PASS"
+    },
+    {
+      "id": 31,
+      "query": "导航去上海虹桥火车站，躲避拥堵",
+      "lang": "zh",
+      "category": "navigation",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "climate",
+        "navigation",
+        "window",
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.6233,
+        "music": 0.2582,
+        "navigation": 0.924,
+        "seat": 0.3231,
+        "window": 0.6233,
+        "phone": 0.5138,
+        "query": 0.3891
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 909.63,
+      "status": "PASS"
+    },
+    {
+      "id": 32,
+      "query": "带我回公司，选择距离最短路线",
+      "lang": "zh",
+      "category": "navigation",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.379,
+        "music": 0.3362,
+        "navigation": 0.8199,
+        "seat": 0.3072,
+        "window": 0.4999,
+        "phone": 0.6749,
+        "query": 0.4908
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 922.74,
+      "status": "PASS"
+    },
+    {
+      "id": 33,
+      "query": "导航回家，不走高速",
+      "lang": "zh",
+      "category": "navigation",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "climate",
+        "music",
+        "navigation",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.6474,
+        "music": 0.6248,
+        "navigation": 0.7264,
+        "seat": 0.5237,
+        "window": 0.6195,
+        "phone": 0.4334,
+        "query": 0.3038
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 923.68,
+      "status": "PASS"
+    },
+    {
+      "id": 34,
+      "query": "退出当前的导航路线",
+      "lang": "zh",
+      "category": "navigation",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "navigation"
+      ],
+      "domain_probabilities": {
+        "climate": 0.281,
+        "music": 0.267,
+        "navigation": 0.5117,
+        "seat": 0.205,
+        "window": 0.273,
+        "phone": 0.4607,
+        "query": 0.1844
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 918.69,
+      "status": "PASS"
+    },
+    {
+      "id": 35,
+      "query": "搜索沿途最近的特来电充电站",
+      "lang": "zh",
+      "category": "navigation",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "phone",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.1673,
+        "music": 0.1755,
+        "navigation": 0.7084,
+        "seat": 0.0892,
+        "window": 0.0809,
+        "phone": 0.5969,
+        "query": 0.5665
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 916.4,
+      "status": "PASS"
+    },
+    {
+      "id": 36,
+      "query": "看下前面路段堵不堵车",
+      "lang": "zh",
+      "category": "navigation",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "phone",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.4799,
+        "music": 0.4164,
+        "navigation": 0.6386,
+        "seat": 0.3469,
+        "window": 0.4667,
+        "phone": 0.5867,
+        "query": 0.5236
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 906.25,
+      "status": "PASS"
+    },
+    {
+      "id": 37,
+      "query": "導航前往香港國際機場",
+      "lang": "zhtw",
+      "category": "navigation",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "navigation"
+      ],
+      "domain_probabilities": {
+        "climate": 0.3457,
+        "music": 0.2662,
+        "navigation": 0.9115,
+        "seat": 0.3198,
+        "window": 0.3522,
+        "phone": 0.4447,
+        "query": 0.3981
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 927.26,
+      "status": "PASS"
+    },
+    {
+      "id": 38,
+      "query": "帶我去台北車站，高速優先",
+      "lang": "zhtw",
+      "category": "navigation",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "climate",
+        "navigation",
+        "window",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.5884,
+        "music": 0.4499,
+        "navigation": 0.8714,
+        "seat": 0.4625,
+        "window": 0.5475,
+        "phone": 0.4934,
+        "query": 0.5027
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 917.27,
+      "status": "PASS"
+    },
+    {
+      "id": 39,
+      "query": "查詢附近哪裡有加油站",
+      "lang": "zhtw",
+      "category": "navigation",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "phone",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.0969,
+        "music": 0.2464,
+        "navigation": 0.795,
+        "seat": 0.0859,
+        "window": 0.2836,
+        "phone": 0.6816,
+        "query": 0.6132
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 916.15,
+      "status": "PASS"
+    },
+    {
+      "id": 40,
+      "query": "Navigate to downtown Seattle avoiding toll roads",
+      "lang": "en",
+      "category": "navigation",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "navigation"
+      ],
+      "domain_probabilities": {
+        "climate": 0.1783,
+        "music": 0.1215,
+        "navigation": 0.7967,
+        "seat": 0.0968,
+        "window": 0.2553,
+        "phone": 0.351,
+        "query": 0.2798
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 914.1,
+      "status": "PASS"
+    },
+    {
+      "id": 41,
+      "query": "Find the fastest route to JFK airport",
+      "lang": "en",
+      "category": "navigation",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.3087,
+        "music": 0.2649,
+        "navigation": 0.6278,
+        "seat": 0.2729,
+        "window": 0.3116,
+        "phone": 0.4095,
+        "query": 0.5284
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 929.25,
+      "status": "PASS"
+    },
+    {
+      "id": 42,
+      "query": "Cancel current navigation route",
+      "lang": "en",
+      "category": "navigation",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "navigation"
+      ],
+      "domain_probabilities": {
+        "climate": 0.2993,
+        "music": 0.2443,
+        "navigation": 0.6362,
+        "seat": 0.1764,
+        "window": 0.4507,
+        "phone": 0.3801,
+        "query": 0.1853
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 913.19,
+      "status": "PASS"
+    },
+    {
+      "id": 43,
+      "query": "导航去西藏布达拉宫",
+      "lang": "zh",
+      "category": "navigation",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.103,
+        "music": 0.2358,
+        "navigation": 0.9005,
+        "seat": 0.0753,
+        "window": 0.2498,
+        "phone": 0.507,
+        "query": 0.3609
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 931.83,
+      "status": "PASS"
+    },
+    {
+      "id": 44,
+      "query": "重新规划一条避开收费站的路线",
+      "lang": "zh",
+      "category": "navigation",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "navigation"
+      ],
+      "domain_probabilities": {
+        "climate": 0.2516,
+        "music": 0.2917,
+        "navigation": 0.5688,
+        "seat": 0.1647,
+        "window": 0.4078,
+        "phone": 0.4085,
+        "query": 0.3869
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 942.13,
+      "status": "PASS"
+    },
+    {
+      "id": 45,
+      "query": "查找附近的五星级酒店",
+      "lang": "zh",
+      "category": "navigation",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "navigation"
+      ],
+      "domain_probabilities": {
+        "climate": 0.2794,
+        "music": 0.1967,
+        "navigation": 0.6475,
+        "seat": 0.2488,
+        "window": 0.1037,
+        "phone": 0.492,
+        "query": 0.4464
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 963.42,
+      "status": "PASS"
+    },
+    {
+      "id": 46,
+      "query": "把主驾座椅加热开到二档",
+      "lang": "zh",
+      "category": "seat",
+      "expected_domains": [
+        "seat"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat"
+      ],
+      "domain_probabilities": {
+        "climate": 0.7911,
+        "music": 0.3542,
+        "navigation": 0.4445,
+        "seat": 0.8975,
+        "window": 0.234,
+        "phone": 0.3264,
+        "query": 0.1885
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 963.6,
+      "status": "PASS"
+    },
+    {
+      "id": 47,
+      "query": "副驾驶座椅通风打开",
+      "lang": "zh",
+      "category": "seat",
+      "expected_domains": [
+        "seat"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.7105,
+        "music": 0.1702,
+        "navigation": 0.1902,
+        "seat": 0.9759,
+        "window": 0.6344,
+        "phone": 0.0373,
+        "query": 0.176
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 936.03,
+      "status": "PASS"
+    },
+    {
+      "id": 48,
+      "query": "把后排座椅加热全部关掉",
+      "lang": "zh",
+      "category": "seat",
+      "expected_domains": [
+        "seat"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat"
+      ],
+      "domain_probabilities": {
+        "climate": 0.628,
+        "music": 0.332,
+        "navigation": 0.3687,
+        "seat": 0.5915,
+        "window": 0.4473,
+        "phone": 0.3263,
+        "query": 0.1741
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 951.28,
+      "status": "PASS"
+    },
+    {
+      "id": 49,
+      "query": "開啟駕駛座腰部按摩功能",
+      "lang": "zhtw",
+      "category": "seat",
+      "expected_domains": [
+        "seat"
+      ],
+      "predicted_hits": [
+        "seat"
+      ],
+      "domain_probabilities": {
+        "climate": 0.0814,
+        "music": 0.0966,
+        "navigation": 0.3915,
+        "seat": 0.7084,
+        "window": 0.0202,
+        "phone": 0.1828,
+        "query": 0.142
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 935.98,
+      "status": "PASS"
+    },
+    {
+      "id": 50,
+      "query": "關閉副駕駛座椅加熱",
+      "lang": "zhtw",
+      "category": "seat",
+      "expected_domains": [
+        "seat"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.5076,
+        "music": 0.1346,
+        "navigation": 0.3843,
+        "seat": 0.7402,
+        "window": 0.5196,
+        "phone": 0.3615,
+        "query": 0.2195
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 938.31,
+      "status": "PASS"
+    },
+    {
+      "id": 51,
+      "query": "Turn on driver seat heating to level 3",
+      "lang": "en",
+      "category": "seat",
+      "expected_domains": [
+        "seat"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.837,
+        "music": 0.0527,
+        "navigation": 0.4913,
+        "seat": 0.9156,
+        "window": 0.6413,
+        "phone": 0.1215,
+        "query": 0.2606
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 932.82,
+      "status": "PASS"
+    },
+    {
+      "id": 52,
+      "query": "Enable passenger seat ventilation",
+      "lang": "en",
+      "category": "seat",
+      "expected_domains": [
+        "seat"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.6516,
+        "music": 0.0727,
+        "navigation": 0.4186,
+        "seat": 0.9648,
+        "window": 0.6675,
+        "phone": 0.2881,
+        "query": 0.2894
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 945.93,
+      "status": "PASS"
+    },
+    {
+      "id": 53,
+      "query": "把主驾驶座椅靠背往后调一点",
+      "lang": "zh",
+      "category": "seat",
+      "expected_domains": [
+        "seat"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "seat"
+      ],
+      "domain_probabilities": {
+        "climate": 0.3064,
+        "music": 0.2032,
+        "navigation": 0.7003,
+        "seat": 0.8969,
+        "window": 0.1792,
+        "phone": 0.2109,
+        "query": 0.1815
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 947.87,
+      "status": "PASS"
+    },
+    {
+      "id": 54,
+      "query": "把左前车窗降下一半透透气",
+      "lang": "zh",
+      "category": "window",
+      "expected_domains": [
+        "window"
+      ],
+      "predicted_hits": [
+        "climate",
+        "navigation",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.8817,
+        "music": 0.184,
+        "navigation": 0.5304,
+        "seat": 0.7803,
+        "window": 0.8909,
+        "phone": 0.2341,
+        "query": 0.2147
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 947.4,
+      "status": "PASS"
+    },
+    {
+      "id": 55,
+      "query": "把车窗全部关上",
+      "lang": "zh",
+      "category": "window",
+      "expected_domains": [
+        "window"
+      ],
+      "predicted_hits": [
+        "climate",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.6279,
+        "music": 0.3263,
+        "navigation": 0.4874,
+        "seat": 0.3358,
+        "window": 0.7252,
+        "phone": 0.1118,
+        "query": 0.276
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 991.18,
+      "status": "PASS"
+    },
+    {
+      "id": 56,
+      "query": "天窗打开留一条缝",
+      "lang": "zh",
+      "category": "window",
+      "expected_domains": [
+        "window"
+      ],
+      "predicted_hits": [
+        "climate",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.5603,
+        "music": 0.4291,
+        "navigation": 0.3082,
+        "seat": 0.2961,
+        "window": 0.5852,
+        "phone": 0.0722,
+        "query": 0.2189
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 999.48,
+      "status": "PASS"
+    },
+    {
+      "id": 57,
+      "query": "把天窗遮阳帘关上，太阳太晒了",
+      "lang": "zh",
+      "category": "window",
+      "expected_domains": [
+        "window"
+      ],
+      "predicted_hits": [
+        "climate",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.6256,
+        "music": 0.1748,
+        "navigation": 0.4981,
+        "seat": 0.4383,
+        "window": 0.8336,
+        "phone": 0.2761,
+        "query": 0.4339
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 950.74,
+      "status": "PASS"
+    },
+    {
+      "id": 58,
+      "query": "將所有車窗升起並關閉天窗",
+      "lang": "zhtw",
+      "category": "window",
+      "expected_domains": [
+        "window"
+      ],
+      "predicted_hits": [
+        "climate",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.6732,
+        "music": 0.1775,
+        "navigation": 0.4643,
+        "seat": 0.2227,
+        "window": 0.8643,
+        "phone": 0.3192,
+        "query": 0.222
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 947.29,
+      "status": "PASS"
+    },
+    {
+      "id": 59,
+      "query": "Roll down the front windows halfway",
+      "lang": "en",
+      "category": "window",
+      "expected_domains": [
+        "window"
+      ],
+      "predicted_hits": [
+        "climate",
+        "navigation",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.8429,
+        "music": 0.1862,
+        "navigation": 0.6006,
+        "seat": 0.6518,
+        "window": 0.8579,
+        "phone": 0.1668,
+        "query": 0.2785
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 945.36,
+      "status": "PASS"
+    },
+    {
+      "id": 60,
+      "query": "Close the sunroof and sunshade",
+      "lang": "en",
+      "category": "window",
+      "expected_domains": [
+        "window"
+      ],
+      "predicted_hits": [
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.4986,
+        "music": 0.1278,
+        "navigation": 0.4936,
+        "seat": 0.3064,
+        "window": 0.7959,
+        "phone": 0.0937,
+        "query": 0.2537
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 938.62,
+      "status": "PASS"
+    },
+    {
+      "id": 61,
+      "query": "副驾车窗降到底",
+      "lang": "zh",
+      "category": "window",
+      "expected_domains": [
+        "window"
+      ],
+      "predicted_hits": [
+        "climate",
+        "navigation",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.8,
+        "music": 0.3802,
+        "navigation": 0.5338,
+        "seat": 0.7219,
+        "window": 0.845,
+        "phone": 0.1887,
+        "query": 0.2246
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 942.14,
+      "status": "PASS"
+    },
+    {
+      "id": 62,
+      "query": "给张三打个电话",
+      "lang": "zh",
+      "category": "phone",
+      "expected_domains": [
+        "phone"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.3436,
+        "music": 0.2212,
+        "navigation": 0.5853,
+        "seat": 0.2689,
+        "window": 0.2425,
+        "phone": 0.9152,
+        "query": 0.3969
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 944.26,
+      "status": "PASS"
+    },
+    {
+      "id": 63,
+      "query": "拨打电话给老婆",
+      "lang": "zh",
+      "category": "phone",
+      "expected_domains": [
+        "phone"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.2537,
+        "music": 0.3569,
+        "navigation": 0.5044,
+        "seat": 0.0964,
+        "window": 0.1376,
+        "phone": 0.9251,
+        "query": 0.3105
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 934.47,
+      "status": "PASS"
+    },
+    {
+      "id": 64,
+      "query": "呼叫电话号码 13800138000",
+      "lang": "zh",
+      "category": "phone",
+      "expected_domains": [
+        "phone"
+      ],
+      "predicted_hits": [
+        "climate",
+        "navigation",
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.6244,
+        "music": 0.46,
+        "navigation": 0.5347,
+        "seat": 0.4789,
+        "window": 0.2867,
+        "phone": 0.883,
+        "query": 0.2308
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 929.19,
+      "status": "PASS"
+    },
+    {
+      "id": 65,
+      "query": "把当前的通话挂断",
+      "lang": "zh",
+      "category": "phone",
+      "expected_domains": [
+        "phone"
+      ],
+      "predicted_hits": [
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.1906,
+        "music": 0.3536,
+        "navigation": 0.4789,
+        "seat": 0.1792,
+        "window": 0.2399,
+        "phone": 0.8475,
+        "query": 0.1676
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 948.85,
+      "status": "PASS"
+    },
+    {
+      "id": 66,
+      "query": "打電話給李四經理",
+      "lang": "zhtw",
+      "category": "phone",
+      "expected_domains": [
+        "phone"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.3988,
+        "music": 0.1798,
+        "navigation": 0.691,
+        "seat": 0.2233,
+        "window": 0.1113,
+        "phone": 0.9553,
+        "query": 0.331
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 942.56,
+      "status": "PASS"
+    },
+    {
+      "id": 67,
+      "query": "Call my wife on mobile",
+      "lang": "en",
+      "category": "phone",
+      "expected_domains": [
+        "phone"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.3271,
+        "music": 0.4581,
+        "navigation": 0.5106,
+        "seat": 0.2783,
+        "window": 0.2009,
+        "phone": 0.9351,
+        "query": 0.265
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 940.59,
+      "status": "PASS"
+    },
+    {
+      "id": 68,
+      "query": "Redial the last outgoing number",
+      "lang": "en",
+      "category": "phone",
+      "expected_domains": [
+        "phone"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.224,
+        "music": 0.3157,
+        "navigation": 0.525,
+        "seat": 0.1519,
+        "window": 0.2833,
+        "phone": 0.8013,
+        "query": 0.2108
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 946.92,
+      "status": "PASS"
+    },
+    {
+      "id": 69,
+      "query": "给爸爸回拨电话",
+      "lang": "zh",
+      "category": "phone",
+      "expected_domains": [
+        "phone"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.4031,
+        "music": 0.3773,
+        "navigation": 0.5421,
+        "seat": 0.4034,
+        "window": 0.3118,
+        "phone": 0.8411,
+        "query": 0.4259
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 951.62,
+      "status": "PASS"
+    },
+    {
+      "id": 70,
+      "query": "今天北京天气怎么样，会下雨吗",
+      "lang": "zh",
+      "category": "query",
+      "expected_domains": [
+        "query"
+      ],
+      "predicted_hits": [
+        "climate",
+        "navigation",
+        "phone",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.5302,
+        "music": 0.3359,
+        "navigation": 0.6761,
+        "seat": 0.2703,
+        "window": 0.4378,
+        "phone": 0.5835,
+        "query": 0.7657
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 933.75,
+      "status": "PASS"
+    },
+    {
+      "id": 71,
+      "query": "现在几点了",
+      "lang": "zh",
+      "category": "query",
+      "expected_domains": [
+        "query"
+      ],
+      "predicted_hits": [
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.4228,
+        "music": 0.4266,
+        "navigation": 0.3569,
+        "seat": 0.3455,
+        "window": 0.3401,
+        "phone": 0.4034,
+        "query": 0.6781
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 941.48,
+      "status": "PASS"
+    },
+    {
+      "id": 72,
+      "query": "今天尾号限行几号",
+      "lang": "zh",
+      "category": "query",
+      "expected_domains": [
+        "query"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.298,
+        "music": 0.228,
+        "navigation": 0.5726,
+        "seat": 0.2143,
+        "window": 0.4122,
+        "phone": 0.4529,
+        "query": 0.5735
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 936.61,
+      "status": "PASS"
+    },
+    {
+      "id": 73,
+      "query": "车辆剩余电量还能跑多少公里",
+      "lang": "zh",
+      "category": "query",
+      "expected_domains": [
+        "query"
+      ],
+      "predicted_hits": [
+        "climate",
+        "navigation",
+        "phone",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.5604,
+        "music": 0.376,
+        "navigation": 0.6923,
+        "seat": 0.1966,
+        "window": 0.4859,
+        "phone": 0.5191,
+        "query": 0.566
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 945.98,
+      "status": "PASS"
+    },
+    {
+      "id": 74,
+      "query": "查詢明天香港的天氣預報",
+      "lang": "zhtw",
+      "category": "query",
+      "expected_domains": [
+        "query"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "phone",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.1626,
+        "music": 0.0899,
+        "navigation": 0.6652,
+        "seat": 0.1026,
+        "window": 0.2127,
+        "phone": 0.5444,
+        "query": 0.779
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 952.54,
+      "status": "PASS"
+    },
+    {
+      "id": 75,
+      "query": "What is the weather forecast for Seattle today",
+      "lang": "en",
+      "category": "query",
+      "expected_domains": [
+        "query"
+      ],
+      "predicted_hits": [
+        "climate",
+        "navigation",
+        "phone",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.5853,
+        "music": 0.3867,
+        "navigation": 0.7413,
+        "seat": 0.1926,
+        "window": 0.3722,
+        "phone": 0.6318,
+        "query": 0.8715
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 946.99,
+      "status": "PASS"
+    },
+    {
+      "id": 76,
+      "query": "What is the current battery range of this vehicle",
+      "lang": "en",
+      "category": "query",
+      "expected_domains": [
+        "query"
+      ],
+      "predicted_hits": [
+        "navigation"
+      ],
+      "domain_probabilities": {
+        "climate": 0.3133,
+        "music": 0.2867,
+        "navigation": 0.6121,
+        "seat": 0.1238,
+        "window": 0.3375,
+        "phone": 0.1655,
+        "query": 0.4862
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 957.91,
+      "status": "CHECK"
+    },
+    {
+      "id": 77,
+      "query": "今天星期几，农历初几",
+      "lang": "zh",
+      "category": "query",
+      "expected_domains": [
+        "query"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.3624,
+        "music": 0.3464,
+        "navigation": 0.557,
+        "seat": 0.2397,
+        "window": 0.306,
+        "phone": 0.3754,
+        "query": 0.6971
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 948.2,
+      "status": "PASS"
+    },
+    {
+      "id": 78,
+      "query": "打开空调，放一首八三夭的外婆的告别式，再导航去香港",
+      "lang": "zh",
+      "category": "multi_intent",
+      "expected_domains": [
+        "climate",
+        "music",
+        "navigation"
+      ],
+      "predicted_hits": [
+        "climate",
+        "music",
+        "navigation",
+        "seat",
+        "window",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.917,
+        "music": 0.9264,
+        "navigation": 0.9008,
+        "seat": 0.8325,
+        "window": 0.7765,
+        "phone": 0.4946,
+        "query": 0.5411
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 957.26,
+      "status": "PASS"
+    },
+    {
+      "id": 79,
+      "query": "车里有点闷，把空调调到22度，然后放一首周杰伦的晴天",
+      "lang": "zh",
+      "category": "multi_intent",
+      "expected_domains": [
+        "climate",
+        "music"
+      ],
+      "predicted_hits": [
+        "climate",
+        "music",
+        "navigation",
+        "seat",
+        "window",
+        "query"
+      ],
+      "domain_probabilities": {
+        "climate": 0.9374,
+        "music": 0.9264,
+        "navigation": 0.5596,
+        "seat": 0.8927,
+        "window": 0.9234,
+        "phone": 0.191,
+        "query": 0.5356
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 951.01,
+      "status": "PASS"
+    },
+    {
+      "id": 80,
+      "query": "把车窗打开，把音乐打开，空调调到二十度",
+      "lang": "zh",
+      "category": "multi_intent",
+      "expected_domains": [
+        "window",
+        "music",
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "music",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.9468,
+        "music": 0.9373,
+        "navigation": 0.3618,
+        "seat": 0.7604,
+        "window": 0.8533,
+        "phone": 0.1905,
+        "query": 0.4203
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 958.4,
+      "status": "PASS"
+    },
+    {
+      "id": 81,
+      "query": "把左前车窗降下一半，座椅加热开到二档",
+      "lang": "zh",
+      "category": "multi_intent",
+      "expected_domains": [
+        "window",
+        "seat"
+      ],
+      "predicted_hits": [
+        "climate",
+        "music",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.9415,
+        "music": 0.5788,
+        "navigation": 0.4675,
+        "seat": 0.9444,
+        "window": 0.8963,
+        "phone": 0.2146,
+        "query": 0.1854
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 944.92,
+      "status": "PASS"
+    },
+    {
+      "id": 82,
+      "query": "导航去公司，顺便播放一些轻音乐",
+      "lang": "zh",
+      "category": "multi_intent",
+      "expected_domains": [
+        "navigation",
+        "music"
+      ],
+      "predicted_hits": [
+        "music",
+        "navigation"
+      ],
+      "domain_probabilities": {
+        "climate": 0.4044,
+        "music": 0.9444,
+        "navigation": 0.9087,
+        "seat": 0.253,
+        "window": 0.4721,
+        "phone": 0.1784,
+        "query": 0.1944
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 953.03,
+      "status": "PASS"
+    },
+    {
+      "id": 83,
+      "query": "给老婆打电话，并且把导航设为回家",
+      "lang": "zh",
+      "category": "multi_intent",
+      "expected_domains": [
+        "phone",
+        "navigation"
+      ],
+      "predicted_hits": [
+        "music",
+        "navigation",
+        "window",
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.4564,
+        "music": 0.5142,
+        "navigation": 0.9611,
+        "seat": 0.3743,
+        "window": 0.5994,
+        "phone": 0.9375,
+        "query": 0.4001
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 965.19,
+      "status": "PASS"
+    },
+    {
+      "id": 84,
+      "query": "把空调调到二十三度，同时开启主驾座椅通风",
+      "lang": "zh",
+      "category": "multi_intent",
+      "expected_domains": [
+        "climate",
+        "seat"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.9529,
+        "music": 0.219,
+        "navigation": 0.3516,
+        "seat": 0.9461,
+        "window": 0.617,
+        "phone": 0.2428,
+        "query": 0.2671
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 950.05,
+      "status": "PASS"
+    },
+    {
+      "id": 85,
+      "query": "打開空調至二十四度，播放陳奕迅的歌，並導航到高鐵站",
+      "lang": "zhtw",
+      "category": "multi_intent",
+      "expected_domains": [
+        "climate",
+        "music",
+        "navigation"
+      ],
+      "predicted_hits": [
+        "climate",
+        "music",
+        "navigation",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.9253,
+        "music": 0.9626,
+        "navigation": 0.8963,
+        "seat": 0.803,
+        "window": 0.866,
+        "phone": 0.4071,
+        "query": 0.412
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 943.55,
+      "status": "PASS"
+    },
+    {
+      "id": 86,
+      "query": "車窗降下一半，開啟座椅加熱",
+      "lang": "zhtw",
+      "category": "multi_intent",
+      "expected_domains": [
+        "window",
+        "seat"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.9525,
+        "music": 0.1775,
+        "navigation": 0.2889,
+        "seat": 0.9591,
+        "window": 0.8855,
+        "phone": 0.0386,
+        "query": 0.2279
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 953.33,
+      "status": "PASS"
+    },
+    {
+      "id": 87,
+      "query": "打電話給張三，同時把導航退出來",
+      "lang": "zhtw",
+      "category": "multi_intent",
+      "expected_domains": [
+        "phone",
+        "navigation"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "window",
+        "phone"
+      ],
+      "domain_probabilities": {
+        "climate": 0.4409,
+        "music": 0.3448,
+        "navigation": 0.6661,
+        "seat": 0.3828,
+        "window": 0.6639,
+        "phone": 0.9571,
+        "query": 0.242
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 964.35,
+      "status": "PASS"
+    },
+    {
+      "id": 88,
+      "query": "Turn on the AC, play a song by Celine Dion, and navigate to Seattle",
+      "lang": "en",
+      "category": "multi_intent",
+      "expected_domains": [
+        "climate",
+        "music",
+        "navigation"
+      ],
+      "predicted_hits": [
+        "climate",
+        "music",
+        "navigation",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.9027,
+        "music": 0.9423,
+        "navigation": 0.9093,
+        "seat": 0.6159,
+        "window": 0.658,
+        "phone": 0.4366,
+        "query": 0.4557
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 947.74,
+      "status": "PASS"
+    },
+    {
+      "id": 89,
+      "query": "Set climate to 20 degrees and play some rock music",
+      "lang": "en",
+      "category": "multi_intent",
+      "expected_domains": [
+        "climate",
+        "music"
+      ],
+      "predicted_hits": [
+        "climate",
+        "music",
+        "seat"
+      ],
+      "domain_probabilities": {
+        "climate": 0.9261,
+        "music": 0.903,
+        "navigation": 0.476,
+        "seat": 0.6029,
+        "window": 0.3142,
+        "phone": 0.1048,
+        "query": 0.3201
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 959.94,
+      "status": "PASS"
+    },
+    {
+      "id": 90,
+      "query": "Roll down the driver window and turn on seat heating",
+      "lang": "en",
+      "category": "multi_intent",
+      "expected_domains": [
+        "window",
+        "seat"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.9374,
+        "music": 0.0598,
+        "navigation": 0.3858,
+        "seat": 0.9688,
+        "window": 0.8342,
+        "phone": 0.1436,
+        "query": 0.2816
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 958.97,
+      "status": "PASS"
+    },
+    {
+      "id": 91,
+      "query": "把音乐声音关掉，查看一下前面的路况",
+      "lang": "zh",
+      "category": "multi_intent",
+      "expected_domains": [
+        "music",
+        "navigation"
+      ],
+      "predicted_hits": [
+        "music",
+        "navigation",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.2244,
+        "music": 0.8303,
+        "navigation": 0.5817,
+        "seat": 0.269,
+        "window": 0.5125,
+        "phone": 0.1654,
+        "query": 0.4014
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 952.56,
+      "status": "PASS"
+    },
+    {
+      "id": 92,
+      "query": "关闭车窗，打开空调制冷模式",
+      "lang": "zh",
+      "category": "multi_intent",
+      "expected_domains": [
+        "window",
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.8861,
+        "music": 0.3815,
+        "navigation": 0.3723,
+        "seat": 0.6966,
+        "window": 0.7051,
+        "phone": 0.1152,
+        "query": 0.2893
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 952.19,
+      "status": "PASS"
+    },
+    {
+      "id": 93,
+      "query": "关闭空调，但是不要关座椅加热",
+      "lang": "zh",
+      "category": "negation_avoidance",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "music",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.6469,
+        "music": 0.5252,
+        "navigation": 0.2043,
+        "seat": 0.5357,
+        "window": 0.5668,
+        "phone": 0.0967,
+        "query": 0.1387
+      },
+      "expected_exclusions": [
+        "seat"
+      ],
+      "detected_exclusions": [
+        "seat"
+      ],
+      "latency_ms": 945.42,
+      "status": "PASS"
+    },
+    {
+      "id": 94,
+      "query": "把车窗打开，不要动空调",
+      "lang": "zh",
+      "category": "negation_avoidance",
+      "expected_domains": [
+        "window"
+      ],
+      "predicted_hits": [
+        "navigation",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.3574,
+        "music": 0.3165,
+        "navigation": 0.5098,
+        "seat": 0.4446,
+        "window": 0.7377,
+        "phone": 0.1744,
+        "query": 0.3976
+      },
+      "expected_exclusions": [
+        "climate"
+      ],
+      "detected_exclusions": [
+        "climate"
+      ],
+      "latency_ms": 959.3,
+      "status": "PASS"
+    },
+    {
+      "id": 95,
+      "query": "导航去公司，避开高速，不要动音乐",
+      "lang": "zh",
+      "category": "negation_avoidance",
+      "expected_domains": [
+        "navigation"
+      ],
+      "predicted_hits": [
+        "climate",
+        "navigation",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.7024,
+        "music": 0.8253,
+        "navigation": 0.892,
+        "seat": 0.5632,
+        "window": 0.7697,
+        "phone": 0.2643,
+        "query": 0.2984
+      },
+      "expected_exclusions": [
+        "music"
+      ],
+      "detected_exclusions": [
+        "music"
+      ],
+      "latency_ms": 949.09,
+      "status": "PASS"
+    },
+    {
+      "id": 96,
+      "query": "把温度调低两度，不要开外循环",
+      "lang": "zh",
+      "category": "negation_avoidance",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "music",
+        "navigation",
+        "seat",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.8192,
+        "music": 0.6903,
+        "navigation": 0.501,
+        "seat": 0.6692,
+        "window": 0.6687,
+        "phone": 0.2095,
+        "query": 0.293
+      },
+      "expected_exclusions": [],
+      "detected_exclusions": [],
+      "latency_ms": 950.24,
+      "status": "PASS"
+    },
+    {
+      "id": 97,
+      "query": "放一首轻快的歌，别开导航",
+      "lang": "zh",
+      "category": "negation_avoidance",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "music"
+      ],
+      "domain_probabilities": {
+        "climate": 0.3302,
+        "music": 0.8334,
+        "navigation": 0.6163,
+        "seat": 0.3836,
+        "window": 0.4868,
+        "phone": 0.3121,
+        "query": 0.2009
+      },
+      "expected_exclusions": [
+        "navigation"
+      ],
+      "detected_exclusions": [
+        "navigation"
+      ],
+      "latency_ms": 957.95,
+      "status": "PASS"
+    },
+    {
+      "id": 98,
+      "query": "關閉音樂，但保持導航開啟",
+      "lang": "zhtw",
+      "category": "negation_avoidance",
+      "expected_domains": [
+        "music"
+      ],
+      "predicted_hits": [
+        "music"
+      ],
+      "domain_probabilities": {
+        "climate": 0.2246,
+        "music": 0.6778,
+        "navigation": 0.7772,
+        "seat": 0.2751,
+        "window": 0.4525,
+        "phone": 0.1621,
+        "query": 0.0621
+      },
+      "expected_exclusions": [
+        "navigation"
+      ],
+      "detected_exclusions": [
+        "navigation"
+      ],
+      "latency_ms": 953.21,
+      "status": "PASS"
+    },
+    {
+      "id": 99,
+      "query": "Turn off the climate control, but keep seat heating on",
+      "lang": "en",
+      "category": "negation_avoidance",
+      "expected_domains": [
+        "climate"
+      ],
+      "predicted_hits": [
+        "climate",
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.6385,
+        "music": 0.1287,
+        "navigation": 0.2891,
+        "seat": 0.6989,
+        "window": 0.6349,
+        "phone": 0.0921,
+        "query": 0.2234
+      },
+      "expected_exclusions": [
+        "seat"
+      ],
+      "detected_exclusions": [
+        "seat"
+      ],
+      "latency_ms": 964.97,
+      "status": "PASS"
+    },
+    {
+      "id": 100,
+      "query": "Open the windows halfway, do not touch the air conditioner",
+      "lang": "en",
+      "category": "negation_avoidance",
+      "expected_domains": [
+        "window"
+      ],
+      "predicted_hits": [
+        "window"
+      ],
+      "domain_probabilities": {
+        "climate": 0.2856,
+        "music": 0.319,
+        "navigation": 0.3519,
+        "seat": 0.4926,
+        "window": 0.5093,
+        "phone": 0.1184,
+        "query": 0.2038
+      },
+      "expected_exclusions": [
+        "climate"
+      ],
+      "detected_exclusions": [
+        "climate"
+      ],
+      "latency_ms": 941.97,
+      "status": "PASS"
+    }
+  ]
+}

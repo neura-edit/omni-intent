@@ -8,3 +8,9 @@ __pycache__/
 *.safetensors
 *.ses
 :memory:.ses
+*.apk
+local.properties
+.gradle/
+build/
+.idea/
+*.iml
