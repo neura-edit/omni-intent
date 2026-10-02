@@ -179,9 +179,7 @@ flowchart TD
 - [x] **INT8 Quantization (ONNX Runtime)**: Compressed to 82MB, forward latency down to 23~35ms on mobile/IVI
 - [x] **Native Android Application (`android/`)**: Modern Jetpack Compose architecture with model warmup & threshold tuning
 - [x] **100-Utterance Automotive Benchmark Suite**: Automated regression pipeline
-- [x] **Full Traditional Chinese (繁體中文) Support**: Across Web, Android App, and Documentation
-- [ ] **Qualcomm Snapdragon 8155 / 8295 SNPE / QNN NPU Hardware Optimization**: Targeting < 15ms latency
-- [ ] **Regional Dialect & Acoustic End-to-End Extensions**
+- [x] **Full Traditional Chinese Support**: Across Web Console, Android Native App, and Documentation
 
 ---
 
