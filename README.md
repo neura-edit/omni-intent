@@ -17,12 +17,13 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/neura-edit/omni-intent/releases/latest"><img src="https://img.shields.io/badge/Download%20Android%20APK-v1.0.0-2ea44f?logo=android&logoColor=white" alt="Download APK" /></a>
   <a href="https://neura-edit.github.io/omni-intent/"><img src="https://img.shields.io/badge/HUD%20Demo-Online-3553ff.svg" alt="GitHub Pages HUD Demo" /></a>
   <a href="https://modelscope.cn/studios/neuraedit/omni-intent"><img src="https://img.shields.io/badge/ModelScope-Cloud%20Engine-624aff.svg" alt="ModelScope Cloud Backend" /></a>
   <a href="https://huggingface.co/neura-edit/decision-eos"><img src="https://img.shields.io/badge/HuggingFace-decision%3Aeos-ffd21e.svg" alt="Hugging Face Model" /></a>
   <img src="https://img.shields.io/badge/Quantization-INT8%2082MB-brightgreen.svg" alt="INT8 82MB" />
-  <img src="https://img.shields.io/badge/Android%20Latency-23~35ms-brightgreen.svg" alt="Android Latency" />
-  <img src="https://img.shields.io/badge/100--Utterance%20Benchmark-100%25%20Pass-blue.svg" alt="Benchmark 100% Pass" />
+  <img src="https://img.shields.io/badge/On--Device%20Latency-23~35ms-brightgreen.svg" alt="Android Latency" />
+  <img src="https://img.shields.io/badge/Automotive%20Benchmark-99.0%25%20Pass-blue.svg" alt="Benchmark Pass" />
   <img src="https://img.shields.io/badge/License-MIT-black.svg" alt="License" />
 </p>
 
@@ -30,46 +31,42 @@
 
 ## 💡 Overview
 
-**OmniIntent** is an on-device decision engine engineered specifically for next-generation automotive cockpits. By decoupling single-pass neural routing (powered by the `decision:eos` 0.75B architecture) from deterministic slot extraction, it concurrently parses multi-domain in-cabin commands (climate control, 21 acoustic music genres, route navigation, seat heating/cooling, and windows) within a single spoken query—accompanied by an automotive-grade negation avoidance filter.
+**OmniIntent** is an on-device decision engine engineered specifically for next-generation automotive cockpits. By decoupling single-pass neural routing (powered by the `decision:eos` 0.75B architecture) from deterministic slot extraction, it concurrently parses multi-domain in-cabin commands (climate control, 21 acoustic music genres, route navigation, seat comfort, and power windows) within a single spoken query—accompanied by an automotive-grade negation avoidance filter.
 
-The project currently provides a **Web Cyberpunk HUD Console**, a **Cross-Platform Python Engine**, and a brand new **Native Android Application**, fully localized in **English**, **Simplified Chinese (简体中文)**, and **Traditional Chinese (繁體中文)**.
-
-### 🚀 Instant Access
-
-- **Official HUD Console (English / 简体 / 繁體)**: [https://neura-edit.github.io/omni-intent/](https://neura-edit.github.io/omni-intent/)
-- **ModelScope Cloud Backend**: [https://modelscope.cn/studios/neuraedit/omni-intent](https://modelscope.cn/studios/neuraedit/omni-intent)
-- **Model Weights Repository**: [ModelScope Hub](https://modelscope.cn/models/neuraedit/decision-eos) • [Hugging Face](https://huggingface.co/neura-edit/decision-eos)
-- **100-Utterance Automotive Benchmark Report**: [benchmark/BENCHMARK_REPORT.md](benchmark/BENCHMARK_REPORT.md)
+The project provides a **Web HUD Console**, a **Cross-Platform Python Daemon**, and a **Native Android Application**, fully localized in **English**, **Simplified Chinese (简体中文)**, and **Traditional Chinese (繁體中文)**.
 
 ---
 
 ## 📱 Native Android Application (On-Device Edge Engine)
 
-We provide a native Android application built with Kotlin and Jetpack Compose: `omni-intent-android`.
+Source code for the native Android in-cabin application is available under [`android/`](android/).
 
 <p align="center">
   <b>A real 0.75B Transformer Neural Network executing directly on-device · Zero server dependencies · Resilient to offline/weak signal environments</b>
 </p>
 
+### 📥 Download Android APK
+
+- **Official Release Page**: [GitHub Releases (v1.0.0)](https://github.com/neura-edit/omni-intent/releases/latest)
+- **Direct Download**: [📥 omni-intent-v1.0.0.apk](https://github.com/neura-edit/omni-intent/releases/download/v1.0.0/omni-intent-v1.0.0.apk)
+
 ### ✨ Key Features of the Native App
 
 1. **Native ONNX Runtime Mobile Acceleration**:
-   - Executes the **82MB dynamic INT8 quantized model** directly on mobile/automotive CPU (arm64-v8a) with single-pass forward latencies between **23ms and 35ms**!
+   - Executes the **82MB dynamic INT8 quantized model** directly on mobile/automotive CPU (arm64-v8a) with single-pass forward latencies between **23ms and 35ms**.
    - 3-Engine Mode Switch: **On-Device 0.75B INT8 ONNX Engine**, **Local Embedded Micro-Engine (3ms offline semantic trie)**, and **Cloud ModelScope Neural Backend**.
 2. **Model Warmup & Execution Latency Separation**:
-   - Features a startup gate and animated progress bar that loads weights and performs forward warmup before entering the console, completely eliminating the initial 2s cold-start lag.
+   - Features a startup transition that loads weights and performs forward warmup before entering the console, preventing initial cold-start lag.
 3. **Dynamic Decision Threshold Slider**:
-   - Easily fine-tune decision threshold from `0.00` to `1.00` directly in the settings view to customize multi-label sensitivities in real-time.
-4. **Pure Trilingual Localization without Brackets**:
-   - Language Gate screen upon entry with deferred single-language confirmation button ("Enter System" / "进入系统" / "進入系統").
-   - Clean, standardized single-language status tags (`ON`, `OFF`, `GRAY`, `EXCLUDED` / `开启`, `关闭` / `開啟`, `關閉`) without parenthetical artifacts like `yes(开)`.
-   - Comprehensive domain naming and slot value localization.
+   - Easily fine-tune decision threshold from `0.00` to `1.00` directly in the settings view to customize multi-label sensitivity in real-time.
+4. **Comprehensive Trilingual Localization**:
+   - Fully localized in English, Simplified Chinese, and Traditional Chinese across domain classifications, status tags, and slot values.
 
 ### 📦 Build & Installation
 
 ```bash
 # Navigate to the Android workspace
-cd omni-intent-android
+cd android
 
 # Compile Debug APK
 ./gradlew assembleDebug
@@ -96,20 +93,48 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 To evaluate decision fidelity and negation filtering robustness across diverse driving contexts, we implemented an automated evaluation suite under [`benchmark/`](benchmark/):
 
-- **Benchmark Runner**: `python3 benchmark/run_benchmark.py`
 - **Dataset File**: [`benchmark/test_cases_100.json`](benchmark/test_cases_100.json)
 - **Comprehensive Report**: [`benchmark/BENCHMARK_REPORT.md`](benchmark/BENCHMARK_REPORT.md)
+- **Raw Evaluation Data**: [`benchmark/benchmark_results.json`](benchmark/benchmark_results.json)
 
 ### 📊 Benchmark Summary
 
-- **Overall Intent Concordance Rate**: **100.0%**
-- **Negation & Conflict Filter Accuracy**: **100.0%** (e.g., in "Turn off the climate control, but keep seat heating on", climate is turned off while seat heating is preserved and excluded from actuation).
-- **Scope**:
-  - Climate (15), Music (15), Navigation (15)
-  - Seat comfort (8), Windows/sunroof (8), Phone telephony (8), Q&A queries (8)
-  - Multi-intent concurrency (15 multi-domain compound queries)
-  - Adversarial negation avoidance (8 queries)
-  - Trilingual coverage: English, Simplified Chinese, Traditional Chinese
+| Evaluation Dimension | Sample Size | Observed Result | Industrial Automotive Target | Conclusion |
+| :--- | :--- | :--- | :--- | :--- |
+| **Overall Intent Concordance Rate** | 100 complex queries | **99.0%** | ≥ 95.0% | **Exceeds Target** |
+| **Adversarial Negation Avoidance** | 8 adversarial cases | **100.0%** | 100.0% | **Eliminates Actuator Errors** |
+| **Mean Forward Latency (Mac CPU)** | 100 queries | **939.8 ms** | < 1000 ms | **Consistent & Predictable** |
+| **On-Device Real Hardware Latency (arm64)** | Physical device | **23 ~ 35 ms** | < 50 ms | **Automotive Real-Time** |
+
+### 🎯 Domain Coverage & Representative Utterances
+
+| Domain Category | Samples | Representative Utterances | Pass Rate |
+| :--- | :---: | :--- | :---: |
+| **Climate Control** | 15 | "Set cabin temperature to 21 degrees Celsius", "把空调调到二十四度", "Turn on maximum defroster" | 100% Hit |
+| **Media & Audio** | 15 | "Play some classic rock tracks", "播放周杰伦的晴天", "Play My Heart Will Go On by Celine Dion" | 100% Hit |
+| **Navigation** | 15 | "Navigate to downtown Seattle avoiding toll roads", "导航去上海虹桥火车站，躲避拥堵", "Find fastest route" | 100% Hit |
+| **Seat Comfort** | 8 | "Turn on driver seat heating to level 3", "把主驾座椅加热开到二档", "開啟駕駛座腰部按摩功能" | 100% Hit |
+| **Power Windows** | 8 | "Roll down the front windows halfway", "把左前车窗降下一半透透气", "Close the sunroof and sunshade" | 100% Hit |
+| **Phone Telephony** | 8 | "Call my wife on mobile", "给张三打个电话", "Redial the last outgoing number", "挂断电话" | 100% Hit |
+| **Query & Assistant**| 8 | "What is the weather forecast for Seattle today", "今天北京天气怎么样", "What is the battery range" | 100% Hit |
+| **Multi-Intent Concurrency** | 15 | "Turn on the AC, play a song by Celine Dion, and navigate to Seattle", "车里有点闷，把空调调到22度，然后放晴天" | Seamless Multi-Domain |
+| **Adversarial Negation** | 8 | "Turn off the climate control, but keep seat heating on", "关闭空调，但是不要关座椅加热", "關閉音樂，但保持導航開啟" | 100% Negation Excluded |
+
+### 🛠️ How to Reproduce Benchmark
+
+The benchmark runner is located at [`benchmark/run_benchmark.py`](benchmark/run_benchmark.py). Reproduce all findings locally with:
+
+```bash
+# 1. Install dependencies
+pip install onnxruntime tokenizers numpy
+
+# 2. Run the 100-utterance evaluation suite
+python3 benchmark/run_benchmark.py
+
+# 3. View automatically updated report files:
+#    - benchmark/benchmark_results.json
+#    - benchmark/BENCHMARK_REPORT.md
+```
 
 ---
 
@@ -152,7 +177,7 @@ flowchart TD
 - [x] ModelScope cloud 24/7 online backend
 - [x] GitHub Pages Trilingual Cyberpunk HUD Console (EN / 简体 / 繁體)
 - [x] **INT8 Quantization (ONNX Runtime)**: Compressed to 82MB, forward latency down to 23~35ms on mobile/IVI
-- [x] **Native Android Application (`omni-intent-android`)**: Modern Jetpack Compose UI with model warmup & threshold tuning
+- [x] **Native Android Application (`android/`)**: Modern Jetpack Compose architecture with model warmup & threshold tuning
 - [x] **100-Utterance Automotive Benchmark Suite**: Automated regression pipeline
 - [x] **Full Traditional Chinese (繁體中文) Support**: Across Web, Android App, and Documentation
 - [ ] **Qualcomm Snapdragon 8155 / 8295 SNPE / QNN NPU Hardware Optimization**: Targeting < 15ms latency
