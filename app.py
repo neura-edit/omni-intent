@@ -174,29 +174,35 @@ KNOWN_ARTISTS_BILINGUAL = {
     "maroon 5": "魔力红 / Maroon 5",
     "八三夭": "八三夭 / 831",
     "831": "八三夭 / 831",
+    "周杰倫": "周杰伦 / Jay Chou",
+    "陳奕迅": "陈奕迅 / Eason Chan",
+    "林俊傑": "林俊杰 / JJ Lin",
+    "鄧紫棋": "邓紫棋 / G.E.M.",
+    "張學友": "张学友 / Jacky Cheung",
+    "薛之謙": "薛之谦 / Joker Xue",
     "celine dion": "席琳·迪翁 / Celine Dion",
     "席琳·迪翁": "席琳·迪翁 / Celine Dion"
 }
 
 SONG_BILINGUAL = {
-    "外婆的告别式": "外婆的告别式 / Grandma's Farewell", "grandma's farewell": "外婆的告别式 / Grandma's Farewell",
-    "我心永恒": "我心永恒 / My Heart Will Go On", "my heart will go on": "我心永恒 / My Heart Will Go On",
-    "伟大的渺小": "伟大的渺小 / Little Big Us", "little big us": "伟大的渺小 / Little Big Us",
-    "蓝莲花": "蓝莲花 / Blue Lotus", "blue lotus": "蓝莲花 / Blue Lotus",
-    "听海": "听海 / Listen to the Sea", "listen to the sea": "听海 / Listen to the Sea",
+    "外婆的告别式": "外婆的告别式 / Grandma's Farewell", "外婆的告別式": "外婆的告别式 / Grandma's Farewell", "grandma's farewell": "外婆的告别式 / Grandma's Farewell",
+    "我心永恒": "我心永恒 / My Heart Will Go On", "我心永恆": "我心永恒 / My Heart Will Go On", "my heart will go on": "我心永恒 / My Heart Will Go On",
+    "伟大的渺小": "伟大的渺小 / Little Big Us", "偉大的渺小": "伟大的渺小 / Little Big Us", "little big us": "伟大的渺小 / Little Big Us",
+    "蓝莲花": "蓝莲花 / Blue Lotus", "藍蓮花": "蓝莲花 / Blue Lotus", "blue lotus": "蓝莲花 / Blue Lotus",
+    "听海": "听海 / Listen to the Sea", "聽海": "听海 / Listen to the Sea", "listen to the sea": "听海 / Listen to the Sea",
     "晴天": "晴天 / Sunny Day", "sunny day": "晴天 / Sunny Day",
     "青花瓷": "青花瓷 / Blue and White Porcelain", "blue and white porcelain": "青花瓷 / Blue and White Porcelain",
     "七里香": "七里香 / Common Jasmine Orange", "common jasmine orange": "七里香 / Common Jasmine Orange",
     "十年": "十年 / Ten Years", "ten years": "十年 / Ten Years",
     "稻香": "稻香 / Fragrance of Rice", "fragrance of rice": "稻香 / Fragrance of Rice",
     "夜曲": "夜曲 / Nocturne", "nocturne": "夜曲 / Nocturne",
-    "告白气球": "告白气球 / Love Confession", "love confession": "告白气球 / Love Confession",
-    "红豆": "红豆 / Red Bean", "red bean": "红豆 / Red Bean",
-    "年少有为": "年少有为 / If I Were Young", "if i were young": "年少有为 / If I Were Young",
+    "告白气球": "告白气球 / Love Confession", "告白氣球": "告白气球 / Love Confession", "love confession": "告白气球 / Love Confession",
+    "红豆": "红豆 / Red Bean", "紅豆": "红豆 / Red Bean", "red bean": "红豆 / Red Bean",
+    "年少有为": "年少有为 / If I Were Young", "年少有為": "年少有为 / If I Were Young", "if i were young": "年少有为 / If I Were Young",
     "平凡之路": "平凡之路 / The Ordinary Road", "the ordinary road": "平凡之路 / The Ordinary Road",
     "消愁": "消愁 / Sorrow Drowning", "sorrow drowning": "消愁 / Sorrow Drowning",
-    "起风了": "起风了 / The Wind Rises", "the wind rises": "起风了 / The Wind Rises",
-    "shape of you": "你的样子 / Shape of You", "你的样子": "你的样子 / Shape of You",
+    "起风了": "起风了 / The Wind Rises", "起風了": "起风了 / The Wind Rises", "the wind rises": "起风了 / The Wind Rises",
+    "shape of you": "你的样子 / Shape of You", "你的样子": "你的样子 / Shape of You", "你的樣子": "你的样子 / Shape of You",
     "perfect": "完美 / Perfect",
     "someone like you": "像你一样的人 / Someone Like You",
     "bad guy": "坏家伙 / Bad Guy",
@@ -261,8 +267,8 @@ for _, (lbl, kws) in GENRE_MAP.items():
     GENRE_TERMS.update(kws)
 
 KNOWN_ARTISTS_CN = [
-    "周杰伦", "周董", "陈奕迅", "林俊杰", "邓紫棋", "五月天", "王菲",
-    "李荣浩", "薛之谦", "毛不易", "张学友", "华晨宇", "汪峰", "张杰", "许嵩",
+    "周杰伦", "周杰倫", "周董", "陈奕迅", "陳奕迅", "林俊杰", "林俊傑", "邓紫棋", "鄧紫棋", "五月天", "王菲",
+    "李荣浩", "薛之谦", "薛之謙", "毛不易", "张学友", "張學友", "华晨宇", "汪峰", "张杰", "许嵩",
     "许巍", "朴树", "刀郎", "李健", "周深", "孙燕姿", "张韶涵", "梁静茹",
     "莫文蔚", "伍佰", "动力火车", "陶喆", "王力宏", "凤凰传奇", "赵雷", "八三夭"
 ]
@@ -287,14 +293,14 @@ for code, (lbl, kws) in MOOD_MAP.items():
 ALL_MOODS_ORDERED.sort(key=lambda x: len(x[0]), reverse=True)
 
 CARRIER_TOKENS = [
-    "我们", "咱们", "大家", "他们", "你们", "车里人", "车上人", "全车人", "车里", "车上",
+    "我们", "咱們", "咱们", "大家", "他们", "他們", "你们", "妳們", "车里人", "車裡人", "车上人", "車上人", "全车人", "全車人", "车里", "車裡", "车上", "車上",
     "我", "你", "他", "她", "它",
-    "想要", "想", "要", "打算", "准备", "喜欢", "爱听", "希望能", "希望", "需要", "烦请", "麻烦", "请", "可以", "能",
-    "帮我们", "帮咱们", "帮我", "给我们", "给咱们", "给我", "替我们", "替我", "为我们", "为我",
-    "还", "又", "也", "就", "再", "顺便", "接着", "然后", "先", "现在", "立刻", "马上",
-    "播放", "点播", "播送", "放", "听", "播", "唱", "来", "搜", "查", "换", "切", "听听", "放放", "播播",
-    "一首", "两首", "几首", "首", "曲", "支", "首歌曲", "首歌", "首曲子", "点", "下", "个", "一些", "一点", "些",
-    "的", "音乐", "歌", "歌曲", "曲子", "风格", "曲风", "类型", "旋律", "调子",
+    "想要", "想", "要", "打算", "准备", "準備", "喜欢", "喜歡", "爱听", "愛聽", "希望能", "希望", "需要", "烦请", "麻烦", "麻煩", "请", "請", "可以", "能",
+    "帮我们", "幫我們", "帮咱们", "幫咱們", "帮我", "幫我", "给我们", "給我們", "给咱们", "給咱們", "给我", "給我", "替我们", "替我", "为我们", "為我們", "为我", "為我",
+    "还", "還", "又", "也", "就", "再", "顺便", "順便", "接着", "接著", "然后", "然後", "先", "现在", "立刻", "马上",
+    "播放", "点播", "點播", "播送", "放", "听", "聽", "播", "唱", "来", "來", "搜", "查", "换", "換", "切", "听听", "聽聽", "放放", "播播",
+    "一首", "两首", "兩首", "几首", "幾首", "首", "曲", "支", "首歌曲", "首歌", "首曲子", "点", "點", "下", "个", "個", "一些", "一点", "一點", "些",
+    "的", "音乐", "音樂", "歌", "歌曲", "曲子", "风格", "曲風", "曲风", "类型", "旋律", "调子",
     "吧", "啊", "呀", "啦", "呢", "嘛", "一下", "一会", "会儿",
     "play", "listen to", "listen", "hear", "song", "songs", "music", "track", "tracks",
     "some", "a", "an", "the", "to", "piece of", "piece", "please", "can you", "can", "you", "we", "want to", "want",
@@ -479,9 +485,10 @@ def extract_music_slots(text):
 
     # Chinese syntactic pattern matching with prefix pruning
     if not artist and not song:
-        pattern = r"^(?:(?:我(?:们)?|咱们|大家|他们|你们|车[里内上]|全车人|你|他(?:们)?|她(?:们)?)?\s*(?:还|又|也|就|再|顺便|接着|然后|先|麻烦|请)?\s*(?:想要|想|要|打算|希望能?|准备|喜欢|爱听)?\s*(?:帮我(?:们)?|给我(?:们)?|替我(?:们)?|为我(?:们)?|来)?\s*(?:播放|点播|放|听|播|唱|搜|查|切|换)?\s*(?:一?[首曲支]|两首|几首|首歌曲|首歌|首曲子|点|下|个|一些|一点)?\s*)"
+        pattern = r"^(?:(?:我(?:们|們)?|咱们|咱們|大家|他们|他們|你们|妳們|车[里内上]|車[裡內上]|全车人|全車人|你|他(?:们|們)?|她(?:们|們)?)?\s*(?:还|還|又|也|就|再|顺便|順便|接着|接著|然后|然後|先|麻烦|麻煩|请|請)?\s*(?:想要|想|要|打算|希望能?|准备|準備|喜欢|喜歡|爱听|愛聽)?\s*(?:帮我(?:们|們)?|幫我(?:们|們)?|给我(?:们|們)?|給我(?:们|們)?|替我(?:们|們)?|为我(?:们|們)?|為我(?:们|們)?|来|來)?\s*(?:播放|点播|點播|放|听|聽|播|唱|搜|查|切|换|換)?\s*(?:一?[首曲支]|两首|兩首|几首|幾首|首歌曲|首歌|首曲子|点|點|下|个|個|一些|一点|一點)?\s*)"
+        suffix_pat = r"(?:的?(?:这首歌|這首歌|这首|這首|歌曲|音乐|音樂|歌|曲子))$"
         cleaned = re.sub(pattern, "", music_clause).strip()
-        cleaned = re.sub(r"(?:的?(?:音乐|歌|歌曲|曲子))$", "", cleaned).strip()
+        cleaned = re.sub(suffix_pat, "", cleaned).strip()
         cleaned = re.sub(r"^(?:play|listen to|hear)?\s*(?:some|a\s+song|a\s+track|a\s+piece\s+of)?\s*", "", cleaned, flags=re.I).strip()
         cleaned = re.sub(r"(?:music|songs?|track)?$", "", cleaned, flags=re.I).strip()
 
@@ -500,7 +507,8 @@ def extract_music_slots(text):
                 left = m_cn.group(1).strip()
                 right = m_cn.group(2).strip()
                 left = re.sub(pattern, "", left).strip()
-                if left in ADJECTIVE_MOODS or right in GENRE_TERMS or right in ["歌", "音乐", "歌曲", "曲子"]:
+                right = re.sub(suffix_pat, "", right).strip()
+                if left in ADJECTIVE_MOODS or right in GENRE_TERMS or right in ["歌", "音乐", "音樂", "歌曲", "曲子"]:
                     artist = "未指定 / Unspecified"
                     song = make_recommendation_song([left])
                     target = "genre_mood_all"
@@ -511,7 +519,7 @@ def extract_music_slots(text):
             else:
                 for a in KNOWN_ARTISTS_CN:
                     if cleaned == a:
-                        raw_a = "周杰伦" if a == "周董" else a
+                        raw_a = "周杰伦" if a in ["周董", "周杰倫"] else a
                         artist = KNOWN_ARTISTS_BILINGUAL.get(raw_a, raw_a)
                         song = "未指定（默认播放热门精选） / Unspecified (Top Hits)"
                         target = "artist_all"
@@ -519,13 +527,16 @@ def extract_music_slots(text):
                 if not artist:
                     for a in KNOWN_ARTISTS_CN:
                         if cleaned.startswith(a) and len(cleaned) > len(a):
-                            raw_a = "周杰伦" if a == "周董" else a
+                            raw_a = "周杰伦" if a in ["周董", "周杰倫"] else a
                             artist = KNOWN_ARTISTS_BILINGUAL.get(raw_a, raw_a)
                             song = cleaned[len(a):].strip(" 的")
+                            song = re.sub(suffix_pat, "", song).strip()
+                            song = SONG_BILINGUAL.get(song, song)
                             target = "specific_song"
                             break
                     if not song and cleaned:
-                        song = cleaned
+                        cleaned = re.sub(suffix_pat, "", cleaned).strip()
+                        song = SONG_BILINGUAL.get(cleaned, cleaned)
                         target = "specific_song"
 
     if artist:
@@ -561,7 +572,7 @@ def extract_music_slots(text):
 
 
 CN_NUM = {
-    "零": 0, "一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5,
+    "零": 0, "一": 1, "二": 2, "两": 2, "兩": 2, "三": 3, "四": 4, "五": 5,
     "六": 6, "七": 7, "八": 8, "九": 9, "十": 10,
 }
 
@@ -575,8 +586,8 @@ def cn_to_number(s):
     except ValueError:
         pass
 
-    if "点" in s:
-        parts = s.split("点")
+    if "点" in s or "點" in s:
+        parts = s.split("点") if "点" in s else s.split("點")
         integer_part = cn_to_number(parts[0])
         if integer_part is None:
             return None
@@ -597,7 +608,7 @@ def cn_to_number(s):
     if s.startswith("十"):
         return 10.0 + CN_NUM.get(s[1], 0)
 
-    m = re.match(r"^([一二两三四五六七八九])十([一二两三四五六七八九])?$", s)
+    m = re.match(r"^([一二两兩三四五六七八九])十([一二两兩三四五六七八九])?$", s)
     if m:
         tens = CN_NUM.get(m.group(1), 0) * 10
         ones = CN_NUM.get(m.group(2), 0) if m.group(2) else 0
@@ -611,12 +622,29 @@ def cn_to_number(s):
 
 def extract_climate_slots(text):
     text_lower = text.lower()
+    has_climate_cue = any(w in text_lower for w in [
+        "空调", "空調", "温度", "溫度", "冷气", "冷氣", "暖风", "暖風", "制冷", "製冷", "制热", "製熱", "暖气", "暖氣",
+        "除雾", "除霧", "除霜", "风量", "風量", "外循环", "外循環", "内循环", "內循環",
+        "太热", "太熱", "太冷", "热一点", "熱一點", "冷一点", "冷一點", "降温", "降溫", "升温", "升溫",
+        "ac", "a/c", "climate", "temperature", "temp", "cooler", "warmer", "cool down", "warm up", "defrost"
+    ]) or bool(re.search(r"[0-9一二两兩三四五六七八九十]+\s*(?:度|°|℃)", text))
+
+    if not has_climate_cue:
+        return {
+            "target_temp": "未指定 / Unspecified",
+            "temp_value": None,
+            "temp_type": "未指定 / Unspecified",
+            "delta": None,
+            "zone": "未指定 / Unspecified",
+            "mode": "未指定 / Unspecified",
+        }
+
     zone = "全车 / All Zones"
-    if "主驾" in text or "driver" in text_lower or "left side" in text_lower:
+    if "主驾" in text or "主駕" in text or "driver" in text_lower or "left side" in text_lower:
         zone = "主驾 / Driver"
-    elif "副驾" in text or "passenger" in text_lower or "right side" in text_lower:
+    elif "副驾" in text or "副駕" in text or "passenger" in text_lower or "right side" in text_lower:
         zone = "副驾 / Passenger"
-    elif "后排" in text or "rear" in text_lower or "back seat" in text_lower:
+    elif "后排" in text or "後排" in text or "rear" in text_lower or "back seat" in text_lower:
         zone = "后排 / Rear"
 
     temp = None
@@ -625,7 +653,7 @@ def extract_climate_slots(text):
 
     # 1. Absolute temperature parsing (EN / CN)
     m_abs_en = re.search(r"(?:set\s+(?:the\s+)?(?:temp|temperature|ac|a/c|air)\s+to|temp\s+to|ac\s+to|make\s+it)\s*([0-9\.]+)\s*(?:degrees|degree|c|celsius|f|°c)?", text_lower)
-    m_abs_cn = re.search(r"(?:温度|调至|调到|设为|设置成|设成|开到|到)?\s*([0-9一二两三四五六七八九十点\.]+)\s*(?:度|°|℃|摄氏度)", text)
+    m_abs_cn = re.search(r"(?:温度|溫度|调至|調至|调到|調到|设为|設為|设置成|設置成|设成|設成|开到|開到|到)?\s*([0-9一二两兩三四五六七八九十点點\.]+)\s*(?:度|°|℃|摄氏度|攝氏度)", text)
 
     if m_abs_en:
         num = float(m_abs_en.group(1))
@@ -650,8 +678,8 @@ def extract_climate_slots(text):
             m_d = re.search(r"by\s*([0-9\.]+)\s*(?:degrees|degree|°)?", text_lower)
             delta = -(float(m_d.group(1)) if m_d else 2.0)
             temp_type = f"相对降温 ({delta}℃) / Cooler ({delta}°C)"
-        elif ("高" in text or "升" in text or "热" in text):
-            m_rel = re.search(r"(?:升温|调高|升高|热一点|暖和点|加|升)?\s*([0-9一二两三四五六七八九十\.]+)\s*(?:度|°|℃)?", text)
+        elif ("高" in text or "升" in text or "热" in text or "熱" in text):
+            m_rel = re.search(r"(?:升温|升溫|调高|調高|升高|热一点|熱一點|暖和点|暖和點|加|升)?\s*([0-9一二两兩三四五六七八九十\.]+)\s*(?:度|°|℃)?", text)
             if m_rel and m_rel.group(1):
                 d = cn_to_number(m_rel.group(1))
                 if d and d <= 10:
@@ -661,7 +689,7 @@ def extract_climate_slots(text):
                 delta = 1.0
                 temp_type = f"相对升温 (+{delta}℃) / Warmer (+1.0°C)"
         elif ("低" in text or "降" in text or "冷" in text):
-            m_low = re.search(r"(?:降温|调低|降低|冷一点|凉快点|减)?\s*([0-9一二两三四五六七八九十\.]+)\s*(?:度|°|℃)?", text)
+            m_low = re.search(r"(?:降温|降溫|调低|調低|降低|冷一点|冷一點|凉快点|涼快點|减|減)?\s*([0-9一二两兩三四五六七八九十\.]+)\s*(?:度|°|℃)?", text)
             if m_low and m_low.group(1):
                 d = cn_to_number(m_low.group(1))
                 if d and d <= 10:
@@ -672,15 +700,15 @@ def extract_climate_slots(text):
                 temp_type = f"相对降温 (-1.0℃) / Cooler (-1.0°C)"
 
     mode = "自动 / Automatic (AUTO)"
-    if any(w in text_lower for w in ["制冷", "冷风", "冷气", "ac", "a/c", "cooling"]):
+    if any(w in text_lower for w in ["制冷", "製冷", "冷风", "冷風", "冷气", "冷氣", "ac", "a/c", "cooling"]):
         mode = "制冷 / Cooling (A/C)"
-    elif any(w in text_lower for w in ["制热", "暖风", "暖气", "heater", "heating"]):
+    elif any(w in text_lower for w in ["制热", "製熱", "暖风", "暖風", "暖气", "暖氣", "heater", "heating"]):
         mode = "制热 / Heating (HEATER)"
-    elif any(w in text_lower for w in ["除雾", "除霜", "defrost", "defog"]):
+    elif any(w in text_lower for w in ["除雾", "除霧", "除霜", "defrost", "defog"]):
         mode = "除雾/除霜 / Defrost & Defog"
-    elif any(w in text_lower for w in ["内循环", "recirculation"]):
+    elif any(w in text_lower for w in ["内循环", "內循環", "recirculation"]):
         mode = "内循环 / Recirculation"
-    elif any(w in text_lower for w in ["外循环", "fresh air"]):
+    elif any(w in text_lower for w in ["外循环", "外循環", "fresh air"]):
         mode = "外循环 / Fresh Air"
 
     return {
@@ -697,9 +725,10 @@ def extract_nav_slots(text):
     text_lower = text.lower()
     has_nav_cue = any(w in text_lower for w in [
         "导航", "路线", "地图", "路况", "目的地", "带我", "回公司", "回家", "怎么走", "堵车", "去哪", "查路线",
-        "加油站", "充电桩", "前往", "带我去", "送我到", "开车去", "开车到", "导到", "导去",
+        "導航", "路線", "地圖", "路況", "帶我", "怎麼走", "塞車", "查路線",
+        "加油站", "充电桩", "充電樁", "前往", "带我去", "帶我去", "送我到", "开车去", "開車去", "开车到", "開車到", "导到", "導到", "导去", "導去",
         "navigate", "navigation", "gps", "route", "destination", "take me to", "drive to", "directions to", "head to"
-    ]) or bool(re.search(r"(?:^|[，,；;。！!？?\s])(?:我想|我要|帮我|请)?(?:去|到|回|前往)\s*[\u4e00-\u9fa5]{2,15}", text))
+    ]) or bool(re.search(r"(?:^|[，,；;。！!？?\s])(?:我想|我要|帮我|幫我|请|請)?(?:去|到|回|前往)\s*[\u4e00-\u9fa5]{2,15}", text))
 
     if not has_nav_cue:
         return {
@@ -708,25 +737,25 @@ def extract_nav_slots(text):
             "preference": "未指定 / Unspecified",
         }
 
-    if any(w in text_lower for w in ["退出导航", "关闭导航", "停掉导航", "取消导航", "不导了", "exit navigation", "cancel navigation", "stop navigation"]):
+    if any(w in text_lower for w in ["退出导航", "退出導航", "关闭导航", "關閉導航", "停掉导航", "停掉導航", "取消导航", "取消導航", "不导了", "不導了", "exit navigation", "cancel navigation", "stop navigation"]):
         action = "退出导航 / Exit Navigation"
-    elif any(w in text_lower for w in ["查路线", "看路线", "check route", "show route", "directions to"]):
+    elif any(w in text_lower for w in ["查路线", "查路線", "看路线", "看路線", "check route", "show route", "directions to"]):
         action = "查询路线 / Check Route"
-    elif any(w in text_lower for w in ["路况如何", "堵不堵", "堵车吗", "how is traffic", "check traffic", "traffic condition"]):
+    elif any(w in text_lower for w in ["路况如何", "路況如何", "堵不堵", "塞車嗎", "塞不塞車", "堵车吗", "how is traffic", "check traffic", "traffic condition"]):
         action = "查询路况 / Check Traffic"
-    elif any(w in text_lower for w in ["附近的", "周围的", "nearby", "find gas station", "find charging"]):
+    elif any(w in text_lower for w in ["附近的", "周围的", "周圍的", "nearby", "find gas station", "find charging"]):
         action = "周边/沿途搜索 / Nearby Search"
     else:
         action = "设置目的地导航 / Set Destination"
 
     pref = "系统推荐 / Default"
-    if "不走高速" in text or "avoid highway" in text_lower or "avoid highways" in text_lower or "no highway" in text_lower:
+    if "不走高速" in text or "避开高速" in text or "避開高速" in text or "avoid highway" in text_lower or "avoid highways" in text_lower or "no highway" in text_lower:
         pref = "不走高速 / Avoid Highways"
-    elif "躲避拥堵" in text or "避开拥堵" in text or "avoid traffic" in text_lower or "avoiding traffic" in text_lower:
+    elif "躲避拥堵" in text or "躲避擁堵" in text or "避开拥堵" in text or "避開擁堵" in text or "avoid traffic" in text_lower or "avoiding traffic" in text_lower:
         pref = "躲避拥堵 / Avoid Congestion"
-    elif "高速优先" in text or "prefer highway" in text_lower:
+    elif "高速优先" in text or "高速優先" in text or "prefer highway" in text_lower:
         pref = "高速优先 / Highway First"
-    elif "距离最短" in text or "shortest" in text_lower:
+    elif "距离最短" in text or "距離最短" in text or "shortest" in text_lower:
         pref = "距离最短 / Shortest Route"
     elif "最快" in text or "fastest" in text_lower:
         pref = "时间最快 / Fastest Route"
@@ -739,25 +768,25 @@ def extract_nav_slots(text):
         dest_clean = re.sub(r"\b(avoiding traffic|avoid traffic|avoiding highways|avoid highways|fastest route|shortest route)\b", "", dest_raw, flags=re.I).strip()
         dest = dest_clean
     else:
-        clauses = re.split(r"[,;!?，；！？]|\band\b|\bbut\b|\bthen\b|并且|但|但是|然后|同时|顺便|另外|再", text)
+        clauses = re.split(r"[,;!?，；！？]|\band\b|\bbut\b|\bthen\b|并且|並且|但|但是|然后|然後|同时|同時|顺便|順便|另外|再", text)
         patterns = [
-            r"(?:^|\s)(?:再|然后再|顺便|另外|还想|还要|顺带)?\s*(?:导航|带我|我想|我要|送我|开车|开去|帮我导?到|请帮我导?到|导到|导去)?\s*(?:去|到|至|向|前往)\s*([^，,；;。！!？?]+?)(?:怎么走|的路线|的路况|路线|路况|导航)?$",
-            r"(?:^|\s)(?:查一下|查询|看看)?(?:去|到|前往)\s*([^，,；;。！!？?]+?)(?:的路线|的路况|怎么走)?$",
-            r"(?:回|去)(公司|家|学校|办公室|机场|车站|酒店|医院|超市|香港|西雅图|北京|上海)",
+            r"(?:^|\s)(?:再|然后再|然後再|顺便|順便|另外|还想|還想|还要|還要|顺带|順帶)?\s*(?:导航|導航|带我|帶我|我想|我要|送我|开车|開車|开去|開去|帮我导?到|幫我導?到|请帮我导?到|請幫我導?到|导到|導到|导去|導去)?\s*(?:去|到|至|向|前往)\s*([^，,；;。！!？?]+?)(?:怎么走|怎麼走|的路线|的路線|的路况|的路況|路线|路線|路况|路況|导航|導航)?$",
+            r"(?:^|\s)(?:查一下|查询|查詢|看看)?(?:去|到|前往)\s*([^，,；;。！!？?]+?)(?:的路线|的路線|的路况|的路況|怎么走|怎麼走)?$",
+            r"(?:回|去)(公司|家|学校|學校|办公室|辦公室|机场|機場|车站|車站|酒店|医院|醫院|超市|香港|西雅图|西雅圖|北京|上海)",
         ]
         for c in clauses:
             c = c.strip()
-            cleaned_c = re.sub(r"(?:躲避拥堵|不走高速|避开高速|避开拥堵|高速优先|距离最短|走最近的路|推荐路线)", "", c).strip()
+            cleaned_c = re.sub(r"(?:躲避拥堵|躲避擁堵|不走高速|避开高速|避開高速|避开拥堵|避開擁堵|高速优先|高速優先|距离最短|距離最短|走最近的路|推荐路线|推薦路線)", "", c).strip()
             for p in patterns:
                 m = re.search(p, cleaned_c)
                 if m and m.group(1):
                     cand = m.group(1).strip()
-                    cand = re.sub(r"^(?:一下|看下|帮我|查下|一个)?", "", cand).strip()
-                    cand = re.sub(r"(?:怎么走|的路线|的路况|路线|路况)$", "", cand).strip()
-                    if cand and cand not in ["哪", "哪里", "什么地方", "导航"]:
-                        if re.search(r"^\d+(?:\.\d+)?度$|^[一二两三四五六七八九十百]+度$|^[0-9一二两三四五六七八九十]+%?$|^最大$|^最小$", cand):
+                    cand = re.sub(r"^(?:一下|看下|帮我|幫我|查下|一个|一個)?", "", cand).strip()
+                    cand = re.sub(r"(?:怎么走|怎麼走|的路线|的路線|的路况|的路況|路线|路線|路况|路況)$", "", cand).strip()
+                    if cand and cand not in ["哪", "哪里", "哪裡", "什么地方", "什麼地方", "导航", "導航"]:
+                        if re.search(r"^\d+(?:\.\d+)?度$|^[一二两兩三四五六七八九十百]+度$|^[0-9一二两兩三四五六七八九十]+%?$|^最大$|^最小$", cand):
                             continue
-                        if any(w in cand for w in ["空调", "音乐", "车窗", "座椅", "天窗", "音量", "风量"]):
+                        if any(w in cand for w in ["空调", "空調", "音乐", "音樂", "车窗", "車窗", "座椅", "天窗", "音量", "风量", "風量"]):
                             continue
                         dest = cand
                         break
@@ -767,15 +796,15 @@ def extract_nav_slots(text):
     COMMON_DEST_MAP = {
         "公司": "公司 / Office",
         "家": "家 / Home",
-        "办公室": "办公室 / Office",
-        "学校": "学校 / School",
-        "机场": "机场 / Airport",
-        "车站": "火车站 / Railway Station",
-        "火车站": "火车站 / Railway Station",
-        "高铁站": "高铁站 / High-Speed Rail Station",
-        "医院": "医院 / Hospital",
+        "办公室": "办公室 / Office", "辦公室": "办公室 / Office",
+        "学校": "学校 / School", "學校": "学校 / School",
+        "机场": "机场 / Airport", "機場": "机场 / Airport",
+        "车站": "火车站 / Railway Station", "車站": "火车站 / Railway Station",
+        "火车站": "火车站 / Railway Station", "火車站": "火车站 / Railway Station",
+        "高铁站": "高铁站 / High-Speed Rail Station", "高鐵站": "高铁站 / High-Speed Rail Station",
+        "医院": "医院 / Hospital", "醫院": "医院 / Hospital",
         "超市": "超市 / Supermarket",
-        "商场": "商场 / Shopping Mall",
+        "商场": "商场 / Shopping Mall", "商場": "商场 / Shopping Mall",
         "加油站": "加油站 / Gas Station",
         "充电站": "充电站 / Charging Station",
         "充电桩": "充电桩 / Charging Station",
@@ -2935,7 +2964,12 @@ function localizeSlotValue(val, lang) {
     '欢快/提神': { zh: '欢快/提神', en: 'Upbeat & Energetic' },
     '舒缓/安静': { zh: '舒缓/安静', en: 'Calm & Relaxed' },
     '八三夭': { zh: '八三夭', en: '831' },
+    '周杰倫': { zh: '周杰倫', en: 'Jay Chou' },
+    '陳奕迅': { zh: '陳奕迅', en: 'Eason Chan' },
+    '林俊傑': { zh: '林俊傑', en: 'JJ Lin' },
+    '鄧紫棋': { zh: '鄧紫棋', en: 'G.E.M.' },
     '外婆的告别式': { zh: '外婆的告别式', en: "Grandma's Farewell" },
+    '外婆的告別式': { zh: '外婆的告別式', en: "Grandma's Farewell" },
     '香港': { zh: '香港', en: 'Hong Kong' },
     '西雅图': { zh: '西雅图', en: 'Seattle' },
     '席琳·迪翁': { zh: '席琳·迪翁', en: 'Celine Dion' },

@@ -1727,7 +1727,12 @@ function localizeSlotValue(val, lang) {
     '欢快/提神': { zh: '欢快/提神', en: 'Upbeat & Energetic' },
     '舒缓/安静': { zh: '舒缓/安静', en: 'Calm & Relaxed' },
     '八三夭': { zh: '八三夭', en: '831' },
+    '周杰倫': { zh: '周杰倫', en: 'Jay Chou' },
+    '陳奕迅': { zh: '陳奕迅', en: 'Eason Chan' },
+    '林俊傑': { zh: '林俊傑', en: 'JJ Lin' },
+    '鄧紫棋': { zh: '鄧紫棋', en: 'G.E.M.' },
     '外婆的告别式': { zh: '外婆的告别式', en: "Grandma's Farewell" },
+    '外婆的告別式': { zh: '外婆的告別式', en: "Grandma's Farewell" },
     '香港': { zh: '香港', en: 'Hong Kong' },
     '西雅图': { zh: '西雅图', en: 'Seattle' },
     '席琳·迪翁': { zh: '席琳·迪翁', en: 'Celine Dion' },
@@ -2290,41 +2295,43 @@ function clientDecide(text, lang) {
   // 4. Slots Extraction
   // Climate Slots
   let targetTemp = '未指定 / Unspecified';
-  const mTemp = t.match(/(\d{1,2}(?:\.\d)?)\s*度/);
+  const mTemp = t.match(/(\d{1,2}(?:\.\d)?)\s*(?:度|°|℃)/);
   if (mTemp) targetTemp = mTemp[1] + '°C';
   let tempType = '绝对设定 / Absolute';
-  if (/(?:调高|升高|升温|热一点|加)/.test(t)) tempType = '相对调高 / Increase';
-  else if (/(?:调低|降低|降温|冷一点|减)/.test(t)) tempType = '相对调低 / Decrease';
+  if (/(?:调高|調高|升高|升温|升溫|热一点|熱一點|加)/.test(t)) tempType = '相对调高 / Increase';
+  else if (/(?:调低|調低|降低|降温|降溫|冷一点|冷一點|减|減)/.test(t)) tempType = '相对调低 / Decrease';
   let zone = '全车 / All Zones';
-  if (/(?:主驾|司机位)/.test(t)) zone = '主驾驶 / Driver';
-  else if (/(?:副驾)/.test(t)) zone = '副驾驶 / Passenger';
-  else if (/(?:后排)/.test(t)) zone = '后排 / Rear';
+  if (/(?:主驾|主駕|司机位|司機位|驾驶)/.test(t)) zone = '主驾驶 / Driver';
+  else if (/(?:副驾|副駕)/.test(t)) zone = '副驾驶 / Passenger';
+  else if (/(?:后排|後排)/.test(t)) zone = '后排 / Rear';
   const climateSlots = { target_temp: targetTemp, temp_type: tempType, zone: zone, mode: '自动 / Auto' };
 
   // Music Slots
   let artist = '未指定 / Unspecified';
-  ['周杰伦', '陈奕迅', '林俊杰', '邓紫棋', '王菲', 'Taylor Swift', 'Coldplay', 'Adele', '八三夭'].forEach(a => {
+  ['周杰伦', '周杰倫', '陈奕迅', '陳奕迅', '林俊杰', '林俊傑', '邓紫棋', '鄧紫棋', '王菲', 'Taylor Swift', 'Coldplay', 'Adele', '八三夭'].forEach(a => {
     if (t.includes(a)) artist = a;
   });
   let song = '未指定 / Unspecified';
-  ['晴天', '七里香', '十年', '外婆的告别式', 'Shape of You', 'Hello', 'Yellow'].forEach(s => {
+  ['晴天', '七里香', '十年', '外婆的告别式', '外婆的告別式', '告白气球', '告白氣球', '年少有为', '年少有為', '蓝莲花', '藍蓮花', '听海', '聽海', 'Shape of You', 'Hello', 'Yellow'].forEach(s => {
     if (t.includes(s)) song = s;
   });
   let mood = '流行 / Pop';
-  if (/(?:古典|交响乐|管弦)/.test(t)) mood = '古典 / Classical';
-  else if (/(?:爵士|布鲁斯)/.test(t)) mood = '爵士 / Jazz';
-  else if (/(?:摇滚)/.test(t)) mood = '摇滚 / Rock';
-  else if (/(?:轻快|欢快)/.test(t)) mood = '欢快动感 / Energetic';
+  if (/(?:古典|交响乐|交響樂|管弦)/.test(t)) mood = '古典 / Classical';
+  else if (/(?:爵士|布鲁斯|藍調)/.test(t)) mood = '爵士 / Jazz';
+  else if (/(?:摇滚|搖滾)/.test(t)) mood = '摇滚 / Rock';
+  else if (/(?:轻快|輕快|欢快|歡快)/.test(t)) mood = '欢快动感 / Energetic';
   let musicAction = turnOffs.includes('music') ? '暂停播放 / Pause' : '点播播放 / Play';
   const musicSlots = { artist: artist, song: song, mood: mood, action: musicAction, target_type: '歌曲点播 / Track Play' };
 
   // Navigation Slots
   let dest = '未指定 / Unspecified';
-  const mDest = t.match(/(?:去|到|前往|开往)\s*([^，,；;。！!？?\s]+)/);
+  const mDest = t.match(/(?:去|到|前往|开往|開往)\s*([^，,；;。！!？?\s]+)/);
   if (mDest) dest = mDest[1];
   let pref = '系统推荐 / Default';
-  if (/(?:不走高速|避开高速|别走高速)/.test(t)) pref = '不走高速 / Avoid Highways';
-  else if (/(?:躲避拥堵|避开拥堵)/.test(t)) pref = '躲避拥堵 / Avoid Congestion';
+  if (/(?:不走高速|避开高速|避開高速|别走高速|別走高速)/.test(t)) pref = '不走高速 / Avoid Highways';
+  else if (/(?:躲避拥堵|躲避擁堵|避开拥堵|避開擁堵|避開塞車|躲避塞車)/.test(t)) pref = '躲避拥堵 / Avoid Congestion';
+  else if (/(?:高速优先|高速優先)/.test(t)) pref = '高速优先 / Highway First';
+  else if (/(?:距离最短|距離最短)/.test(t)) pref = '距离最短 / Shortest Route';
   const navSlots = { destination: dest, preference: pref, action: '发起导航 / Start Navigation' };
 
   const phoneSlots = { contact: '未指定 / Unspecified', phone_number: '未指定 / Unspecified', action: '呼叫 / Call' };

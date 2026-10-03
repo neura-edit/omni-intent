@@ -20,18 +20,18 @@ object OmniIntentEngine {
 
     val KNOWN_ARTISTS_BILINGUAL = mapOf(
         "八三夭" to "八三夭 / 831", "831" to "八三夭 / 831",
-        "周杰伦" to "周杰伦 / Jay Chou", "周董" to "周杰伦 / Jay Chou", "jay chou" to "周杰伦 / Jay Chou",
-        "陈奕迅" to "陈奕迅 / Eason Chan", "eason chan" to "陈奕迅 / Eason Chan",
-        "林俊杰" to "林俊杰 / JJ Lin", "jj lin" to "林俊杰 / JJ Lin", "jj" to "林俊杰 / JJ Lin",
-        "邓紫棋" to "邓紫棋 / G.E.M.", "g.e.m." to "邓紫棋 / G.E.M.", "gem" to "邓紫棋 / G.E.M.",
+        "周杰伦" to "周杰伦 / Jay Chou", "周杰倫" to "周杰伦 / Jay Chou", "周董" to "周杰伦 / Jay Chou", "jay chou" to "周杰伦 / Jay Chou",
+        "陈奕迅" to "陈奕迅 / Eason Chan", "陳奕迅" to "陈奕迅 / Eason Chan", "eason chan" to "陈奕迅 / Eason Chan",
+        "林俊杰" to "林俊杰 / JJ Lin", "林俊傑" to "林俊杰 / JJ Lin", "jj lin" to "林俊杰 / JJ Lin", "jj" to "林俊杰 / JJ Lin",
+        "邓紫棋" to "邓紫棋 / G.E.M.", "鄧紫棋" to "邓紫棋 / G.E.M.", "g.e.m." to "邓紫棋 / G.E.M.", "gem" to "邓紫棋 / G.E.M.",
         "五月天" to "五月天 / Mayday", "mayday" to "五月天 / Mayday",
         "王菲" to "王菲 / Faye Wong", "faye wong" to "王菲 / Faye Wong",
-        "李荣浩" to "李荣浩 / Ronghao Li", "ronghao li" to "李荣浩 / Ronghao Li",
-        "薛之谦" to "薛之谦 / Joker Xue", "joker xue" to "薛之谦 / Joker Xue",
+        "李荣浩" to "李荣浩 / Ronghao Li", "李榮浩" to "李荣浩 / Ronghao Li", "ronghao li" to "李荣浩 / Ronghao Li",
+        "薛之谦" to "薛之谦 / Joker Xue", "薛之謙" to "薛之谦 / Joker Xue", "joker xue" to "薛之谦 / Joker Xue",
         "毛不易" to "毛不易 / Buyi Mao", "buyi mao" to "毛不易 / Buyi Mao",
-        "张学友" to "张学友 / Jacky Cheung", "jacky cheung" to "张学友 / Jacky Cheung",
-        "许嵩" to "许嵩 / Vae Xu", "vae xu" to "许嵩 / Vae Xu",
-        "许巍" to "许巍 / Wei Xu", "wei xu" to "许巍 / Wei Xu",
+        "张学友" to "张学友 / Jacky Cheung", "張學友" to "张学友 / Jacky Cheung", "jacky cheung" to "张学友 / Jacky Cheung",
+        "许嵩" to "许嵩 / Vae Xu", "許嵩" to "许嵩 / Vae Xu", "vae xu" to "许嵩 / Vae Xu",
+        "许巍" to "许巍 / Wei Xu", "許巍" to "许巍 / Wei Xu", "wei xu" to "许巍 / Wei Xu",
         "伍佰" to "伍佰 / Wu Bai", "wu bai" to "伍佰 / Wu Bai",
         "陶喆" to "陶喆 / David Tao", "david tao" to "陶喆 / David Tao",
         "王力宏" to "王力宏 / Leehom Wang", "leehom wang" to "王力宏 / Leehom Wang",
@@ -43,7 +43,9 @@ object OmniIntentEngine {
     )
 
     val SONG_BILINGUAL = mapOf(
-        "外婆的告别式" to "外婆的告别式 / Grandma's Farewell", "grandma's farewell" to "外婆的告别式 / Grandma's Farewell",
+        "外婆的告别式" to "外婆的告别式 / Grandma's Farewell",
+        "外婆的告別式" to "外婆的告别式 / Grandma's Farewell",
+        "grandma's farewell" to "外婆的告别式 / Grandma's Farewell",
         "我心永恒" to "我心永恒 / My Heart Will Go On",
         "稻香" to "稻香 / Fragrance of Rice", "fragrance of rice" to "稻香 / Fragrance of Rice",
         "晴天" to "晴天 / Sunny Day", "sunny day" to "晴天 / Sunny Day",
@@ -51,37 +53,37 @@ object OmniIntentEngine {
         "七里香" to "七里香 / Common Jasmine Orange", "common jasmine orange" to "七里香 / Common Jasmine Orange",
         "十年" to "十年 / Ten Years", "ten years" to "十年 / Ten Years",
         "夜曲" to "夜曲 / Nocturne", "nocturne" to "夜曲 / Nocturne",
-        "告白气球" to "告白气球 / Love Confession", "love confession" to "告白气球 / Love Confession",
-        "红豆" to "红豆 / Red Bean", "red bean" to "红豆 / Red Bean",
-        "年少有为" to "年少有为 / If I Were Young", "if i were young" to "年少有为 / If I Were Young",
+        "告白气球" to "告白气球 / Love Confession", "告白氣球" to "告白气球 / Love Confession", "love confession" to "告白气球 / Love Confession",
+        "红豆" to "红豆 / Red Bean", "紅豆" to "红豆 / Red Bean", "red bean" to "红豆 / Red Bean",
+        "年少有为" to "年少有为 / If I Were Young", "年少有為" to "年少有为 / If I Were Young", "if i were young" to "年少有为 / If I Were Young",
         "平凡之路" to "平凡之路 / The Ordinary Road", "the ordinary road" to "平凡之路 / The Ordinary Road",
         "消愁" to "消愁 / Sorrow Drowning", "sorrow drowning" to "消愁 / Sorrow Drowning",
-        "起风了" to "起风了 / The Wind Rises", "the wind rises" to "起风了 / The Wind Rises",
-        "shape of you" to "你的样子 / Shape of You", "你的样子" to "你的样子 / Shape of You",
+        "起风了" to "起风了 / The Wind Rises", "起風了" to "起风了 / The Wind Rises", "the wind rises" to "起风了 / The Wind Rises",
+        "shape of you" to "你的样子 / Shape of You", "你的样子" to "你的样子 / Shape of You", "你的樣子" to "你的样子 / Shape of You",
         "yellow" to "黄色 / Yellow"
     )
 
     val GENRE_MAP = mapOf(
-        "摇滚" to "摇滚 / Rock", "rock" to "摇滚 / Rock",
+        "摇滚" to "摇滚 / Rock", "搖滾" to "摇滚 / Rock", "rock" to "摇滚 / Rock",
         "爵士" to "爵士 / Jazz", "jazz" to "爵士 / Jazz",
         "古典" to "古典 / Classical", "classical" to "古典 / Classical",
         "流行" to "流行 / Pop", "pop" to "流行 / Pop",
-        "民谣" to "民谣 / Folk", "folk" to "民谣 / Folk",
-        "电音" to "电音 / EDM", "edm" to "电音 / EDM",
-        "轻音乐" to "轻音乐 / Lo-Fi / Ambient", "lofi" to "轻音乐 / Lo-Fi / Ambient",
-        "纯音乐" to "纯音乐 / Instrumental", "instrumental" to "纯音乐 / Instrumental",
-        "古风" to "国风 / 古风 / Chinese Style", "国风" to "国风 / 古风 / Chinese Style",
-        "说唱" to "说唱 / Hip-Hop", "hiphop" to "说唱 / Hip-Hop", "rap" to "说唱 / Hip-Hop"
+        "民谣" to "民谣 / Folk", "民謠" to "民谣 / Folk", "folk" to "民谣 / Folk",
+        "电音" to "电音 / EDM", "電音" to "电音 / EDM", "edm" to "电音 / EDM",
+        "轻音乐" to "轻音乐 / Lo-Fi / Ambient", "輕音樂" to "轻音乐 / Lo-Fi / Ambient", "lofi" to "轻音乐 / Lo-Fi / Ambient",
+        "纯音乐" to "纯音乐 / Instrumental", "純音樂" to "纯音乐 / Instrumental", "instrumental" to "纯音乐 / Instrumental",
+        "古风" to "国风 / 古风 / Chinese Style", "古風" to "国风 / 古风 / Chinese Style", "国风" to "国风 / 古风 / Chinese Style", "國風" to "国风 / 古风 / Chinese Style",
+        "说唱" to "说唱 / Hip-Hop", "說唱" to "说唱 / Hip-Hop", "hiphop" to "说唱 / Hip-Hop", "rap" to "说唱 / Hip-Hop"
     )
 
     val MOOD_MAP = mapOf(
-        "欢快" to "欢快/提神 / Upbeat & Energetic", "提神" to "欢快/提神 / Upbeat & Energetic",
-        "开心" to "欢快/提神 / Upbeat & Energetic", "兴奋" to "欢快/提神 / Upbeat & Energetic",
-        "动感" to "欢快/提神 / Upbeat & Energetic", "happy" to "欢快/提神 / Upbeat & Energetic",
-        "伤感" to "伤感/低落 / Sad & Healing", "难过" to "伤感/低落 / Sad & Healing",
-        "低落" to "伤感/低落 / Sad & Healing", "治愈" to "伤感/低落 / Sad & Healing", "sad" to "伤感/低落 / Sad & Healing",
-        "安静" to "舒缓/安静 / Calm & Relaxed", "舒缓" to "舒缓/安静 / Calm & Relaxed",
-        "放松" to "舒缓/安静 / Calm & Relaxed", "助眠" to "舒缓/安静 / Calm & Relaxed", "calm" to "舒缓/安静 / Calm & Relaxed"
+        "欢快" to "欢快/提神 / Upbeat & Energetic", "歡快" to "欢快/提神 / Upbeat & Energetic", "提神" to "欢快/提神 / Upbeat & Energetic",
+        "开心" to "欢快/提神 / Upbeat & Energetic", "開心" to "欢快/提神 / Upbeat & Energetic", "兴奋" to "欢快/提神 / Upbeat & Energetic", "興奮" to "欢快/提神 / Upbeat & Energetic",
+        "动感" to "欢快/提神 / Upbeat & Energetic", "動感" to "欢快/提神 / Upbeat & Energetic", "happy" to "欢快/提神 / Upbeat & Energetic",
+        "伤感" to "伤感/低落 / Sad & Healing", "傷感" to "伤感/低落 / Sad & Healing", "难过" to "伤感/低落 / Sad & Healing", "難過" to "伤感/低落 / Sad & Healing",
+        "低落" to "伤感/低落 / Sad & Healing", "治愈" to "伤感/低落 / Sad & Healing", "治癒" to "伤感/低落 / Sad & Healing", "sad" to "伤感/低落 / Sad & Healing",
+        "安静" to "舒缓/安静 / Calm & Relaxed", "舒缓" to "舒缓/安静 / Calm & Relaxed", "舒緩" to "舒缓/安静 / Calm & Relaxed",
+        "放松" to "舒缓/安静 / Calm & Relaxed", "放鬆" to "舒缓/安静 / Calm & Relaxed", "助眠" to "舒缓/安静 / Calm & Relaxed", "calm" to "舒缓/安静 / Calm & Relaxed"
     )
 
     suspend fun decide(
@@ -219,7 +221,7 @@ object OmniIntentEngine {
         if (arabic != null) return arabic
 
         val cnMap = mapOf(
-            '零' to 0, '一' to 1, '二' to 2, '两' to 2, '三' to 3, '四' to 4,
+            '零' to 0, '一' to 1, '二' to 2, '两' to 2, '兩' to 2, '三' to 3, '四' to 4,
             '五' to 5, '六' to 6, '七' to 7, '八' to 8, '九' to 9, '十' to 10
         )
         if (s.length == 1) {
@@ -253,7 +255,10 @@ object OmniIntentEngine {
         val hasClimateCue = listOf(
             "空调", "暖气", "暖风", "冷气", "冷风", "除雾", "除霜", "温度", "风量", "外循环", "内循环",
             "制热", "制冷", "太热", "太冷", "热一点", "冷一点", "有点冷", "有点热", "降温", "升温", "吹风",
-            "开到", "调到", "度", "ac", "a/c", "air condition", "climate", "temperature", "temp", "fan"
+            "开到", "调到", "度",
+            "空調", "暖氣", "暖風", "冷氣", "冷風", "除霧", "溫度", "風量", "外循環", "內循環",
+            "製熱", "製冷", "太熱", "熱一點", "有點冷", "有點熱", "降溫", "升溫", "吹風", "開到", "調到", "調至",
+            "ac", "a/c", "air condition", "climate", "temperature", "temp", "fan"
         ).any { qLower.contains(it) }
 
         var climateTemp: String? = null
@@ -265,24 +270,24 @@ object OmniIntentEngine {
             climateMode = "自动 / Automatic (AUTO)"
             climateZone = "全车 / All Zones"
 
-            if (query.contains("主驾") || qLower.contains("driver")) climateZone = "主驾 / Driver"
-            else if (query.contains("副驾") || qLower.contains("passenger")) climateZone = "副驾 / Passenger"
-            else if (query.contains("后排") || qLower.contains("rear")) climateZone = "后排 / Rear"
+            if (query.contains("主驾") || query.contains("主駕") || qLower.contains("driver")) climateZone = "主驾 / Driver"
+            else if (query.contains("副驾") || query.contains("副駕") || qLower.contains("passenger")) climateZone = "副驾 / Passenger"
+            else if (query.contains("后排") || query.contains("後排") || qLower.contains("rear")) climateZone = "后排 / Rear"
 
-            val isRelative = Pattern.compile("(调高|调低|升高|降低|升|降|热一点|冷一点)").matcher(query).find()
+            val isRelative = Pattern.compile("(调高|調高|调低|調低|升高|降低|升|降|热一点|熱一點|冷一点|冷一點)").matcher(query).find()
             if (isRelative) {
-                val mRel = Pattern.compile("(调高|调低|升高|降低|升|降|热一点|冷一点)\\s*([0-9一二两三四五六七八九十]{1,3})?\\s*(?:度|°|℃)?").matcher(query)
+                val mRel = Pattern.compile("(调高|調高|调低|調低|升高|降低|升|降|热一点|熱一點|冷一点|冷一點)\\s*([0-9一二两兩三四五六七八九十]{1,3})?\\s*(?:度|°|℃)?").matcher(query)
                 if (mRel.find()) {
                     val act = mRel.group(1) ?: "调"
                     val dStr = mRel.group(2)
                     val dVal = if (dStr != null) (parseChineseOrArabicNumber(dStr) ?: 1f) else 1f
                     val dFormatted = if (dVal % 1.0f == 0f) dVal.toInt().toString() else dVal.toString()
-                    val sign = if (act.contains("高") || act.contains("升") || act.contains("热")) "+" else "-"
+                    val sign = if (act.contains("高") || act.contains("升") || act.contains("热") || act.contains("熱")) "+" else "-"
                     climateTemp = "相对微调 / Relative Adjustment"
                     climateTempType = "相对${if (sign == "+") "升温" else "降温"} (${sign}${dFormatted}℃) / ${if (sign == "+") "Warmer" else "Cooler"} (${sign}${dFormatted}°C)"
                 }
             } else {
-                val mTempAbs = Pattern.compile("(?:温度|调至|调到|设为|设置成|设成|开到|到)?\\s*([0-9一二两三四五六七八九十]{1,3}(?:\\.[0-9])?)\\s*(?:度|°|℃|摄氏度)").matcher(query)
+                val mTempAbs = Pattern.compile("(?:温度|溫度|调至|調至|调到|調到|设为|設為|设置成|設置成|设成|設成|开到|開到|到)?\\s*([0-9一二两兩三四五六七八九十]{1,3}(?:\\.[0-9])?)\\s*(?:度|°|℃|摄氏度|攝氏度)").matcher(query)
                 if (mTempAbs.find()) {
                     val numStr = mTempAbs.group(1) ?: "24"
                     val num = parseChineseOrArabicNumber(numStr) ?: 24f
@@ -294,28 +299,36 @@ object OmniIntentEngine {
                 }
             }
 
-            val hasNoFreshAir = query.contains("不要开外循环") || query.contains("别开外循环") ||
-                    query.contains("不用外循环") || query.contains("不开外循环") || query.contains("关闭外循环") || query.contains("不要外循环")
-            val hasNoRecirc = query.contains("不要开内循环") || query.contains("别开内循环") ||
-                    query.contains("不用内循环") || query.contains("不开内循环") || query.contains("关闭内循环") || query.contains("不要内循环")
+            val hasNoFreshAir = query.contains("不要开外循环") || query.contains("不要開外循環") ||
+                    query.contains("别开外循环") || query.contains("別開外循環") ||
+                    query.contains("不用外循环") || query.contains("不用外循環") ||
+                    query.contains("不开外循环") || query.contains("不開外循環") ||
+                    query.contains("关闭外循环") || query.contains("關閉外循環") ||
+                    query.contains("不要外循环") || query.contains("不要外循環")
+            val hasNoRecirc = query.contains("不要开内循环") || query.contains("不要開內循環") ||
+                    query.contains("别开内循环") || query.contains("別開內循環") ||
+                    query.contains("不用内循环") || query.contains("不用內循環") ||
+                    query.contains("不开内循环") || query.contains("不開內循環") ||
+                    query.contains("关闭内循环") || query.contains("關閉內循環") ||
+                    query.contains("不要内循环") || query.contains("不要內循環")
 
             if (hasNoFreshAir) {
                 climateMode = "内循环 (已规避外循环) / Recirculation (Fresh Air Excluded)"
             } else if (hasNoRecirc) {
                 climateMode = "外循环 (已规避内循环) / Fresh Air (Recirculation Excluded)"
-            } else if (qLower.contains("制冷") || qLower.contains("冷气") || qLower.contains("冷风") || qLower.contains("ac") || qLower.contains("cooling")) {
+            } else if (qLower.contains("制冷") || qLower.contains("製冷") || qLower.contains("冷气") || qLower.contains("冷氣") || qLower.contains("冷风") || qLower.contains("冷風") || qLower.contains("ac") || qLower.contains("cooling")) {
                 climateMode = "制冷 / Cooling (A/C)"
-            } else if (qLower.contains("制热") || qLower.contains("暖风") || qLower.contains("暖气") || qLower.contains("heater")) {
+            } else if (qLower.contains("制热") || qLower.contains("製熱") || qLower.contains("暖风") || qLower.contains("暖風") || qLower.contains("暖气") || qLower.contains("暖氣") || qLower.contains("heater")) {
                 climateMode = "制热 / Heating (HEATER)"
-            } else if (qLower.contains("除雾") || qLower.contains("除霜") || qLower.contains("defrost")) {
+            } else if (qLower.contains("除雾") || qLower.contains("除霧") || qLower.contains("除霜") || qLower.contains("defrost")) {
                 climateMode = "除雾/除霜 / Defrost & Defog"
-            } else if (qLower.contains("内循环") || qLower.contains("recirculation")) {
+            } else if (qLower.contains("内循环") || qLower.contains("內循環") || qLower.contains("recirculation")) {
                 climateMode = "内循环 / Recirculation"
-            } else if (qLower.contains("外循环") || qLower.contains("fresh air")) {
+            } else if (qLower.contains("外循环") || qLower.contains("外循環") || qLower.contains("fresh air")) {
                 climateMode = "外循环 / Fresh Air"
-            } else if (query.contains("开空调") || query.contains("打开空调") || query.contains("开到")) {
+            } else if (query.contains("开空调") || query.contains("開空調") || query.contains("打开空调") || query.contains("打開空調") || query.contains("开到") || query.contains("開到")) {
                 climateMode = "开启空调 / Automatic (AUTO)"
-            } else if (query.contains("关空调") || query.contains("关闭空调")) {
+            } else if (query.contains("关空调") || query.contains("關空調") || query.contains("关闭空调") || query.contains("關閉空調")) {
                 climateMode = "关闭空调 / Power Off"
             }
         }
@@ -323,8 +336,10 @@ object OmniIntentEngine {
         // 2. Music slots (matching app.py extract_music_slots)
         val hasMusicCue = listOf(
             "音乐", "歌", "歌曲", "曲子", "曲", "首", "收音机", "广播", "音频", "电台",
+            "音樂", "收音機", "廣播", "音頻", "電台", "聽", "聽首", "點播", "點歌", "點一首",
             "放首", "听首", "点播", "播放", "播", "放", "听", "唱",
-            "切歌", "下一首", "上一首", "别放了", "单曲循环", "随机播放", "放歌", "听歌", "放点音乐", "来点音乐",
+            "切歌", "下一首", "上一首", "别放了", "別放了", "单曲循环", "單曲循環", "随机播放", "隨機播放",
+            "放歌", "听歌", "聽歌", "放点音乐", "放點音樂", "来点音乐", "來點音樂",
             "music", "song", "songs", "track", "tune", "play", "listen"
         ).any { qLower.contains(it) } || KNOWN_ARTISTS_BILINGUAL.keys.any { qLower.contains(it.lowercase()) } ||
                 SONG_BILINGUAL.keys.any { qLower.contains(it.lowercase()) } ||
@@ -338,15 +353,15 @@ object OmniIntentEngine {
 
         if (hasMusicCue) {
             musicAction = "播放 / Play"
-            if (query.contains("暂停") || query.contains("别放了") || query.contains("停止播放") || query.contains("关掉音乐")) {
+            if (query.contains("暂停") || query.contains("暫停") || query.contains("别放了") || query.contains("別放了") || query.contains("停止播放") || query.contains("关掉音乐") || query.contains("關掉音樂")) {
                 musicAction = "暂停 / Pause"
-            } else if (query.contains("切歌") || query.contains("下一首") || query.contains("换一首")) {
+            } else if (query.contains("切歌") || query.contains("下一首") || query.contains("换一首") || query.contains("換一首")) {
                 musicAction = "切到下一首 / Next Track"
             } else if (query.contains("上一首")) {
                 musicAction = "上一首 / Previous Track"
-            } else if (query.contains("单曲循环")) {
+            } else if (query.contains("单曲循环") || query.contains("單曲循環")) {
                 musicAction = "单曲循环 / Repeat Track"
-            } else if (query.contains("随机播放")) {
+            } else if (query.contains("随机播放") || query.contains("隨機播放")) {
                 musicAction = "随机播放 / Shuffle"
             }
 
@@ -366,15 +381,17 @@ object OmniIntentEngine {
 
             // Syntactic artist/song decomposition matching web version (app.py)
             if (musicArtist == null || musicSong == null) {
-                val prefixRegex = Pattern.compile("^(?:(?:我(?:们)?|咱们|大家|车[里内上]|全车人|你|他(?:们)?|她(?:们)?)?\\s*(?:还|又|也|就|再|顺便|接着|然后|先|麻烦|请)?\\s*(?:想要|想|要|打算|希望能?|准备|喜欢|爱听)?\\s*(?:帮我(?:们)?|给我(?:们)?|替我(?:们)?|来)?\\s*(?:播放|点播|放|听|播|唱|搜|查|切|换)?\\s*(?:一?[首曲支]|两首|几首|首歌曲|首歌|首曲子|点|下|个|一些|一点)?\\s*)")
+                val prefixRegex = Pattern.compile("^(?:(?:我(?:们|們)?|咱们|咱們|大家|他们|他們|你们|妳們|车[里内上]|車[裡內上]|全车人|全車人|你|他(?:们|們)?|她(?:们|們)?)?\\s*(?:还|還|又|也|就|再|顺便|順便|接着|接著|然后|然後|先|麻烦|麻煩|请|請)?\\s*(?:想要|想|要|打算|希望能?|准备|準備|喜欢|喜歡|爱听|愛聽)?\\s*(?:帮我(?:们|們)?|幫我(?:们|們)?|给我(?:们|們)?|給我(?:们|們)?|替我(?:们|們)?|为我(?:们|們)?|為我(?:们|們)?|来|來)?\\s*(?:播放|点播|點播|放|听|聽|播|唱|搜|查|切|换|換)?\\s*(?:一?[首曲支]|两首|兩首|几首|幾首|首歌曲|首歌|首曲子|点|點|下|个|個|一些|一点|一點)?\\s*)")
+                val suffixRegex = Regex("(?:的?(?:这首歌|這首歌|这首|這首|歌曲|音乐|音樂|歌|曲子))$")
                 var cleaned = prefixRegex.matcher(query).replaceFirst("").trim()
-                cleaned = cleaned.replace(Regex("(?:的?(?:这首歌|这首|歌曲|音乐|歌|曲子))$"), "").trim()
+                cleaned = cleaned.replace(suffixRegex, "").trim()
 
                 if (cleaned.isNotEmpty()) {
                     val deParts = cleaned.split("的", limit = 2)
                     if (deParts.size == 2) {
                         val left = prefixRegex.matcher(deParts[0].trim()).replaceFirst("").trim()
-                        val right = deParts[1].trim()
+                        var right = deParts[1].trim()
+                        right = right.replace(suffixRegex, "").trim()
                         if (musicArtist == null && left.isNotEmpty()) {
                             musicArtist = KNOWN_ARTISTS_BILINGUAL[left] ?: left
                         }
@@ -406,7 +423,7 @@ object OmniIntentEngine {
                     }
                 }
             }
-            if (musicMood == null && (musicArtist != null || musicSong != null || query.contains("歌") || query.contains("音乐"))) {
+            if (musicMood == null && (musicArtist != null || musicSong != null || query.contains("歌") || query.contains("音乐") || query.contains("音樂"))) {
                 musicMood = "未限定 / Any Mood"
             }
 
@@ -417,7 +434,7 @@ object OmniIntentEngine {
                 musicTargetType = "歌手热门精选 / Popular Songs"
             } else if (musicMood != null && musicMood != "未限定 / Any Mood") {
                 musicTargetType = "风格/情绪智能推荐 / Genre & Mood Mix"
-            } else if (query.contains("歌") || query.contains("音乐") || query.contains("放点") || query.contains("来点")) {
+            } else if (query.contains("歌") || query.contains("音乐") || query.contains("音樂") || query.contains("放点") || query.contains("放點") || query.contains("来点") || query.contains("來點")) {
                 musicTargetType = "随机点播 / Shuffle"
                 musicSong = "未指定（继续播放/随心听） / Continue Playback"
             }
@@ -427,8 +444,9 @@ object OmniIntentEngine {
         val hasNavCue = listOf(
             "导航", "路线", "地图", "路况", "目的地", "带我", "回公司", "回家", "怎么走", "堵车", "去哪", "查路线",
             "加油站", "充电桩", "前往", "带我去", "送我到", "开车去", "开车到", "导到", "导去", "高速",
+            "導航", "路線", "地圖", "路況", "帶我", "怎麼走", "塞車", "充電樁", "帶我去", "送我到", "開車去", "開車到", "導到", "導去",
             "navigate", "navigation", "gps", "route", "destination"
-        ).any { qLower.contains(it) } || (Pattern.compile("(?:去|到|回|前往)([^，,。！!？?\\s]+?(?:机场|火车站|车站|高铁站|家|公司|医院|学校|商场|超市|公园|路|广场|酒店|北京|上海|香港))").matcher(query).find())
+        ).any { qLower.contains(it) } || (Pattern.compile("(?:去|到|回|前往)([^，,。！!？?\\s]+?(?:机场|機場|火车站|火車站|车站|車站|高铁站|高鐵站|家|公司|医院|醫院|学校|學校|商场|商場|超市|公园|公園|路|广场|廣場|酒店|北京|上海|香港))").matcher(query).find())
 
         var navDestination: String? = null
         var navAction: String? = null
@@ -438,25 +456,25 @@ object OmniIntentEngine {
             navAction = "设置目的地导航 / Set Destination"
             navPreference = "系统推荐 / Default"
 
-            if (query.contains("退出导航") || query.contains("关闭导航") || query.contains("取消导航")) {
+            if (query.contains("退出导航") || query.contains("退出導航") || query.contains("关闭导航") || query.contains("關閉導航") || query.contains("取消导航") || query.contains("取消導航")) {
                 navAction = "退出导航 / Exit Navigation"
-            } else if (query.contains("查路线") || query.contains("看路线")) {
+            } else if (query.contains("查路线") || query.contains("查路線") || query.contains("看路线") || query.contains("看路線")) {
                 navAction = "查询路线 / Check Route"
-            } else if (query.contains("路况")) {
+            } else if (query.contains("路况") || query.contains("路況")) {
                 navAction = "查询路况 / Check Traffic"
             }
 
-            if (query.contains("不走高速") || query.contains("避开高速")) navPreference = "不走高速 / Avoid Highways"
-            else if (query.contains("避开拥堵") || query.contains("躲避拥堵")) navPreference = "躲避拥堵 / Avoid Congestion"
-            else if (query.contains("高速优先")) navPreference = "高速优先 / Highway First"
-            else if (query.contains("距离最短")) navPreference = "距离最短 / Shortest Route"
+            if (query.contains("不走高速") || query.contains("避开高速") || query.contains("避開高速")) navPreference = "不走高速 / Avoid Highways"
+            else if (query.contains("避开拥堵") || query.contains("避開擁堵") || query.contains("躲避拥堵") || query.contains("躲避擁堵") || query.contains("避開塞車") || query.contains("躲避塞車")) navPreference = "躲避拥堵 / Avoid Congestion"
+            else if (query.contains("高速优先") || query.contains("高速優先")) navPreference = "高速优先 / Highway First"
+            else if (query.contains("距离最短") || query.contains("距離最短")) navPreference = "距离最短 / Shortest Route"
             else if (query.contains("最快")) navPreference = "时间最快 / Fastest Route"
 
-            val navP = Pattern.compile("(?:去|到|回|前往)([^，,。！!？?\\s]+?(?:机场|火车站|车站|高铁站|家|公司|医院|学校|商场|超市|公园|路|广场|酒店|北京|上海|香港))").matcher(query)
+            val navP = Pattern.compile("(?:去|到|回|前往)([^，,。！!？?\\s]+?(?:机场|機場|火车站|火車站|车站|車站|高铁站|高鐵站|家|公司|医院|醫院|学校|學校|商场|商場|超市|公园|公園|路|广场|廣場|酒店|北京|上海|香港))").matcher(query)
             if (navP.find()) {
                 val d = navP.group(1)?.trim()
                 navDestination = when (d) {
-                    "虹桥机场" -> "虹桥国际机场 / Hongqiao Airport"
+                    "虹桥机场", "虹橋機場" -> "虹桥国际机场 / Hongqiao Airport"
                     "北京" -> "北京 / Beijing"
                     "上海" -> "上海 / Shanghai"
                     "家" -> "家 / Home"
@@ -469,39 +487,39 @@ object OmniIntentEngine {
         // 4. Seat slots
         var seatZone: String? = null
         var seatAction: String? = null
-        if (query.contains("主驾") || query.contains("驾驶位")) seatZone = "主驾座椅 / Driver Seat"
-        else if (query.contains("副驾")) seatZone = "副驾座椅 / Passenger Seat"
+        if (query.contains("主驾") || query.contains("主駕") || query.contains("驾驶位") || query.contains("駕駛位") || query.contains("驾驶座") || query.contains("駕駛座")) seatZone = "主驾座椅 / Driver Seat"
+        else if (query.contains("副驾") || query.contains("副駕") || query.contains("副驾驶") || query.contains("副駕駛")) seatZone = "副驾座椅 / Passenger Seat"
         else if (query.contains("座椅")) seatZone = "前排座椅 / Front Seats"
 
         if (seatZone != null || query.contains("座椅")) {
-            if (query.contains("加热")) seatAction = "座椅加热 / Seat Heating"
-            else if (query.contains("通风")) seatAction = "座椅通风 / Seat Ventilation"
+            if (query.contains("加热") || query.contains("加熱")) seatAction = "座椅加热 / Seat Heating"
+            else if (query.contains("通风") || query.contains("通風")) seatAction = "座椅通风 / Seat Ventilation"
             else if (query.contains("按摩")) seatAction = "座椅按摩 / Seat Massage"
         }
 
         // 5. Window slots
         var windowZone: String? = null
         var windowAction: String? = null
-        if (query.contains("主驾窗")) windowZone = "主驾车窗 / Driver Window"
-        else if (query.contains("副驾窗") || query.contains("副驾车窗")) windowZone = "副驾车窗 / Passenger Window"
+        if (query.contains("主驾窗") || query.contains("主駕窗") || query.contains("驾驶窗") || query.contains("駕駛窗")) windowZone = "主驾车窗 / Driver Window"
+        else if (query.contains("副驾窗") || query.contains("副駕窗") || query.contains("副驾车窗") || query.contains("副駕車窗")) windowZone = "副驾车窗 / Passenger Window"
         else if (query.contains("天窗")) windowZone = "全景天窗 / Sunroof"
-        else if (query.contains("遮阳帘")) windowZone = "天窗遮阳帘 / Sunshade"
-        else if (query.contains("车窗") || query.contains("窗户")) windowZone = "全车车窗 / All Windows"
+        else if (query.contains("遮阳帘") || query.contains("遮陽簾")) windowZone = "天窗遮阳帘 / Sunshade"
+        else if (query.contains("车窗") || query.contains("車窗") || query.contains("窗户") || query.contains("窗戶")) windowZone = "全车车窗 / All Windows"
 
-        if (windowZone != null || query.contains("车窗") || query.contains("天窗")) {
-            if (query.contains("降下一半") || query.contains("开一半")) windowAction = "降下一半 (50%) / Roll Down 50%"
-            else if (query.contains("开一条缝") || query.contains("微开")) windowAction = "微开透气 (15%) / Vent (15%)"
-            else if (query.contains("关") || query.contains("升起")) windowAction = "完全关闭 / Close"
-            else if (query.contains("开") || query.contains("降下")) windowAction = "完全打开 / Open"
+        if (windowZone != null || query.contains("车窗") || query.contains("車窗") || query.contains("天窗")) {
+            if (query.contains("降下一半") || query.contains("开一半") || query.contains("開一半")) windowAction = "降下一半 (50%) / Roll Down 50%"
+            else if (query.contains("开一条缝") || query.contains("開一條縫") || query.contains("微开") || query.contains("微開")) windowAction = "微开透气 (15%) / Vent (15%)"
+            else if (query.contains("关") || query.contains("關") || query.contains("升起")) windowAction = "完全关闭 / Close"
+            else if (query.contains("开") || query.contains("開") || query.contains("降下")) windowAction = "完全打开 / Open"
         }
 
         // 6. Phone slots
         var phoneContact: String? = null
         var phoneNumber: String? = null
         var phoneAction: String? = null
-        if (query.contains("电话") || query.contains("呼叫") || query.contains("打给") || query.contains("拨打")) {
-            phoneAction = if (query.contains("挂断")) "挂断电话 / Hang Up" else "拨打电话 / Make Call"
-            val mPhone = Pattern.compile("(?:打给|打电话给|呼叫|联系)\\s*([^，,。！!？?\\s]+)").matcher(query)
+        if (query.contains("电话") || query.contains("電話") || query.contains("呼叫") || query.contains("打给") || query.contains("打給") || query.contains("拨打") || query.contains("撥打") || query.contains("拨号") || query.contains("撥號")) {
+            phoneAction = if (query.contains("挂断") || query.contains("掛斷")) "挂断电话 / Hang Up" else "拨打电话 / Make Call"
+            val mPhone = Pattern.compile("(?:打给|打給|打电话给|打電話給|呼叫|联系|聯繫|撥打|拨打)\\s*([^，,。！!？?\\s]+)").matcher(query)
             if (mPhone.find()) {
                 phoneContact = mPhone.group(1)?.trim()
             }
@@ -510,13 +528,13 @@ object OmniIntentEngine {
         // 7. Query slots
         var queryType: String? = null
         var queryTarget: String? = null
-        if (query.contains("天气") || query.contains("气温") || query.contains("下雨")) {
+        if (query.contains("天气") || query.contains("天氣") || query.contains("气温") || query.contains("氣溫") || query.contains("下雨")) {
             queryType = "天气与环境查询 / Weather & Forecast Query"
             queryTarget = "天气状况与趋势 / Weather Condition & Forecast"
-        } else if (query.contains("几点") || query.contains("时间") || query.contains("日期")) {
+        } else if (query.contains("几点") || query.contains("幾點") || query.contains("时间") || query.contains("時間") || query.contains("日期")) {
             queryType = "时间与日期查询 / Time & Date Query"
             queryTarget = "当前标准时间与日历 / Current Time & Date"
-        } else if (query.contains("续航") || query.contains("电量") || query.contains("胎压")) {
+        } else if (query.contains("续航") || query.contains("續航") || query.contains("电量") || query.contains("電量") || query.contains("胎压") || query.contains("胎壓")) {
             queryType = "车辆状态查询 / Vehicle Status"
             queryTarget = "三电/胎压/剩余续航 / Battery, Range & Status"
         }
@@ -524,7 +542,7 @@ object OmniIntentEngine {
         // 8. Negations and domain actions
         val negationsList = mutableListOf<String>()
         // Only extract actual avoidance/bypass constraints (e.g. 避开拥堵, 不要走高速, 避开收费, 躲避拥堵)
-        val navAvoidPattern = Pattern.compile("(?:避开|躲避|不走|不要走|免去|除外)\\s*(?:拥堵|高速|收费|收费站|高架|小路|收费路段|拥堵路段|红绿灯)")
+        val navAvoidPattern = Pattern.compile("(?:避开|避開|躲避|不走|不要走|免去|除外)\\s*(?:拥堵|擁堵|塞車|高速|收费|收費|收费站|收費站|高架|小路|收费路段|收費路段|拥堵路段|擁堵路段|红绿灯|紅綠燈)")
         val navMatcher = navAvoidPattern.matcher(query)
         while (navMatcher.find()) {
             val content = navMatcher.group(0)?.trim() ?: ""
@@ -593,41 +611,53 @@ object OmniIntentEngine {
 
             when (dId) {
                 "climate" -> {
-                    if (q.contains("空调") || q.contains("温度") || q.contains("冷气") || q.contains("暖风") ||
-                        q.contains("制冷") || q.contains("制热") || q.contains("度") || q.contains("除雾")) {
+                    if (q.contains("空调") || q.contains("空調") || q.contains("温度") || q.contains("溫度") ||
+                        q.contains("冷气") || q.contains("冷氣") || q.contains("暖风") || q.contains("暖風") ||
+                        q.contains("制冷") || q.contains("製冷") || q.contains("制热") || q.contains("製熱") ||
+                        q.contains("度") || q.contains("除雾") || q.contains("除霧")) {
                         score = 0.98f
                     }
                 }
                 "music" -> {
-                    if (q.contains("歌") || q.contains("音乐") || q.contains("播放") || q.contains("周杰伦") ||
-                        q.contains("八三夭") || q.contains("831") || q.contains("告别式") ||
-                        q.contains("稻香") || q.contains("晴天") || q.contains("摇滚") || q.contains("爵士") || q.contains("听")) {
+                    if (q.contains("歌") || q.contains("音乐") || q.contains("音樂") || q.contains("播放") ||
+                        q.contains("点播") || q.contains("點播") || q.contains("放") || q.contains("听") || q.contains("聽") ||
+                        q.contains("周杰伦") || q.contains("周杰倫") || q.contains("八三夭") || q.contains("831") ||
+                        q.contains("告别式") || q.contains("告別式") || q.contains("稻香") || q.contains("晴天") ||
+                        q.contains("摇滚") || q.contains("搖滾") || q.contains("爵士")) {
                         score = 0.96f
                     }
                 }
                 "navigation" -> {
-                    if (q.contains("导航") || q.contains("去") || q.contains("路线") || q.contains("高速") ||
-                        q.contains("机场") || q.contains("带我去") || q.contains("堵车") || q.contains("避开拥堵")) {
+                    if (q.contains("导航") || q.contains("導航") || q.contains("去") || q.contains("路线") || q.contains("路線") ||
+                        q.contains("高速") || q.contains("机场") || q.contains("機場") || q.contains("高铁") || q.contains("高鐵") ||
+                        q.contains("带我去") || q.contains("帶我去") || q.contains("堵车") || q.contains("塞車") ||
+                        q.contains("避开拥堵") || q.contains("避開擁堵") || q.contains("躲避拥堵") || q.contains("躲避擁堵")) {
                         score = 0.97f
                     }
                 }
                 "seat" -> {
-                    if (q.contains("座椅") || (q.contains("主驾") && (q.contains("加热") || q.contains("通风")))) {
+                    if (q.contains("座椅") || ((q.contains("主驾") || q.contains("主駕") || q.contains("副驾") || q.contains("副駕")) &&
+                        (q.contains("加热") || q.contains("加熱") || q.contains("通风") || q.contains("通風") || q.contains("按摩")))) {
                         score = 0.94f
                     }
                 }
                 "window" -> {
-                    if (q.contains("车窗") || q.contains("天窗") || q.contains("窗户") || q.contains("降下一半")) {
+                    if (q.contains("车窗") || q.contains("車窗") || q.contains("天窗") || q.contains("窗户") || q.contains("窗戶") ||
+                        q.contains("降下一半") || q.contains("開一半") || q.contains("遮阳帘") || q.contains("遮陽簾")) {
                         score = 0.95f
                     }
                 }
                 "phone" -> {
-                    if (q.contains("打电话") || q.contains("电话") || q.contains("呼叫") || q.contains("拨打")) {
+                    if (q.contains("打电话") || q.contains("打電話") || q.contains("电话") || q.contains("電話") ||
+                        q.contains("呼叫") || q.contains("拨打") || q.contains("撥打") || q.contains("拨号") || q.contains("撥號")) {
                         score = 0.96f
                     }
                 }
                 "query" -> {
-                    if (q.contains("天气") || q.contains("几点") || q.contains("是谁") || q.contains("怎么样")) {
+                    if (q.contains("天气") || q.contains("天氣") || q.contains("几点") || q.contains("幾點") ||
+                        q.contains("是谁") || q.contains("是誰") || q.contains("怎么样") || q.contains("怎麼樣") ||
+                        q.contains("时间") || q.contains("時間") || q.contains("续航") || q.contains("續航") ||
+                        q.contains("电量") || q.contains("電量") || q.contains("胎压") || q.contains("胎壓")) {
                         score = 0.92f
                     }
                 }

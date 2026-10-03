@@ -41,37 +41,47 @@ object OnnxIntentEngine {
     val DOMAIN_KEYWORDS: Map<String, List<String>> = mapOf(
         "seat" to listOf(
             "座椅加热", "座椅通风", "座椅按摩", "座椅", "加热", "通风", "屁股", "座",
+            "座椅加熱", "座椅通風", "通風", "駕駛座", "副駕駛座",
             "seat heater", "seat heating", "heated seat", "heated seats", "seat ventilation",
             "ventilated seat", "ventilated seats", "seat massage", "seat", "seats"
         ),
         "climate" to listOf(
             "空调", "暖气", "暖风", "冷气", "冷风", "除雾", "除霜", "温度", "风量", "外循环", "内循环",
             "制热", "制冷", "太热", "太冷", "热一点", "冷一点", "有点冷", "有点热", "降温", "升温", "吹风",
-            "开到", "调到", "度", "ac", "a/c", "air condition", "climate", "temperature", "temp", "fan"
+            "开到", "调到", "度",
+            "空調", "暖氣", "暖風", "冷氣", "冷風", "除霧", "溫度", "風量", "外循環", "內循環",
+            "製熱", "製冷", "太熱", "熱一點", "有點冷", "有點熱", "降溫", "升溫", "吹風", "開到", "調到", "調至",
+            "ac", "a/c", "air condition", "climate", "temperature", "temp", "fan"
         ),
         "window" to listOf(
             "车窗", "天窗", "后排窗", "主驾窗", "副驾窗", "窗户", "开窗", "关窗", "降下", "升起", "留缝",
+            "車窗", "後排窗", "主駕窗", "副駕窗", "窗戶", "開窗", "關窗", "留縫", "遮陽簾", "遮阳帘",
             "window", "windows", "sunroof", "moonroof"
         ),
         "music" to listOf(
             "音乐", "歌", "歌曲", "曲子", "曲", "首", "收音机", "广播", "音频", "电台", "听", "放", "唱",
-            "点播", "播放", "播", "来点", "周董", "周杰伦", "陈奕迅", "林俊杰", "邓紫棋", "五月天", "许巍",
-            "八三夭", "831", "外婆的告别式", "稻香", "晴天", "夜曲", "告白气球", "七里香", "古典", "爵士", "轻音乐", "纯音乐", "钢琴", "摇滚",
-            "民谣", "古风", "电音", "老歌", "切歌", "下一首", "上一首", "别放了", "单曲循环", "随机播放",
-            "放歌", "听歌", "放点音乐", "来点音乐", "music", "song", "songs", "track", "tune", "play", "listen"
+            "點播", "點歌", "點一首", "音樂", "收音機", "廣播", "音頻", "電台", "聽",
+            "点播", "播放", "播", "来点", "來點", "周董", "周杰伦", "周杰倫", "陈奕迅", "陳奕迅", "林俊杰", "林俊傑", "邓紫棋", "鄧紫棋", "五月天", "许巍", "許巍",
+            "八三夭", "831", "外婆的告别式", "外婆的告別式", "稻香", "晴天", "夜曲", "告白气球", "告白氣球", "七里香", "古典", "爵士", "轻音乐", "輕音樂", "纯音乐", "純音樂", "钢琴", "鋼琴", "摇滚", "搖滾",
+            "民谣", "民謠", "古风", "古風", "电音", "電音", "老歌", "切歌", "下一首", "上一首", "别放了", "別放了", "单曲循环", "單曲循環", "随机播放", "隨機播放",
+            "放歌", "听歌", "聽歌", "放点音乐", "放點音樂", "来点音乐", "來點音樂", "music", "song", "songs", "track", "tune", "play", "listen"
         ),
         "navigation" to listOf(
             "导航", "路线", "地图", "路况", "目的地", "带我", "回公司", "回家", "怎么走", "堵车", "去哪", "查路线",
             "加油站", "充电桩", "前往", "带我去", "送我到", "开车去", "开车到", "导到", "导去",
+            "導航", "路線", "地圖", "路況", "帶我", "怎麼走", "塞車", "充電樁", "帶我去", "開車去", "開車到", "導到", "導去",
             "navigate", "navigation", "gps", "route", "map", "traffic", "destination"
         ),
         "phone" to listOf(
             "电话", "呼叫", "拨号", "联系人", "打给", "接听", "挂断", "接电话", "拨打", "打电话", "致电", "联系",
+            "電話", "撥號", "聯絡人", "聯繫人", "打給", "接聽", "掛斷", "接電話", "撥打", "打電話", "致電", "聯繫",
             "call", "dial", "phone", "contact"
         ),
         "query" to listOf(
             "天气", "气温", "下雨", "降雨", "温度如何", "几点", "时间", "星期", "礼拜", "日期",
+            "天氣", "氣溫", "幾點", "時間", "禮拜",
             "限行", "尾号", "续航", "电量", "油量", "胎压", "笑话", "百科", "谁", "吗", "怎么样", "如何",
+            "尾號", "續航", "電量", "胎壓", "笑話", "誰", "嗎", "怎麼樣",
             "weather", "clock", "date", "battery", "range"
         )
     )
@@ -83,17 +93,17 @@ object OnnxIntentEngine {
     )
 
     private val DOMAIN_EXCLUSION_TARGETS = mapOf(
-        "seat" to listOf("座椅加热", "座椅通风", "座椅按摩", "座椅", "主驾座椅", "副驾座椅", "后排座椅", "seat"),
-        "climate" to listOf("空调", "暖气", "暖风", "冷气", "冷风", "ac", "a/c", "air condition", "climate"),
-        "window" to listOf("车窗", "天窗", "后排窗", "主驾窗", "副驾窗", "窗户", "遮阳帘", "window", "sunroof"),
-        "music" to listOf("音乐", "歌", "歌曲", "收音机", "广播", "电台", "播放", "music", "song"),
-        "navigation" to listOf("导航", "路线", "地图", "目的地", "navigation", "route"),
-        "phone" to listOf("电话", "通话", "呼叫", "phone", "call"),
-        "query" to listOf("问答", "语音助手", "assistant")
+        "seat" to listOf("座椅加热", "座椅加熱", "座椅通风", "座椅通風", "座椅按摩", "座椅", "主驾座椅", "主駕座椅", "副驾座椅", "副駕座椅", "后排座椅", "後排座椅", "seat", "駕駛座"),
+        "climate" to listOf("空调", "空調", "暖气", "暖氣", "暖风", "暖風", "冷气", "冷氣", "冷风", "冷風", "ac", "a/c", "air condition", "climate"),
+        "window" to listOf("车窗", "車窗", "天窗", "后排窗", "後排窗", "主驾窗", "主駕窗", "副驾窗", "副駕窗", "窗户", "窗戶", "遮阳帘", "遮陽簾", "window", "sunroof"),
+        "music" to listOf("音乐", "音樂", "歌", "歌曲", "收音机", "收音機", "广播", "廣播", "电台", "電台", "播放", "music", "song"),
+        "navigation" to listOf("导航", "導航", "路线", "路線", "地图", "地圖", "目的地", "navigation", "route"),
+        "phone" to listOf("电话", "電話", "通话", "通話", "呼叫", "phone", "call"),
+        "query" to listOf("问答", "問答", "语音助手", "語音助手", "assistant")
     )
 
     fun analyzeNegation(text: String): NegationResult {
-        val clauses = text.split(Regex("[,;!?，；！？]|\\band\\b|\\bbut\\b|\\bthen\\b|并且|但是|然后|同时|顺便|而且|接着"))
+        val clauses = text.split(Regex("[,;!?，；！？]|\\band\\b|\\bbut\\b|\\bthen\\b|并且|並且|但是|然后|然後|同时|同時|顺便|順便|而且|接着|接著"))
             .map { it.trim() }
             .filter { it.isNotEmpty() }
 
@@ -104,13 +114,26 @@ object OnnxIntentEngine {
         val domainOrder = listOf("seat", "window", "climate", "music", "navigation", "phone", "query")
 
         for (c in clauses) {
-            val cClean = c.replace("告别", "").replace("特别", "").replace("区别", "").replace("级别", "").replace("别人", "").replace("别墅", "").replace("别致", "").replace("离别", "")
+            val cClean = c.replace("告别", "").replace("告別", "")
+                .replace("特别", "").replace("特別", "")
+                .replace("区别", "").replace("區別", "")
+                .replace("级别", "").replace("級別", "")
+                .replace("别人", "").replace("別人", "")
+                .replace("别墅", "").replace("別墅", "")
+                .replace("别致", "").replace("別致", "")
+                .replace("离别", "").replace("離別", "")
             val cLower = cClean.lowercase()
-            // 1. Preservation pattern (e.g. 不要关座椅加热 / 别动天窗 / 保持空调现状)
-            val hasExclusionCue = cClean.contains("不要") || cClean.contains("别") || cClean.contains("不用") || cClean.contains("切勿") || cClean.contains("请勿") ||
+            // 1. Preservation pattern (e.g. 不要关座椅加热 / 别动天窗 / 保持空调现状 / 不要關座椅加熱 / 別動天窗)
+            val hasExclusionCue = cClean.contains("不要") || cClean.contains("别") || cClean.contains("別") ||
+                    cClean.contains("不用") || cClean.contains("切勿") || cClean.contains("请勿") || cClean.contains("請勿") ||
                     cLower.contains("don't") || cLower.contains("do not") || cLower.contains("keep") || cLower.contains("maintain")
-            val hasActionVerb = cClean.contains("关") || cClean.contains("开") || cClean.contains("动") || cClean.contains("停") || cClean.contains("改") ||
-                    cClean.contains("碰") || cClean.contains("调整") || cClean.contains("改变") || cLower.contains("touch") || cLower.contains("turn off") || cLower.contains("close")
+            val hasActionVerb = cClean.contains("关") || cClean.contains("關") ||
+                    cClean.contains("开") || cClean.contains("開") ||
+                    cClean.contains("动") || cClean.contains("動") ||
+                    cClean.contains("停") || cClean.contains("改") ||
+                    cClean.contains("碰") || cClean.contains("调整") || cClean.contains("調整") ||
+                    cClean.contains("改变") || cClean.contains("改變") ||
+                    cLower.contains("touch") || cLower.contains("turn off") || cLower.contains("close")
 
             if (hasExclusionCue && hasActionVerb) {
                 // Must target the entire domain, NOT sub-parameters like 外循环 / 风量 / 温度
@@ -124,9 +147,12 @@ object OnnxIntentEngine {
                 continue
             }
 
-            // 2. Deactivation pattern (e.g. 关闭空调 / 关掉车窗 / 停止播放)
-            val hasTurnOffCue = cClean.startsWith("关") || cClean.startsWith("停") || cClean.startsWith("退出") || cClean.startsWith("取消") ||
-                    cClean.endsWith("关掉") || cClean.endsWith("关闭") || cClean.endsWith("停掉") || cClean.endsWith("关了") ||
+            // 2. Deactivation pattern (e.g. 关闭空调 / 关掉车窗 / 停止播放 / 關閉空調 / 關掉車窗)
+            val hasTurnOffCue = cClean.startsWith("关") || cClean.startsWith("關") ||
+                    cClean.startsWith("停") || cClean.startsWith("退出") || cClean.startsWith("取消") ||
+                    cClean.endsWith("关掉") || cClean.endsWith("關掉") ||
+                    cClean.endsWith("关闭") || cClean.endsWith("關閉") ||
+                    cClean.endsWith("停掉") || cClean.endsWith("关了") || cClean.endsWith("關了") ||
                     cLower.startsWith("turn off") || cLower.startsWith("shut down") || cLower.startsWith("stop") || cLower.startsWith("close")
             if (hasTurnOffCue) {
                 for (d in domainOrder) {
