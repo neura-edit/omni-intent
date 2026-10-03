@@ -72,7 +72,7 @@ cd android
 ./gradlew assembleDebug
 
 # 安装到连接的设备
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb install -r app/build/outputs/apk/debug/omni-intent-debug.apk
 ```
 
 ---

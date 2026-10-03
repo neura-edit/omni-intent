@@ -39,6 +39,10 @@ android {
     }
 }
 
+base {
+    archivesName.set("omni-intent")
+}
+
 kotlin {
     jvmToolchain(17)
 }

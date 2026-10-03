@@ -18,7 +18,7 @@
 
 <p align="center">
   <a href="https://github.com/neura-edit/omni-intent/releases/latest"><img src="https://img.shields.io/badge/Download%20Android%20APK-v1.0.0-2ea44f?logo=android&logoColor=white" alt="Download APK" /></a>
-  <a href="https://neura-edit.github.io/omni-intent/"><img src="https://img.shields.io/badge/HUD%20Demo-Online-3553ff.svg" alt="GitHub Pages HUD Demo" /></a>
+  <a href="https://neura-edit.github.io/omni-intent/"><img src="https://img.shields.io/badge/Web%20Demo-Online-3553ff.svg" alt="GitHub Pages Web Demo" /></a>
   <a href="https://modelscope.cn/studios/neuraedit/omni-intent"><img src="https://img.shields.io/badge/ModelScope-Cloud%20Engine-624aff.svg" alt="ModelScope Cloud Backend" /></a>
   <a href="https://huggingface.co/neura-edit/decision-eos"><img src="https://img.shields.io/badge/HuggingFace-decision%3Aeos-ffd21e.svg" alt="Hugging Face Model" /></a>
   <img src="https://img.shields.io/badge/Quantization-INT8%2082MB-brightgreen.svg" alt="INT8 82MB" />
@@ -33,7 +33,7 @@
 
 **OmniIntent** is an on-device decision engine engineered specifically for next-generation automotive cockpits. By decoupling single-pass neural routing (powered by the `decision:eos` 0.75B architecture) from deterministic slot extraction, it concurrently parses multi-domain in-cabin commands (climate control, 21 acoustic music genres, route navigation, seat comfort, and power windows) within a single spoken query—accompanied by an automotive-grade negation avoidance filter.
 
-The project provides a **Web HUD Console**, a **Cross-Platform Python Daemon**, and a **Native Android Application**, fully localized in **English**, **Simplified Chinese (简体中文)**, and **Traditional Chinese (繁體中文)**.
+The project provides an **Interactive Web Cockpit Console**, a **Cross-Platform Python Daemon**, and a **Native Android Application**, fully localized in **English**, **Simplified Chinese (简体中文)**, and **Traditional Chinese (繁體中文)**.
 
 ---
 
@@ -72,7 +72,7 @@ cd android
 ./gradlew assembleDebug
 
 # Install to connected device or emulator
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb install -r app/build/outputs/apk/debug/omni-intent-debug.apk
 ```
 
 ---
@@ -152,7 +152,7 @@ pip install -r requirements.txt
 python3 app.py
 ```
 
-Open `http://localhost:8080` in your browser to launch the HUD cockpit!
+Open `http://localhost:8080` in your browser to launch the cockpit console!
 
 ---
 
@@ -175,7 +175,7 @@ flowchart TD
 
 - [x] Native Python + ONNX Runtime cross-platform engine
 - [x] ModelScope cloud 24/7 online backend
-- [x] GitHub Pages Trilingual Cyberpunk HUD Console (EN / 简体 / 繁體)
+- [x] **Interactive Web Cockpit Console**: Trilingual support (English, Simplified Chinese, Traditional Chinese)
 - [x] **INT8 Quantization (ONNX Runtime)**: Compressed to 82MB, forward latency down to 23~35ms on mobile/IVI
 - [x] **Native Android Application (`android/`)**: Modern Jetpack Compose architecture with model warmup & threshold tuning
 - [x] **100-Utterance Automotive Benchmark Suite**: Automated regression pipeline
