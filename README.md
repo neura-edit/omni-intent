@@ -81,7 +81,7 @@ adb install -r app/build/outputs/apk/debug/omni-intent-debug.apk
 
 | Runtime Environment | Acceleration Backend | Model Precision | Forward Latency | Memory / Disk | Target Scenarios |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Android Device (Snapdragon/Dimensity/Tensor)** | **ONNX Runtime Mobile (arm64)** | **INT8** | **23ms – 35ms** | **~82MB** | **Production in-cabin IVI, mobile offline** |
+| **Android Device (Snapdragon/Dimensity/Tensor)** | **ONNX Runtime Mobile (arm64)** | **INT8** | **23ms – 35ms** (single-domain forward) / ~80ms (end-to-end) | **~82MB** | **Production in-cabin IVI, mobile offline** |
 | **Local Mac (Apple Silicon)** | **MLX / Metal Unified Memory** | **FP16** | **~140ms** | ~1.4GB | Local developer tuning, cockpit simulation |
 | **Local Host CPU (x86_64 / macOS multi-thread)**| **ONNX Runtime (CPU)** | **INT8** | **~850ms – 950ms** | **~82MB** | Cross-platform zero-dependency offline mode |
 | **ModelScope Free Cloud Container** | Shared 2vCPU (pure CPU float) | FP32 | ~600ms – 1.2s | ~1.5GB | Public online playground, cloud API testing |
@@ -104,21 +104,24 @@ To evaluate decision fidelity and negation filtering robustness across diverse d
 | **Overall Intent Concordance Rate** | 100 complex queries | **99.0%** | ≥ 95.0% | **Exceeds Target** |
 | **Adversarial Negation Avoidance** | 8 adversarial cases | **100.0%** | 100.0% | **Eliminates Actuator Errors** |
 | **Mean Forward Latency (Mac CPU)** | 100 queries | **939.8 ms** | < 1000 ms | **Consistent & Predictable** |
-| **On-Device Real Hardware Latency (arm64)** | Physical device | **23 ~ 35 ms** | < 50 ms | **Automotive Real-Time** |
+| **On-Device Real Hardware Latency (arm64)** | Physical device (single-domain forward) | **23 ~ 35 ms** | < 50 ms | **Automotive Real-Time** |
 
 ### 🎯 Domain Coverage & Representative Utterances
 
+> [!NOTE]
+> The 100-utterance automotive benchmark suite thoroughly evaluates real-world in-cabin voice commands across **English (22 cases)**, **Simplified Chinese (60 cases)**, and **Traditional Chinese (18 cases)**. The table below lists representative English test cases from the evaluation suite:
+
 | Domain Category | Samples | Representative Utterances | Pass Rate |
 | :--- | :---: | :--- | :---: |
-| **Climate Control** | 15 | "Set cabin temperature to 21 degrees Celsius", "把空调调到二十四度", "Turn on maximum defroster" | 100% Hit |
-| **Media & Audio** | 15 | "Play some classic rock tracks", "播放周杰伦的晴天", "Play My Heart Will Go On by Celine Dion" | 100% Hit |
-| **Navigation** | 15 | "Navigate to downtown Seattle avoiding toll roads", "导航去上海虹桥火车站，躲避拥堵", "Find fastest route" | 100% Hit |
-| **Seat Comfort** | 8 | "Turn on driver seat heating to level 3", "把主驾座椅加热开到二档", "開啟駕駛座腰部按摩功能" | 100% Hit |
-| **Power Windows** | 8 | "Roll down the front windows halfway", "把左前车窗降下一半透透气", "Close the sunroof and sunshade" | 100% Hit |
-| **Phone Telephony** | 8 | "Call my wife on mobile", "给张三打个电话", "Redial the last outgoing number", "挂断电话" | 100% Hit |
-| **Query & Assistant**| 8 | "What is the weather forecast for Seattle today", "今天北京天气怎么样", "What is the battery range" | 100% Hit |
-| **Multi-Intent Concurrency** | 15 | "Turn on the AC, play a song by Celine Dion, and navigate to Seattle", "车里有点闷，把空调调到22度，然后放晴天" | Seamless Multi-Domain |
-| **Adversarial Negation** | 8 | "Turn off the climate control, but keep seat heating on", "关闭空调，但是不要关座椅加热", "關閉音樂，但保持導航開啟" | 100% Negation Excluded |
+| **Climate Control** | 15 | "Set cabin temperature to 21 degrees Celsius", "Turn on maximum defroster for the windshield", "Shut down the air conditioner" | 100% Hit |
+| **Media & Audio** | 15 | "Play some classic rock tracks", "Play My Heart Will Go On by Celine Dion", "Skip to the next track please" | 100% Hit |
+| **Navigation** | 15 | "Navigate to downtown Seattle avoiding toll roads", "Find the fastest route to JFK airport", "Cancel current navigation route" | 100% Hit |
+| **Seat Comfort** | 8 | "Turn on driver seat heating to level 3", "Enable passenger seat ventilation", "Turn off passenger seat heating" | 100% Hit |
+| **Power Windows** | 8 | "Roll down the front windows halfway", "Close the sunroof and sunshade", "Open the sunroof slightly for ventilation" | 100% Hit |
+| **Phone Telephony** | 8 | "Call my wife on mobile", "Redial the last outgoing number", "Hang up current call" | 100% Hit |
+| **Query & Assistant**| 8 | "What is the weather forecast for Seattle today", "What is the current battery range of this vehicle", "What time is it now" | 100% Hit |
+| **Multi-Intent Concurrency** | 15 | "Turn on the AC, play a song by Celine Dion, and navigate to Seattle", "Set climate to 20 degrees and play some rock music", "Roll down the driver window and turn on seat heating" | Seamless Multi-Domain |
+| **Adversarial Negation** | 8 | "Turn off the climate control, but keep seat heating on", "Open the windows halfway, do not touch the air conditioner", "Stop playing music, but keep navigation active" | 100% Negation Excluded |
 
 ### 🛠️ How to Reproduce Benchmark
 
